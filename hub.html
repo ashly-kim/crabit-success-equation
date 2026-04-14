@@ -947,7 +947,90 @@
     const totalCells = currentMode==='week' ? students.length*vars.length : students.length*vars.length*7;
     document.getElementById('progressTotal').textContent = totalCells;
     updateProgress();
-    document.querySelectorAll('#inputTable input').forEach(el=>el.addEventListener('input', updateProgress));
+    document.querySelectorAll('#inputTable input').forEach(el=>{
+      el.addEventListener('input', updateProgress);
+      el.addEventListener('change', updateProgress);
+    });
+    bindCellInteractions();
+  }
+
+  // ===== Excel 스타일 셀 포커스 + Fill 드래그 =====
+  function bindCellInteractions(){
+    document.querySelectorAll('#inputTable td.cell').forEach(td=>{
+      const inp = td.querySelector('input');
+      if(inp){
+        inp.addEventListener('focus', ()=>{
+          document.querySelectorAll('#inputTable td.cell.cell-active').forEach(x=>x.classList.remove('cell-active'));
+          td.classList.add('cell-active');
+        });
+        inp.addEventListener('blur', ()=>{
+          setTimeout(()=>{ if(!td.contains(document.activeElement) && !filling) td.classList.remove('cell-active'); }, 80);
+        });
+        // checkbox 클릭 시 셀 활성화
+        if(inp.type === 'checkbox'){
+          inp.addEventListener('click', ()=>{
+            document.querySelectorAll('#inputTable td.cell.cell-active').forEach(x=>x.classList.remove('cell-active'));
+            td.classList.add('cell-active');
+          });
+        }
+      }
+      const handle = td.querySelector('.cell-handle');
+      if(handle){
+        handle.addEventListener('mousedown', e=>startFill(e, td));
+      }
+    });
+  }
+
+  let filling = false;
+  function startFill(e, sourceCell){
+    e.preventDefault();
+    filling = true;
+    const sourceInput = sourceCell.querySelector('input');
+    const sourceVal = sourceInput.type === 'checkbox' ? sourceInput.checked : sourceInput.value;
+    const colIdx = sourceCell.dataset.col;
+    const tbody = sourceCell.closest('tbody');
+    const sourceRow = sourceCell.closest('tr');
+    const allRows = [...tbody.querySelectorAll('tr')];
+    const sourceRowIdx = allRows.indexOf(sourceRow);
+    let lastTargetIdx = sourceRowIdx;
+
+    function clearPreview(){
+      document.querySelectorAll('#inputTable td.cell.cell-fill-preview').forEach(x=>x.classList.remove('cell-fill-preview'));
+    }
+
+    function onMove(ev){
+      const el = document.elementFromPoint(ev.clientX, ev.clientY);
+      const targetCell = el && el.closest && el.closest('td.cell');
+      if(!targetCell || targetCell.dataset.col !== colIdx){ return; }
+      const targetRow = targetCell.closest('tr');
+      const targetIdx = allRows.indexOf(targetRow);
+      if(targetIdx < sourceRowIdx) return;
+      lastTargetIdx = targetIdx;
+      clearPreview();
+      for(let i = sourceRowIdx + 1; i <= targetIdx; i++){
+        const c = allRows[i].children[ [...sourceRow.children].indexOf(sourceCell) ];
+        if(c) c.classList.add('cell-fill-preview');
+      }
+    }
+    function onUp(){
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+      clearPreview();
+      // apply fill
+      const sourceColPos = [...sourceRow.children].indexOf(sourceCell);
+      for(let i = sourceRowIdx + 1; i <= lastTargetIdx; i++){
+        const c = allRows[i].children[sourceColPos];
+        if(!c) continue;
+        const inp = c.querySelector('input');
+        if(!inp) continue;
+        if(inp.type === 'checkbox') inp.checked = sourceVal;
+        else { inp.value = sourceVal; c.classList.add('filled'); }
+      }
+      filling = false;
+      updateProgress();
+    }
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
   }
 
   function updateProgress(){
