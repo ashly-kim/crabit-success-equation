@@ -935,7 +935,26 @@
   }
 
   function renderWizStep1(){
-    document.getElementById('wizEqList').innerHTML = equations.map((eq,i)=>{
+    const lockS = wizState.lockStudent;
+    const allowed = lockS ? new Set(applicableEquations(lockS).map(e=>e.id)) : null;
+    const visibleEq = lockS ? equations.filter(e=>allowed.has(e.id)) : equations;
+
+    // ensure eqIdx is one of the visible
+    if(lockS && !allowed.has(equations[wizState.eqIdx]?.id)){
+      wizState.eqIdx = equations.findIndex(e=>e.id === visibleEq[0].id);
+    }
+
+    const banner = lockS
+      ? `<div class="mb-4 rounded-2xl bg-soft-navy border border-brand-100 p-4 flex items-center gap-3">
+          <div class="w-10 h-10 rounded-full bg-white text-brand-700 font-bold grid place-items-center">${lockS.name[0]}</div>
+          <div class="flex-1">
+            <div class="font-extrabold text-[15px]">${lockS.name} 학생 전용 리포트</div>
+            <div class="text-xs text-ink-500 mt-0.5">이 학생에게 적용 가능한 ${visibleEq.length}개 방정식 중에서 선택해주세요.</div>
+          </div>
+        </div>` : '';
+
+    document.getElementById('wizEqList').innerHTML = banner + equations.map((eq,i)=>{
+      if(lockS && !allowed.has(eq.id)) return ''; // 학생 모드면 적용 불가 방정식 숨김
       const on = i === wizState.eqIdx;
       return `
       <label class="block cursor-pointer">
@@ -955,7 +974,11 @@
       </label>`;
     }).join('');
   }
-  function selectWizEq(i){ wizState.eqIdx = i; wizState.students = new Set(); renderWizStep1(); }
+  function selectWizEq(i){
+    wizState.eqIdx = i;
+    if(!wizState.lockStudent) wizState.students = new Set();
+    renderWizStep1();
+  }
   window.selectWizEq = selectWizEq;
 
   function eligibleStudents(){
