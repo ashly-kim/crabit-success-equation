@@ -162,23 +162,20 @@
 
       </div>
 
-      <!-- ============ TAB 2: 리포트 히스토리 ============ -->
+      <!-- ============ TAB 2: 리포트 생성 히스토리 ============ -->
       <div class="top-pane hidden" data-pane="hist">
 
         <section class="bg-white rounded-3xl p-5 shadow-card ring-soft mb-6">
-          <div class="flex items-center justify-between flex-wrap gap-4">
-            <div class="flex items-center gap-2 flex-wrap">
-              <input placeholder="🔍 학생 이름으로 검색" class="px-4 py-2.5 rounded-xl border border-gray-200 text-sm w-64"/>
-              <select class="px-4 py-2.5 rounded-xl border border-gray-200 text-sm">
-                <option>전체 기간</option><option>최근 30일</option><option>최근 3개월</option>
-              </select>
-              <select class="px-4 py-2.5 rounded-xl border border-gray-200 text-sm">
-                <option>전체 방정식</option><option>중3 수학반 · 성적 향상 v2</option>
-              </select>
-              <select class="px-4 py-2.5 rounded-xl border border-gray-200 text-sm">
-                <option>전체 전달 방식</option><option>카카오 알림톡</option><option>PDF 다운로드</option>
-              </select>
-            </div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <input placeholder="🔍 학생/그룹/방정식으로 검색" class="px-4 py-2.5 rounded-xl border border-gray-200 text-sm flex-1 min-w-[240px]"/>
+            <select class="px-4 py-2.5 rounded-xl border border-gray-200 text-sm">
+              <option>전체 기간</option><option>최근 30일</option><option>최근 3개월</option>
+            </select>
+            <select class="px-4 py-2.5 rounded-xl border border-gray-200 text-sm">
+              <option>전체 방정식</option>
+              <option>중3 수학반 · 성적 향상</option>
+              <option>고1 영어반 · 모의고사 등급</option>
+            </select>
           </div>
         </section>
 
@@ -186,26 +183,18 @@
           <table class="w-full text-sm">
             <thead>
               <tr class="bg-gray-50 text-ink-500 text-[13px]">
-                <th class="px-5 py-3 text-left">학생</th>
+                <th class="px-5 py-3 text-left">생성 일시</th>
                 <th class="px-5 py-3 text-left">방정식</th>
-                <th class="px-5 py-3 text-center">버전</th>
-                <th class="px-5 py-3 text-left">생성일</th>
+                <th class="px-5 py-3 text-left">대상</th>
+                <th class="px-5 py-3 text-center">리포트 수</th>
                 <th class="px-5 py-3 text-left">분석 기간</th>
-                <th class="px-5 py-3 text-center">전달</th>
-                <th class="px-5 py-3 text-center w-20">액션</th>
+                <th class="px-5 py-3 text-center w-20">상세</th>
               </tr>
             </thead>
             <tbody id="historyTable"></tbody>
           </table>
           <div class="px-5 py-4 flex items-center justify-between text-sm text-ink-500 border-t border-gray-100">
-            <div>총 <b class="text-ink-900">46</b>건</div>
-            <div class="flex gap-1">
-              <button class="w-8 h-8 rounded-lg border border-gray-200 hover:bg-gray-50">‹</button>
-              <button class="w-8 h-8 rounded-lg bg-brand-500 text-white">1</button>
-              <button class="w-8 h-8 rounded-lg hover:bg-gray-50">2</button>
-              <button class="w-8 h-8 rounded-lg hover:bg-gray-50">3</button>
-              <button class="w-8 h-8 rounded-lg border border-gray-200 hover:bg-gray-50">›</button>
-            </div>
+            <div>총 <b class="text-ink-900" id="historyCount">0</b>건</div>
           </div>
         </section>
 
