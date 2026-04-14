@@ -540,7 +540,7 @@
         '데이터를 4주 이상 더 쌓은 후 재분석 권장'
       ]
     };
-    return {name:sn+fn, cls, status, eq, months, cur, diff, predLow, predHigh, insight, insightColor, phoneOK, contribution, trend, nextActions: nextActionsPool[status]};
+    return {name:sn+fn, cls, status, eq, months, cur, diff, predLow, predHigh, insight, insightColor, phoneOK, parentPhone, contribution, trend, nextActions: nextActionsPool[status]};
   }
 
   const students = Array.from({length:12}, (_,i)=>genStudent(i));
