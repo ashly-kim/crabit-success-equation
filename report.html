@@ -6,7 +6,7 @@
 <title>리포트카드 · 우리학원 성공방정식</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="shared.js?v=1776177283569"></script>
+<script src="shared.js?v=1776177314103"></script>
 <script>__applyTheme();</script>
 <style>
   html,body{background:#f6f7fb}
@@ -1312,7 +1312,11 @@
     s.parentPhone = newPhone || null;
     s.phoneOK = !!s.parentPhone;
     // 학생이 속한 반에 따라 적용 방정식 재매핑
-    s.eq = newCls.includes('수학') ? equations[0] : (newCls.includes('영어') ? equations[1] : equations[2]);
+    const newEq = newCls.includes('수학') ? equations[0] : (newCls.includes('영어') ? equations[1] : equations[2]);
+    if(s.eq.id !== newEq.id){
+      s.eq = newEq;
+      s.dailyData = null; // 새 방정식 변수 기준으로 재생성 트리거
+    }
     openStudentDetail(currentStudentIdx); // 재렌더
     renderStudentTable();                   // 리스트에도 반영
   }
