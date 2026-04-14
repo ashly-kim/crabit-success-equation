@@ -512,7 +512,34 @@
       insightColor = 'text-rose-600';
     }
 
-    return {name:sn+fn, cls, status, eq, months, cur, diff, predLow, predHigh, insight, insightColor};
+    // 학부모 전화번호 등록 여부 (~85% 등록)
+    const phoneOK = Math.random() > 0.15;
+    // 변수별 기여도 시뮬레이션 (0~100 정규화)
+    const contribution = {};
+    (cls.includes('수학') ? equations[0] : (cls.includes('영어') ? equations[1] : equations[2])).terms.forEach(t=>{
+      contribution[t.name] = 30 + Math.floor(Math.random()*60);
+    });
+    // 추세 (8주 sparkline)
+    const trend = Array.from({length:8}, ()=>40+Math.floor(Math.random()*55));
+    // Next Action 후보
+    const nextActionsPool = {
+      green:[
+        '현재 복습 패턴(주 5h↑) 유지 — 다음 시험까지 그대로 가도 우상향',
+        '질문 횟수를 주 3회 이상으로 늘리면 +2점 추가 기대',
+        '오답노트 작성 습관 추가 시 상위권 진입 가능'
+      ],
+      yellow:[
+        '숙제이행률을 +15%p 끌어올리는 게 1순위',
+        '출결률 회복을 위한 학부모 면담 1회 권장',
+        '주간 복습시간을 최소 3h로 회복 — 2주 안에 추세 반전 가능'
+      ],
+      red:[
+        '주간 복습 1h 부터라도 시작 — 패턴 형성이 우선',
+        '학부모 면담을 통해 학습 환경 점검 필요',
+        '데이터를 4주 이상 더 쌓은 후 재분석 권장'
+      ]
+    };
+    return {name:sn+fn, cls, status, eq:undefined, months, cur, diff, predLow, predHigh, insight, insightColor, phoneOK, contribution, trend, nextActions: nextActionsPool[status]};
   }
 
   const students = Array.from({length:12}, (_,i)=>genStudent(i));
