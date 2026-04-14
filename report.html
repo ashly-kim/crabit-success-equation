@@ -197,7 +197,113 @@
   </main>
 </div>
 
-<!-- ============ 리포트 생성 분기 모달 ============ -->
+<!-- ============ 리포트 생성 풀페이지 위저드 ============ -->
+<div id="wizard" class="hidden fixed inset-0 bg-[#f6f7fb] z-40 overflow-y-auto">
+  <div class="sticky top-0 bg-white/95 backdrop-blur border-b border-gray-100 z-10">
+    <div class="max-w-[1100px] mx-auto px-8 py-4 flex items-center justify-between gap-4 flex-wrap">
+      <div class="flex items-center gap-4">
+        <button onclick="closeWizard()" class="w-10 h-10 rounded-xl hover:bg-gray-100 grid place-items-center text-ink-500" title="나가기">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+        <div>
+          <div class="text-xs tracking-widest font-bold text-brand-600">리포트카드 생성</div>
+          <div class="text-[20px] font-extrabold" id="wizStepTitle">방정식 선택</div>
+        </div>
+      </div>
+      <div class="flex items-center gap-2" id="wizStepDots"></div>
+    </div>
+    <div class="h-1 bg-gray-100"><div id="wizProg" class="h-full bg-brand-500 transition-all" style="width:25%"></div></div>
+  </div>
+
+  <div class="max-w-[1100px] mx-auto px-8 py-12 pb-32">
+
+    <!-- STEP 1: 방정식 선택 -->
+    <div class="wiz-step" data-step="1">
+      <h2 class="text-[30px] font-extrabold mb-2">어떤 방정식으로 리포트를 만드시겠어요?</h2>
+      <p class="text-ink-500 text-[16px] mb-8">방정식을 선택하면 해당 그룹의 학생들이 다음 단계에서 자동으로 리포트 대상으로 잡혀요.</p>
+      <div class="space-y-4" id="wizEqList"></div>
+    </div>
+
+    <!-- STEP 2: 대상 학생 확인 -->
+    <div class="wiz-step hidden" data-step="2">
+      <h2 class="text-[30px] font-extrabold mb-2">대상 학생을 확인해주세요</h2>
+      <p class="text-ink-500 text-[16px] mb-8">선택한 방정식이 적용되는 학생 전원이 기본 선택돼 있어요. 제외하고 싶은 학생은 체크박스를 해제하세요.</p>
+      <div class="bg-white rounded-3xl shadow-card ring-soft overflow-hidden">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+          <label class="flex items-center gap-3 cursor-pointer">
+            <input type="checkbox" id="wizSelectAll" checked class="w-5 h-5" onchange="toggleAllStudents(this.checked)"/>
+            <span class="font-semibold text-[15px]">전체 선택</span>
+          </label>
+          <div class="text-sm text-ink-500">선택됨 <b class="text-brand-600" id="wizSelectCount">0</b>명</div>
+        </div>
+        <div id="wizStudentList" class="divide-y divide-gray-100"></div>
+      </div>
+    </div>
+
+    <!-- STEP 3: 분석 기간 + 톤 -->
+    <div class="wiz-step hidden" data-step="3">
+      <h2 class="text-[30px] font-extrabold mb-2">분석 기간과 리포트 톤을 설정해주세요</h2>
+      <p class="text-ink-500 text-[16px] mb-8">기간·톤 설정에 따라 생성되는 리포트 내용이 달라집니다.</p>
+
+      <div class="bg-white rounded-3xl shadow-card ring-soft p-7 mb-6">
+        <h3 class="text-[18px] font-bold mb-4">분석 기간</h3>
+        <div class="space-y-3">
+          <label class="flex items-start gap-3 rounded-xl border-2 border-brand-500 bg-brand-50 p-4 cursor-pointer wiz-period-label" data-p="auto">
+            <input type="radio" name="wizPeriod" value="auto" checked class="w-5 h-5 mt-0.5" onchange="onPeriodChange('auto')"/>
+            <div class="flex-1">
+              <div class="font-bold text-[15px]">자동 (학생별 최대 가능 기간)</div>
+              <div class="text-sm text-ink-500 mt-1">학생마다 데이터 보유 기간이 달라도 각자 최대로 활용해 분석해요.</div>
+            </div>
+          </label>
+          <label class="flex items-start gap-3 rounded-xl border-2 border-gray-200 p-4 cursor-pointer hover:bg-gray-50 wiz-period-label" data-p="3m">
+            <input type="radio" name="wizPeriod" value="3m" class="w-5 h-5 mt-0.5" onchange="onPeriodChange('3m')"/>
+            <div class="flex-1">
+              <div class="font-bold text-[15px]">최근 3개월로 통일</div>
+              <div class="text-sm text-ink-500 mt-1">학생 간 비교가 쉬워요. 단, 3개월치 데이터가 없는 학생은 분석에서 제외됩니다.</div>
+            </div>
+          </label>
+          <label class="flex items-start gap-3 rounded-xl border-2 border-gray-200 p-4 cursor-pointer hover:bg-gray-50 wiz-period-label" data-p="6m">
+            <input type="radio" name="wizPeriod" value="6m" class="w-5 h-5 mt-0.5" onchange="onPeriodChange('6m')"/>
+            <div class="flex-1">
+              <div class="font-bold text-[15px]">최근 6개월로 통일</div>
+              <div class="text-sm text-ink-500 mt-1">중장기 추세 파악에 유리해요. 6개월 미만 학생은 제외됩니다.</div>
+            </div>
+          </label>
+        </div>
+
+        <div id="wizShortList" class="hidden mt-5 rounded-2xl bg-rose-50 border border-rose-200 p-5">
+          <div class="font-bold text-rose-700 mb-3">⚠️ <span id="wizShortCount">0</span>명은 해당 기간 데이터가 부족해 이번 리포트에서 제외돼요</div>
+          <div class="space-y-1.5 text-sm" id="wizShortNames"></div>
+          <button onclick="keepOnlyEligible()" class="mt-4 text-sm font-semibold text-rose-700 underline hover:text-rose-800">제외 학생 지금 빼기 →</button>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-3xl shadow-card ring-soft p-7">
+        <h3 class="text-[18px] font-bold mb-1">리포트 메시지 톤</h3>
+        <p class="text-sm text-ink-500 mb-5">학부모 전달용뿐 아니라 학원 내부 인사이트 정리용으로도 활용할 수 있어요. 톤마다 문구 예시를 확인해보세요.</p>
+        <div class="grid md:grid-cols-3 gap-4" id="wizToneGrid"></div>
+      </div>
+    </div>
+
+    <!-- STEP 4: 미리보기 -->
+    <div class="wiz-step hidden" data-step="4">
+      <h2 class="text-[30px] font-extrabold mb-2">리포트 미리보기</h2>
+      <p class="text-ink-500 text-[16px] mb-8">생성될 리포트를 학생별로 확인한 뒤 발송 방식을 결정하세요.</p>
+      <div id="wizPreviewList" class="space-y-4"></div>
+    </div>
+
+  </div>
+
+  <div class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur border-t border-gray-100 z-20">
+    <div class="max-w-[1100px] mx-auto px-8 py-4 flex items-center justify-between gap-4">
+      <button onclick="wizPrev()" id="wizPrevBtn" class="px-5 py-3 rounded-xl border border-gray-200 font-semibold hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed">← 이전</button>
+      <div class="text-sm text-ink-500" id="wizStepLabel">1 / 4</div>
+      <button onclick="wizNext()" id="wizNextBtn" class="px-6 py-3 rounded-xl bg-brand-500 text-white font-bold hover:bg-brand-600">다음 →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ (legacy) 리포트 생성 분기 모달 · 미사용 ============ -->
 <div class="modal" id="generateModal">
   <div class="modal-box bg-white rounded-3xl w-full max-w-3xl overflow-hidden">
     <div class="p-8">
