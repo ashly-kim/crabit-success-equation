@@ -900,6 +900,7 @@
     const s = students[currentStudentIdx];
     const apEq = applicableEquations(s);
     const eqIdx = equations.findIndex(e=>e.id === apEq[0].id);
+    document.getElementById('studentDetail').classList.add('hidden');
     openWizard({eqIdx: Math.max(0, eqIdx), lockStudent: s});
   }
   window.openStudentDetail = openStudentDetail;
