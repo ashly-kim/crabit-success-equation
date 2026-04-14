@@ -29,32 +29,12 @@ function run(cmd, args){
   });
 }
 
-// HTML 안의 로컬 .js/.css 참조에 ?v=timestamp 쿼리를 부착해서
-// 브라우저/CDN 캐시를 무력화한다.
+const { bump } = require('./bump-assets');
+let lastBumpAt = 0;
 function bumpAssetVersions(){
-  const stamp = Date.now();
-  const htmlFiles = fs.readdirSync(DIR).filter(f => f.endsWith('.html'));
-  let changed = 0;
-  for(const file of htmlFiles){
-    const full = path.join(DIR, file);
-    let src = fs.readFileSync(full, 'utf8');
-    const before = src;
-    // <script src="...local.js[?v=...]"></script>
-    src = src.replace(/(<script\s+[^>]*src=")([^"]+\.js)(\?v=\d+)?(")/g, (m, pre, url, _q, post) => {
-      if(/^https?:\/\//i.test(url) || url.startsWith('//')) return m;
-      return `${pre}${url}?v=${stamp}${post}`;
-    });
-    // <link ... href="...local.css[?v=...]" ...>
-    src = src.replace(/(<link\s+[^>]*href=")([^"]+\.css)(\?v=\d+)?(")/g, (m, pre, url, _q, post) => {
-      if(/^https?:\/\//i.test(url) || url.startsWith('//')) return m;
-      return `${pre}${url}?v=${stamp}${post}`;
-    });
-    if(src !== before){
-      fs.writeFileSync(full, src);
-      changed++;
-    }
-  }
-  if(changed) console.log(`🔖 [${ts()}] 자산 버전 갱신 (?v=${stamp}) · HTML ${changed}개`);
+  const r = bump(DIR);
+  lastBumpAt = Date.now();
+  if(r.changed) console.log(`🔖 [${ts()}] 자산 버전 갱신 (?v=${r.stamp}) · HTML ${r.changed}개`);
 }
 
 async function deploy(){
@@ -92,9 +72,11 @@ function watchDir(dir){
   fs.watch(dir, { recursive: false }, (event, filename) => {
     if(!filename) return;
     if(filename.startsWith('.')) return;
-    if(filename === 'watch.js' || filename === 'watch.log') return;
+    if(filename === 'watch.js' || filename === 'watch.log' || filename === 'bump-assets.js') return;
     const ext = path.extname(filename);
     if(!EXT.includes(ext)) return;
+    // bump이 방금 직접 쓴 HTML 변경은 무시 (무한 루프 방지)
+    if(ext === '.html' && (Date.now() - lastBumpAt) < 1500) return;
     console.log(`📝 [${ts()}] ${filename} 변경 감지`);
     scheduleDeploy();
   });

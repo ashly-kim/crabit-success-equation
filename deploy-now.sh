@@ -2,6 +2,7 @@
 # 즉시 1회 배포 (git push 기반 · GitHub Pages)
 cd "$(dirname "$0")"
 echo "🚀 배포 중..."
+node bump-assets.js
 git add -A
 if [[ -z "$(git status --porcelain)" ]]; then
   echo "⏭️  변경사항 없음"
