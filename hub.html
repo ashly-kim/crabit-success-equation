@@ -39,9 +39,14 @@
   .grid-table .name-col{position:sticky;left:0;background:white;z-index:1;padding:14px 18px;font-weight:600;border-right:2px solid #e5e7eb}
   .grid-table thead th.name-col{background:#f9fafc;z-index:3;text-align:center}
   .grid-table tbody tr:hover .name-col{background:#fafbfe}
-  .grid-table td.cell{padding:0;position:relative}
-  .grid-table td.cell input{width:100%;height:52px;border:none;background:transparent;outline:none;text-align:center;font-weight:500;font-size:16px}
-  .grid-table td.cell input:focus{background:#fff7d6;box-shadow:inset 0 0 0 2px #f59e0b;border-radius:4px;font-weight:700}
+  .grid-table td.cell{padding:0;position:relative;transition:background .08s}
+  .grid-table td.cell input[type="text"], .grid-table td.cell input:not([type]){width:100%;height:52px;border:none;background:transparent;outline:none;text-align:center;font-weight:500;font-size:16px}
+  .grid-table td.cell.cell-active{background:#fff7d6 !important;box-shadow:inset 0 0 0 2px #f59e0b;z-index:5}
+  .grid-table td.cell.cell-active input{font-weight:700}
+  .grid-table td.cell.cell-fill-preview{background:#fff3b0 !important;box-shadow:inset 0 0 0 1px #f59e0b}
+  .cell-handle{position:absolute;right:-3px;bottom:-3px;width:9px;height:9px;background:#f59e0b;border:1.5px solid #fff;cursor:crosshair;z-index:7;display:none;border-radius:1px}
+  .grid-table td.cell.cell-active .cell-handle{display:block}
+  .cell-check{display:flex;align-items:center;justify-content:center;height:52px}
   .grid-table td.cell.filled input{color:#1a3065}
 
   /* 일간 모드 - 셀 패딩으로 자동 조정 */
