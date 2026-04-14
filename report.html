@@ -1024,14 +1024,9 @@
       students: reportPages.map(p => ({...p.s, kakao:'pending', pdf:false}))
     };
     generations.push(g);
+    renderHistory(); // 백그라운드 갱신
     closeWizard();
-    // 히스토리 탭으로 이동
-    document.querySelectorAll('.top-tab').forEach(x=>{
-      x.classList.toggle('on', x.dataset.tab === 'hist');
-    });
-    document.querySelectorAll('.top-pane').forEach(p=>p.classList.toggle('hidden', p.dataset.pane !== 'hist'));
-    renderHistory();
-    setTimeout(()=>openGenDetail(g.id), 200);
+    setTimeout(()=>openGenDetail(g.id), 150);
   }
 
   // ===== 생성건 상세 풀페이지 =====
