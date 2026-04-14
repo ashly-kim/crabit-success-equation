@@ -470,118 +470,220 @@
     };
   });
 
-  // ===== 리포트 생성 분기 =====
-  function openGenerateModal(){ openModal('generateModal'); }
-  window.openGenerateModal = openGenerateModal;
+  // ===== 리포트 생성 풀페이지 위저드 =====
+  const WIZ_STEPS = 4;
+  let wizStep = 1;
+  let wizState = {eqIdx:0, students:new Set(), period:'auto', tone:'warm'};
 
-  function selectGenerateMode(mode){
-    closeModal('generateModal');
-    if(mode === 'eq'){
-      renderEqBulkList();
-      openDrawer('eqDrawer');
-    } else {
-      renderStudentPickList();
-      document.getElementById('studentSelectPhase').classList.remove('hidden');
-      document.getElementById('studentConfigPhase').classList.add('hidden');
-      document.getElementById('scSubmitBtn').classList.add('hidden');
-      document.getElementById('scBackBtn').classList.add('hidden');
-      document.getElementById('studentDrawerTitle').textContent = '학생을 선택해주세요';
-      openDrawer('studentDrawer');
-    }
+  const tones = [
+    {id:'warm', name:'감성형', desc:'따뜻하고 응원하는 어조', sample:'{name} 학생은 최근 복습 시간이 꾸준히 늘면서 성적도 함께 올라가고 있어요. 이 페이스를 유지한다면 6주 뒤 70점대 진입도 충분히 기대됩니다.'},
+    {id:'casual', name:'친근형', desc:'편안한 대화체', sample:'{name}는 요즘 복습 시간을 늘리더니 점수도 같이 오르고 있어요! 이대로면 6주 뒤 70점도 가능할 것 같아요.'},
+    {id:'pro', name:'전문가형', desc:'데이터 기반 분석 리포트 (내부용)', sample:'{name} · 복습시간(β=0.42)이 가장 큰 기여 변수. 현 추세 유지 시 6주 후 예측 68~74점, 모델 신뢰도 78%.'}
+  ];
+
+  function openWizard(opts){
+    opts = opts || {};
+    wizStep = 1;
+    wizState = {eqIdx: opts.eqIdx ?? 0, students:new Set(), period:'auto', tone:'warm'};
+    document.getElementById('wizard').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    renderWizStep();
   }
-  window.selectGenerateMode = selectGenerateMode;
-
-  // 방정식 리스트 (일괄 생성 드로어용)
-  function renderEqBulkList(){
-    document.getElementById('eqBulkList').innerHTML = equations.map((eq,i)=>`
-      <label class="flex items-start gap-3 rounded-xl border-2 ${i===0?'border-brand-500 bg-brand-50':'border-gray-200'} p-4 cursor-pointer hover:bg-gray-50">
-        <input type="radio" name="eqPick" ${i===0?'checked':''} class="w-4 h-4 mt-1"/>
-        <div class="flex-1">
-          <div class="font-bold text-sm">${eq.name}</div>
-          <div class="text-xs text-ink-500 mt-1">적용 학생: ${eq.count}명 · 신뢰도 ${eq.trust}% · v${eq.version}</div>
-        </div>
-      </label>
-    `).join('');
+  function closeWizard(){
+    document.getElementById('wizard').classList.add('hidden');
+    document.body.style.overflow = '';
   }
+  window.openWizard = openWizard; window.closeWizard = closeWizard;
 
-  // 학생 선택 리스트 (맞춤 생성 드로어용)
-  function renderStudentPickList(keyword=''){
-    const filtered = students.filter(s=>s.name.includes(keyword));
-    document.getElementById('studentPickList').innerHTML = filtered.map((s,i)=>`
-      <button onclick="pickStudentFromDrawer(${students.indexOf(s)})" class="w-full flex items-center gap-3 rounded-xl border border-gray-100 p-3 hover:border-brand-300 hover:bg-brand-50 transition text-left">
-        <div class="w-10 h-10 rounded-full bg-soft-navy text-brand-700 font-bold grid place-items-center">${s.name[0]}</div>
-        <div class="flex-1 min-w-0">
-          <div class="font-semibold text-sm">${s.name}</div>
-          <div class="text-xs text-ink-500 mt-0.5">${s.cls} · ${s.months}개월 데이터</div>
-        </div>
-        <div class="text-xs ${s.status==='green'?'text-emerald-600':s.status==='yellow'?'text-amber-600':'text-rose-500'} font-semibold">
-          ${s.status==='green'?'🟢':s.status==='yellow'?'🟡':'🔴'}
-        </div>
-      </button>
-    `).join('');
-  }
-  window.filterStudentPick = (kw)=>renderStudentPickList(kw);
-
-  // 학생 선택 완료 → Config phase
-  function pickStudentFromDrawer(idx){
+  function startWizardForStudent(idx){
     const s = students[idx];
-    document.getElementById('scSelName').textContent = s.name[0];
-    document.getElementById('scSelFull').textContent = `${s.name} 학생`;
-    document.getElementById('scSelClass').textContent = s.cls;
-    document.getElementById('studentDrawerTitle').textContent = `${s.name} · 리포트 설정`;
-    // 적용 가능 방정식 리스트
-    document.getElementById('scEqList').innerHTML = equations.map((eq,i)=>{
-      const applies = (s.cls.includes('수학') && eq.group.includes('수학')) || (s.cls.includes('영어') && eq.group.includes('영어')) || eq.group==='전체 학생';
-      const isCurrent = s.eq.id === eq.id;
+    const eqIdx = equations.findIndex(e=>e.id === s.eq.id);
+    openWizard({eqIdx: Math.max(0, eqIdx)});
+  }
+  window.startWizardForStudent = startWizardForStudent;
+
+  function renderWizStep(){
+    document.querySelectorAll('.wiz-step').forEach(s=>s.classList.toggle('hidden', +s.dataset.step !== wizStep));
+    document.getElementById('wizProg').style.width = (wizStep/WIZ_STEPS*100)+'%';
+    document.getElementById('wizStepLabel').textContent = `${wizStep} / ${WIZ_STEPS}`;
+    document.getElementById('wizPrevBtn').disabled = wizStep === 1;
+    const titles = ['방정식 선택','대상 학생 확인','분석 기간 · 톤 설정','리포트 미리보기'];
+    document.getElementById('wizStepTitle').textContent = `${wizStep}. ${titles[wizStep-1]}`;
+    document.getElementById('wizNextBtn').textContent = wizStep === WIZ_STEPS ? '리포트 발송하기 ✓' : (wizStep === 3 ? '미리보기 →' : '다음 →');
+    document.getElementById('wizStepDots').innerHTML = [1,2,3,4].map(n=>`
+      <span class="w-8 h-8 rounded-full grid place-items-center text-xs font-bold ${n<wizStep?'bg-brand-500 text-white':n===wizStep?'bg-brand-500 text-white ring-4 ring-brand-100':'bg-gray-200 text-ink-500'}">${n}</span>
+    `).join('');
+    if(wizStep === 1) renderWizStep1();
+    if(wizStep === 2) renderWizStep2();
+    if(wizStep === 3) renderWizStep3();
+    if(wizStep === 4) renderWizStep4();
+  }
+
+  function renderWizStep1(){
+    document.getElementById('wizEqList').innerHTML = equations.map((eq,i)=>{
+      const on = i === wizState.eqIdx;
       return `
-      <label class="flex items-start gap-3 rounded-xl border-2 ${isCurrent?'border-brand-500 bg-brand-50':'border-gray-200'} p-4 cursor-pointer hover:bg-gray-50">
-        <input type="radio" name="scEq" ${isCurrent?'checked':''} ${!applies?'disabled':''} class="w-4 h-4 mt-1"/>
-        <div class="flex-1">
-          <div class="flex items-center gap-2">
-            <div class="font-bold text-sm">${eq.name}</div>
-            ${isCurrent?'<span class="text-[10px] font-bold bg-brand-500 text-white px-2 py-0.5 rounded-full">현재 그룹</span>':''}
-            ${!applies?'<span class="text-[10px] text-rose-500 font-semibold">적용 불가</span>':''}
+      <label class="block cursor-pointer">
+        <input type="radio" name="wizEq" value="${i}" ${on?'checked':''} class="sr-only" onchange="selectWizEq(${i})"/>
+        <div class="rounded-2xl border-2 ${on?'border-brand-500 bg-brand-50':'border-gray-200 bg-white hover:border-brand-300'} p-6 transition">
+          <div class="flex items-start justify-between gap-4 flex-wrap">
+            <div>
+              <div class="flex items-center gap-2 mb-2">
+                <span class="text-xs font-bold text-brand-600 bg-white px-2 py-0.5 rounded-full">v${eq.version}</span>
+                <span class="text-xs text-ink-500">적용 학생 ${eq.count}명 · 신뢰도 ${eq.trust}%</span>
+              </div>
+              <div class="text-[20px] font-extrabold">${eq.name}</div>
+            </div>
           </div>
-          <div class="text-xs text-ink-500 mt-1">적용 학생 ${eq.count}명 · 신뢰도 ${eq.trust}%</div>
+          <div class="mt-4 rounded-xl bg-white/70 ring-1 ring-gray-100 p-4 text-[15px] font-bold leading-relaxed">${eq.formula}</div>
         </div>
       </label>`;
     }).join('');
-    document.getElementById('studentSelectPhase').classList.add('hidden');
-    document.getElementById('studentConfigPhase').classList.remove('hidden');
-    document.getElementById('scSubmitBtn').classList.remove('hidden');
-    document.getElementById('scBackBtn').classList.remove('hidden');
   }
-  window.pickStudentFromDrawer = pickStudentFromDrawer;
+  function selectWizEq(i){ wizState.eqIdx = i; wizState.students = new Set(); renderWizStep1(); }
+  window.selectWizEq = selectWizEq;
 
-  // 학생 리스트에서 행 클릭 → 맞춤 드로어 직통
-  function pickStudentDirect(idx){
-    closeModal('generateModal');
-    renderStudentPickList();
-    pickStudentFromDrawer(idx);
-    openDrawer('studentDrawer');
+  function eligibleStudents(){
+    const eq = equations[wizState.eqIdx];
+    return students.filter(s => eq.group === '전체 학생' || s.cls === eq.group);
   }
-  window.pickStudentDirect = pickStudentDirect;
 
-  function backToStudentPick(){
-    document.getElementById('studentSelectPhase').classList.remove('hidden');
-    document.getElementById('studentConfigPhase').classList.add('hidden');
-    document.getElementById('scSubmitBtn').classList.add('hidden');
-    document.getElementById('scBackBtn').classList.add('hidden');
-    document.getElementById('studentDrawerTitle').textContent = '학생을 선택해주세요';
+  function renderWizStep2(){
+    const list = eligibleStudents();
+    if(wizState.students.size === 0) list.forEach(s=>wizState.students.add(s.name));
+    const allChecked = list.every(s=>wizState.students.has(s.name));
+    document.getElementById('wizSelectAll').checked = allChecked;
+    document.getElementById('wizStudentList').innerHTML = list.map(s=>{
+      const checked = wizState.students.has(s.name);
+      const dot = s.status==='green'?'🟢 예측 가능':s.status==='yellow'?'🟡 주의 필요':'🔴 데이터 부족';
+      return `
+      <label class="flex items-center gap-4 px-6 py-4 cursor-pointer hover:bg-gray-50">
+        <input type="checkbox" ${checked?'checked':''} class="w-5 h-5" onchange="toggleStudent('${s.name}', this.checked)"/>
+        <div class="w-10 h-10 rounded-full bg-soft-navy text-brand-700 font-bold grid place-items-center">${s.name[0]}</div>
+        <div class="flex-1">
+          <div class="font-semibold text-[15px]">${s.name}</div>
+          <div class="text-xs text-ink-500 mt-0.5">${s.cls} · 데이터 ${s.months}개월 · ${dot}</div>
+        </div>
+      </label>`;
+    }).join('');
+    updateSelectCount();
   }
-  window.backToStudentPick = backToStudentPick;
+  function toggleStudent(name, checked){
+    if(checked) wizState.students.add(name); else wizState.students.delete(name);
+    updateSelectCount();
+    const list = eligibleStudents();
+    document.getElementById('wizSelectAll').checked = list.every(s=>wizState.students.has(s.name));
+  }
+  function toggleAllStudents(checked){
+    const list = eligibleStudents();
+    if(checked) list.forEach(s=>wizState.students.add(s.name)); else wizState.students.clear();
+    renderWizStep2();
+  }
+  function updateSelectCount(){
+    const el = document.getElementById('wizSelectCount');
+    if(el) el.textContent = wizState.students.size;
+  }
+  window.toggleStudent = toggleStudent;
+  window.toggleAllStudents = toggleAllStudents;
 
-  // Tone / period 토글 공통
-  document.addEventListener('click', e=>{
-    if(e.target.classList.contains('tone-btn')){
-      e.target.parentElement.querySelectorAll('.tone-btn').forEach(x=>x.classList.remove('on'));
-      e.target.classList.add('on');
+  function onPeriodChange(p){
+    wizState.period = p;
+    document.querySelectorAll('.wiz-period-label').forEach(el=>{
+      if(el.dataset.p === p){ el.classList.remove('border-gray-200'); el.classList.add('border-brand-500','bg-brand-50'); }
+      else{ el.classList.remove('border-brand-500','bg-brand-50'); el.classList.add('border-gray-200'); }
+    });
+    updateShortList();
+  }
+  window.onPeriodChange = onPeriodChange;
+
+  function updateShortList(){
+    const el = document.getElementById('wizShortList');
+    if(wizState.period === 'auto'){ el.classList.add('hidden'); return; }
+    const need = wizState.period === '3m' ? 3 : 6;
+    const sel = eligibleStudents().filter(s=>wizState.students.has(s.name));
+    const short = sel.filter(s=>s.months < need);
+    if(short.length === 0){ el.classList.add('hidden'); return; }
+    el.classList.remove('hidden');
+    document.getElementById('wizShortCount').textContent = short.length;
+    document.getElementById('wizShortNames').innerHTML = short.map(s=>`
+      <div class="flex items-center justify-between">
+        <div><b>${s.name}</b> <span class="text-ink-500">· ${s.cls}</span></div>
+        <div class="text-ink-500">보유 ${s.months}개월 / 필요 ${need}개월</div>
+      </div>
+    `).join('');
+  }
+  function keepOnlyEligible(){
+    const need = wizState.period === '3m' ? 3 : 6;
+    eligibleStudents().forEach(s=>{ if(s.months < need) wizState.students.delete(s.name); });
+    updateShortList();
+  }
+  window.keepOnlyEligible = keepOnlyEligible;
+
+  function renderWizStep3(){
+    document.getElementById('wizToneGrid').innerHTML = tones.map(t=>{
+      const on = t.id === wizState.tone;
+      return `
+      <label class="block cursor-pointer h-full">
+        <input type="radio" name="wizTone" value="${t.id}" ${on?'checked':''} class="sr-only" onchange="selectWizTone('${t.id}')"/>
+        <div class="h-full rounded-2xl border-2 ${on?'border-brand-500 bg-brand-50':'border-gray-200 bg-white hover:border-brand-300'} p-5 transition flex flex-col">
+          <div class="font-bold text-[17px]">${t.name}</div>
+          <div class="text-xs text-ink-500 mb-3">${t.desc}</div>
+          <div class="rounded-xl bg-white/70 ring-1 ring-gray-100 p-4 text-[13px] leading-relaxed flex-1">${t.sample.replace('{name}','김민재')}</div>
+        </div>
+      </label>`;
+    }).join('');
+    updateShortList();
+  }
+  function selectWizTone(id){ wizState.tone = id; renderWizStep3(); }
+  window.selectWizTone = selectWizTone;
+
+  function renderWizStep4(){
+    const eq = equations[wizState.eqIdx];
+    const tone = tones.find(t=>t.id === wizState.tone);
+    const need = wizState.period === '3m' ? 3 : wizState.period === '6m' ? 6 : 0;
+    const sel = eligibleStudents().filter(s=>wizState.students.has(s.name));
+    const final = need ? sel.filter(s=>s.months >= need) : sel;
+    if(final.length === 0){
+      document.getElementById('wizPreviewList').innerHTML = '<div class="bg-white rounded-2xl p-10 text-center text-ink-500">조건에 맞는 학생이 없어요. 이전 단계로 돌아가 설정을 바꿔주세요.</div>';
+      return;
     }
-    if(e.target.classList.contains('sc-period')){
-      e.target.parentElement.querySelectorAll('.sc-period').forEach(x=>{x.classList.remove('border-brand-500','bg-brand-50','text-brand-700'); x.classList.add('border-gray-200')});
-      e.target.classList.remove('border-gray-200'); e.target.classList.add('border-brand-500','bg-brand-50','text-brand-700');
-    }
-  });
+    document.getElementById('wizPreviewList').innerHTML = final.map(s=>{
+      const msg = tone.sample.replace('{name}', s.name);
+      const periodLabel = need ? `최근 ${need}개월` : `최근 ${s.months}개월 (자동)`;
+      return `
+      <div class="bg-white rounded-3xl shadow-card ring-soft p-6">
+        <div class="flex items-start justify-between gap-4 mb-5 flex-wrap">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-full bg-soft-navy text-brand-700 font-bold grid place-items-center text-lg">${s.name[0]}</div>
+            <div>
+              <div class="font-extrabold text-[18px]">${s.name} 학생 · 리포트카드</div>
+              <div class="text-xs text-ink-500 mt-0.5">${s.cls} · ${eq.name} · ${periodLabel}</div>
+            </div>
+          </div>
+          <div class="flex gap-2">
+            <button class="px-3 py-2 text-xs rounded-lg border border-gray-200 hover:bg-gray-50 font-semibold">📄 PDF</button>
+            <button class="px-3 py-2 text-xs rounded-lg bg-yellow-300 text-yellow-900 font-bold hover:bg-yellow-400">💬 알림톡 발송</button>
+          </div>
+        </div>
+        <div class="grid md:grid-cols-3 gap-3 mb-4">
+          <div class="rounded-xl bg-gray-50 p-4"><div class="text-xs text-ink-500">현재 예측</div><div class="font-extrabold mt-1 text-[17px]">${s.status==='red'?'데이터 부족':s.cur+'점'}</div></div>
+          <div class="rounded-xl bg-gray-50 p-4"><div class="text-xs text-ink-500">6주 후 예측</div><div class="font-extrabold mt-1 text-[17px]">${s.status==='red'?'-':s.predLow+'~'+s.predHigh+'점'}</div></div>
+          <div class="rounded-xl bg-gray-50 p-4"><div class="text-xs text-ink-500">핵심 인사이트</div><div class="font-semibold mt-1 text-[13px] ${s.insightColor}">${s.insight}</div></div>
+        </div>
+        <div class="rounded-xl bg-brand-50 border border-brand-100 p-5">
+          <div class="text-xs font-bold text-brand-600 mb-1.5">리포트 문구 · ${tone.name}</div>
+          <div class="text-[15px] leading-relaxed">${msg}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function wizNext(){
+    if(wizStep < WIZ_STEPS){ wizStep++; renderWizStep(); window.scrollTo({top:0}); }
+    else { alert(`${document.querySelectorAll('#wizPreviewList > div').length}건의 리포트가 발송되었어요!`); closeWizard(); }
+  }
+  function wizPrev(){ if(wizStep>1){ wizStep--; renderWizStep(); window.scrollTo({top:0}); } }
+  window.wizNext = wizNext; window.wizPrev = wizPrev;
 </script>
 </body>
 </html>
