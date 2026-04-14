@@ -602,11 +602,10 @@
   // Seed: 샘플 1건 (시연용)
   function seedGeneration(){
     const eq = equations[0];
-    const sampleStudents = students.filter(s=>s.cls === eq.group).slice(0,5).map(s=>({
-      ...s,
-      kakao: !s.phoneOK ? 'noPhone' : (Math.random()>0.85 ? 'fail' : 'sent'),
-      pdf: true
-    }));
+    const sampleStudents = students.filter(s=>s.cls === eq.group).slice(0,5).map(s=>{
+      const kakao = !s.phoneOK ? 'noPhone' : (Math.random()>0.85 ? 'fail' : 'sent');
+      return {...s, kakao, kakaoAt: kakao === 'sent' ? '2026.04.10 14:35' : null, pdf: true};
+    });
     generations.push({
       id:'g_seed', dateTime:'2026.04.10 14:32', eq, periodLabel:'최근 3개월', tone:'warm',
       students: sampleStudents
