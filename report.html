@@ -6,7 +6,7 @@
 <title>리포트카드 · 우리학원 성공방정식</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="shared.js?v=1776174058972"></script>
+<script src="shared.js?v=1776174164551"></script>
 <script>__applyTheme();</script>
 <style>
   html,body{background:#f6f7fb}
@@ -829,23 +829,79 @@
     }[s.status];
 
     document.getElementById('sdBody').innerHTML = `
-      <!-- 프로필 카드 -->
-      <section class="bg-white rounded-3xl shadow-card ring-soft p-7">
-        <div class="flex items-start gap-5 flex-wrap">
-          <div class="w-16 h-16 rounded-full bg-soft-navy text-brand-700 font-extrabold grid place-items-center text-2xl flex-shrink-0">${s.name[0]}</div>
-          <div class="flex-1 min-w-0">
-            <div class="flex items-center gap-3 flex-wrap">
-              <div class="text-[24px] font-extrabold">${s.name}</div>
-              ${statusBadge}
+      <!-- 프로필 카드 (정보 + 수정) -->
+      <section class="bg-white rounded-3xl shadow-card ring-soft p-7" id="sdProfileCard">
+        <div class="flex items-start justify-between gap-4 flex-wrap mb-5">
+          <div class="flex items-center gap-5">
+            <div class="w-16 h-16 rounded-full bg-soft-pink text-accent-600 font-extrabold grid place-items-center text-2xl flex-shrink-0">${s.name[0]}</div>
+            <div>
+              <div class="flex items-center gap-3 flex-wrap">
+                <div class="text-[24px] font-extrabold">${s.name}</div>
+                ${statusBadge}
+              </div>
+              <div class="text-sm text-ink-500 mt-1">데이터 보유 ${s.months}개월 · 마지막 입력 2주 전</div>
             </div>
-            <div class="text-sm text-ink-500 mt-1">${s.cls} · 데이터 보유 ${s.months}개월</div>
           </div>
-          <div class="grid grid-cols-3 gap-4 text-sm">
-            <div><div class="text-[11px] text-ink-500">현재 ${s.eq.y||'예측'}</div><div class="font-extrabold text-[18px] mt-0.5">${s.status==='red'?'—':s.cur+(s.eq.yUnit||'')}</div></div>
-            <div><div class="text-[11px] text-ink-500">다음 시험 예측</div><div class="font-extrabold text-[18px] mt-0.5 text-brand-600">${s.status==='red'?'—':s.predLow+'~'+s.predHigh+(s.eq.yUnit||'')}</div></div>
-            <div><div class="text-[11px] text-ink-500">학부모 연락처</div><div class="font-bold text-[14px] mt-1 ${s.parentPhone?'':'text-rose-600'}">${s.parentPhone || '📵 미등록'}</div></div>
+          <button onclick="toggleSdEdit()" id="sdEditBtn" class="px-4 py-2 rounded-lg border border-gray-200 text-sm font-semibold hover:bg-gray-50 flex items-center gap-1.5">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4v16h16v-7"/><path d="M18 2l4 4-10 10H8v-4z"/></svg>
+            정보 수정
+          </button>
+        </div>
+
+        <!-- 편집 가능 정보 -->
+        <div class="grid md:grid-cols-3 gap-3">
+          <div class="rounded-xl bg-soft-blush border border-accent-100 p-4">
+            <div class="text-[11px] font-bold text-accent-700 tracking-wider">반</div>
+            <div class="font-extrabold text-[17px] mt-1 sd-view">${s.cls}</div>
+            <select id="sdEditCls" class="hidden sd-edit w-full mt-1 px-3 py-2 rounded-lg border border-gray-200 text-sm font-semibold bg-white">
+              ${classes.map(c=>`<option ${c===s.cls?'selected':''}>${c}</option>`).join('')}
+            </select>
+          </div>
+          <div class="rounded-xl bg-soft-blush border border-accent-100 p-4 md:col-span-2">
+            <div class="text-[11px] font-bold text-accent-700 tracking-wider">학부모 연락처</div>
+            <div class="font-extrabold text-[17px] mt-1 sd-view">
+              ${s.parentPhone
+                ? `<span class="font-mono">${s.parentPhone}</span>`
+                : `<span class="text-rose-600 text-[14px]">📵 미등록 — 알림톡 발송 불가. 우측 "정보 수정"으로 등록해주세요.</span>`}
+            </div>
+            <input type="tel" id="sdEditPhone" placeholder="010-1234-5678" value="${s.parentPhone||''}" class="hidden sd-edit w-full mt-1 px-3 py-2 rounded-lg border border-gray-200 text-sm font-semibold font-mono"/>
           </div>
         </div>
+
+        <div id="sdEditActions" class="hidden mt-4 flex justify-end gap-2">
+          <button onclick="cancelSdEdit()" class="px-4 py-2 rounded-lg border border-gray-200 text-sm font-semibold hover:bg-gray-50">취소</button>
+          <button onclick="saveSdEdit()" class="px-5 py-2 rounded-lg bg-accent-500 text-white text-sm font-bold hover:bg-accent-600">저장</button>
+        </div>
+
+        <!-- 핵심 수치 -->
+        <div class="grid grid-cols-3 gap-3 mt-6 text-sm">
+          <div class="rounded-lg bg-gray-50 p-3">
+            <div class="text-[11px] text-ink-500">현재 ${s.eq.y||'예측'}</div>
+            <div class="font-extrabold text-[18px] mt-0.5">${s.status==='red'?'—':s.cur+(s.eq.yUnit||'')}</div>
+          </div>
+          <div class="rounded-lg bg-soft-pink border border-accent-100 p-3">
+            <div class="text-[11px] text-accent-700 font-bold">다음 시험 예측</div>
+            <div class="font-extrabold text-[18px] mt-0.5 text-accent-700">${s.status==='red'?'—':s.predLow+'~'+s.predHigh+(s.eq.yUnit||'')}</div>
+          </div>
+          <div class="rounded-lg bg-gray-50 p-3">
+            <div class="text-[11px] text-ink-500">변화 추이 (직전 대비)</div>
+            <div class="font-extrabold text-[18px] mt-0.5 ${s.diff?.includes?.('+')?'text-emerald-600':'text-rose-500'}">${s.status==='red'?'—':s.diff}</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 학생 정보 카드 바로 밑 CTA -->
+      <section class="rounded-2xl bg-gradient-to-r from-accent-500 to-accent-600 p-5 text-white flex items-center justify-between gap-4 flex-wrap shadow-soft">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-full bg-white/20 grid place-items-center text-xl">📝</div>
+          <div>
+            <div class="font-extrabold text-[16px]">${s.name} 학생만의 리포트카드</div>
+            <div class="text-xs opacity-90 mt-0.5">학부모 상담·피드백 자료로 바로 사용 가능</div>
+          </div>
+        </div>
+        <button onclick="startStudentReport()" class="px-5 py-3 rounded-xl bg-white text-accent-600 font-extrabold hover:bg-soft-blush shadow flex items-center gap-2">
+          리포트 생성하기 →
+        </button>
       </section>
 
       <!-- 적용 가능 방정식 -->
@@ -860,10 +916,10 @@
         <div class="grid md:grid-cols-3 gap-4">${varCards}</div>
       </section>
 
-      <!-- 인사이트 -->
-      <section>
-        <h3 class="text-lg font-extrabold mb-3">원장님이 주목할 인사이트</h3>
-        <div class="space-y-3">${insightHtml}</div>
+      <!-- 인사이트 (한 카드 안에) -->
+      <section class="bg-white rounded-3xl shadow-card ring-soft p-2">
+        <h3 class="text-lg font-extrabold px-5 pt-5 pb-3">원장님이 주목할 인사이트</h3>
+        ${insightHtml}
       </section>
 
       <!-- 다음 액션 -->
@@ -871,24 +927,48 @@
         <h3 class="text-lg font-extrabold px-5 pt-5 pb-3">추천 다음 액션</h3>
         ${nextHtml}
       </section>
-
-      <!-- 하단 CTA 한 번 더 -->
-      <section class="rounded-3xl bg-gradient-to-br from-brand-500 to-brand-600 p-7 text-white">
-        <div class="flex items-center justify-between gap-4 flex-wrap">
-          <div>
-            <div class="text-sm font-bold opacity-90">학부모 상담 / 학생 피드백 준비가 필요하신가요?</div>
-            <div class="text-[20px] font-extrabold mt-1">${s.name} 학생만의 리포트카드를 바로 만들어보세요.</div>
-          </div>
-          <button onclick="startStudentReport()" class="px-5 py-3 rounded-xl bg-white text-brand-700 font-extrabold hover:bg-brand-50 shadow flex items-center gap-2">
-            리포트 생성하기 →
-          </button>
-        </div>
-      </section>
     `;
 
     document.getElementById('studentDetail').classList.remove('hidden');
     document.body.style.overflow = 'hidden';
   }
+
+  // ===== 학생 정보 인라인 편집 =====
+  function toggleSdEdit(){
+    const card = document.getElementById('sdProfileCard');
+    card.querySelectorAll('.sd-view').forEach(el => el.classList.add('hidden'));
+    card.querySelectorAll('.sd-edit').forEach(el => el.classList.remove('hidden'));
+    document.getElementById('sdEditActions').classList.remove('hidden');
+    document.getElementById('sdEditBtn').classList.add('hidden');
+  }
+  function cancelSdEdit(){
+    const s = students[currentStudentIdx];
+    document.getElementById('sdEditCls').value = s.cls;
+    document.getElementById('sdEditPhone').value = s.parentPhone || '';
+    closeSdEdit();
+  }
+  function closeSdEdit(){
+    const card = document.getElementById('sdProfileCard');
+    card.querySelectorAll('.sd-view').forEach(el => el.classList.remove('hidden'));
+    card.querySelectorAll('.sd-edit').forEach(el => el.classList.add('hidden'));
+    document.getElementById('sdEditActions').classList.add('hidden');
+    document.getElementById('sdEditBtn').classList.remove('hidden');
+  }
+  function saveSdEdit(){
+    const s = students[currentStudentIdx];
+    const newCls = document.getElementById('sdEditCls').value;
+    const newPhone = document.getElementById('sdEditPhone').value.trim();
+    s.cls = newCls;
+    s.parentPhone = newPhone || null;
+    s.phoneOK = !!s.parentPhone;
+    // 학생이 속한 반에 따라 적용 방정식 재매핑
+    s.eq = newCls.includes('수학') ? equations[0] : (newCls.includes('영어') ? equations[1] : equations[2]);
+    openStudentDetail(currentStudentIdx); // 재렌더
+    renderStudentTable();                   // 리스트에도 반영
+  }
+  window.toggleSdEdit = toggleSdEdit;
+  window.cancelSdEdit = cancelSdEdit;
+  window.saveSdEdit = saveSdEdit;
   function closeStudentDetail(){
     document.getElementById('studentDetail').classList.add('hidden');
     document.body.style.overflow = '';
