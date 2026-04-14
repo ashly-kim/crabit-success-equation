@@ -885,13 +885,17 @@
               <div><div class="text-base font-semibold">${s.n}</div><div class="text-xs text-ink-500 mt-0.5">${s.cls}</div></div>
             </div>
           </td>
-          ${vars.map(v=>{
+          ${vars.map((v,vi)=>{
             const isTargetStart = v.isNew && si===0;
+            const isCheck = v.unitType === 'check';
+            const dataAttr = isTargetStart ? 'data-target="1"' : '';
+            if(isCheck){
+              return `<td class="cell" data-col="${vi}" ${dataAttr}><label class="cell-check"><input type="checkbox"/></label><div class="cell-handle"></div></td>`;
+            }
             const hasVal = Math.random() > 0.35 && !v.isNew;
             const val = hasVal ? randVal(v.id) : '';
             const cls = hasVal ? 'filled' : '';
-            const dataAttr = isTargetStart ? 'data-target="1"' : '';
-            return `<td class="cell ${cls}" ${dataAttr}><input value="${val}"/></td>`;
+            return `<td class="cell ${cls}" data-col="${vi}" ${dataAttr}><input type="text" value="${val}"/><div class="cell-handle"></div></td>`;
           }).join('')}
         </tr>`).join('')}</tbody>`;
     } else {
