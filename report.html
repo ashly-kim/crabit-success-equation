@@ -1151,7 +1151,7 @@
       const s = currentGen.students[i];
       if(!s.phoneOK || s.kakao === 'noPhone') return; // 자동 제외
       // 95% 성공 시뮬레이션
-      if(Math.random() > 0.05){ s.kakao = 'sent'; success++; }
+      if(Math.random() > 0.05){ s.kakao = 'sent'; s.kakaoAt = fmtNow(); success++; }
       else { s.kakao = 'fail'; fail++; failNames.push(s.name); }
     });
     document.getElementById('krmSuccess').textContent = success;
