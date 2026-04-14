@@ -594,38 +594,59 @@
   }
   renderStudentTable();
 
-  // ===== History Table =====
-  const history = [
-    {name:'박서연', cls:'중3 수학반', eq:'중3 수학반 · 성적 향상', version:'v3', date:'2026.04.14', period:'2026.01.14 ~ 04.14', sent:['kakao','pdf']},
-    {name:'김민재', cls:'중3 수학반', eq:'중3 수학반 · 성적 향상', version:'v3', date:'2026.04.14', period:'2026.01.14 ~ 04.14', sent:['kakao']},
-    {name:'정하윤', cls:'중3 수학반', eq:'중3 수학반 · 성적 향상', version:'v3', date:'2026.04.14', period:'2026.01.14 ~ 04.14', sent:['kakao','pdf']},
-    {name:'최지우', cls:'중3 수학반', eq:'중3 수학반 · 성적 향상', version:'v2', date:'2026.03.10', period:'2025.12.10 ~ 03.10', sent:['pdf']},
-    {name:'박서연', cls:'중3 수학반', eq:'중3 수학반 · 성적 향상', version:'v2', date:'2026.03.10', period:'2025.12.10 ~ 03.10', sent:['kakao']},
-    {name:'한소율', cls:'중3 영어반', eq:'고1 영어반 · 모의고사', version:'v1', date:'2026.02.28', period:'2025.11.28 ~ 02.28', sent:['kakao','pdf']}
-  ];
-  function sentIcons(arr){
-    let out = '<div class="flex gap-1 justify-center">';
-    if(arr.includes('kakao')) out += `<span class="w-7 h-7 rounded-md bg-yellow-100 grid place-items-center" title="알림톡"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="#3a1d1d"><path d="M12 4C6.48 4 2 7.58 2 12c0 2.72 1.7 5.12 4.29 6.56-.18.66-.66 2.38-.76 2.75-.12.46.17.46.36.33.15-.1 2.4-1.63 3.35-2.28.91.13 1.82.19 2.76.19 5.52 0 10-3.58 10-8S17.52 4 12 4z"/></svg></span>`;
-    if(arr.includes('pdf')) out += `<span class="w-7 h-7 rounded-md bg-brand-50 text-brand-600 grid place-items-center" title="PDF"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg></span>`;
-    if(!arr.length) out += '<span class="text-ink-300 text-xs">—</span>';
-    out += '</div>';
-    return out;
+  // ===== 생성 히스토리 모델 =====
+  // generation: {id, dateTime, eq, periodLabel, tone, students:[{...student, kakao:'pending'|'sent'|'fail'|'noPhone', pdf:false}]}
+  const generations = [];
+
+  // Seed: 샘플 1건 (시연용)
+  function seedGeneration(){
+    const eq = equations[0];
+    const sampleStudents = students.filter(s=>s.cls === eq.group).slice(0,5).map(s=>({
+      ...s,
+      kakao: !s.phoneOK ? 'noPhone' : (Math.random()>0.85 ? 'fail' : 'sent'),
+      pdf: true
+    }));
+    generations.push({
+      id:'g_seed', dateTime:'2026.04.10 14:32', eq, periodLabel:'최근 3개월', tone:'warm',
+      students: sampleStudents
+    });
   }
-  document.getElementById('historyTable').innerHTML = history.map(h=>`
-    <tr class="border-t border-gray-100 hover:bg-gray-50">
-      <td class="px-5 py-4"><div class="font-semibold">${h.name}</div><div class="text-xs text-ink-500">${h.cls}</div></td>
-      <td class="px-5 py-4 text-ink-700 text-sm">${h.eq}</td>
-      <td class="px-5 py-4 text-center"><span class="text-[11px] font-bold bg-brand-50 text-brand-700 px-2 py-1 rounded-full">${h.version}</span></td>
-      <td class="px-5 py-4 text-ink-700">${h.date}</td>
-      <td class="px-5 py-4 text-ink-500 text-xs">${h.period}</td>
-      <td class="px-5 py-4 text-center">${sentIcons(h.sent)}</td>
-      <td class="px-5 py-4 text-center">
-        <button class="w-9 h-9 rounded-lg hover:bg-brand-50 grid place-items-center text-ink-500 hover:text-brand-600" title="열람">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
-        </button>
-      </td>
-    </tr>
-  `).join('');
+  seedGeneration();
+
+  function fmtNow(){
+    const d = new Date();
+    const pad = n => String(n).padStart(2,'0');
+    return `${d.getFullYear()}.${pad(d.getMonth()+1)}.${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+
+  function genTargetLabel(g){
+    if(g.students.length === 1) return g.students[0].name;
+    return `${g.eq.group} (${g.students.length}명)`;
+  }
+
+  function renderHistory(){
+    const tbody = document.getElementById('historyTable');
+    document.getElementById('historyCount').textContent = generations.length;
+    if(generations.length === 0){
+      tbody.innerHTML = `<tr><td colspan="6" class="px-5 py-16 text-center text-ink-500">아직 생성된 리포트가 없어요. 우측 상단의 <b class="text-brand-600">리포트카드 생성</b> 버튼으로 시작하세요.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = generations.slice().reverse().map(g=>`
+      <tr class="border-t border-gray-100 hover:bg-gray-50 cursor-pointer transition" onclick="openGenDetail('${g.id}')">
+        <td class="px-5 py-4 font-semibold text-[14px]">${g.dateTime}</td>
+        <td class="px-5 py-4 text-ink-700 text-sm">${g.eq.name}</td>
+        <td class="px-5 py-4 text-ink-700 text-sm font-semibold">${genTargetLabel(g)}</td>
+        <td class="px-5 py-4 text-center"><span class="text-[12px] font-bold bg-brand-50 text-brand-700 px-2.5 py-1 rounded-full">${g.students.length}건</span></td>
+        <td class="px-5 py-4 text-ink-500 text-sm">${g.periodLabel}</td>
+        <td class="px-5 py-4 text-center">
+          <span class="w-9 h-9 rounded-lg inline-grid place-items-center text-ink-500">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+          </span>
+        </td>
+      </tr>
+    `).join('');
+  }
+  renderHistory();
 
   // Top tabs
   document.querySelectorAll('.top-tab').forEach(t=>{
