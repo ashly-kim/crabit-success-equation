@@ -514,6 +514,7 @@
 
     // 학부모 전화번호 등록 여부 (~85% 등록)
     const phoneOK = Math.random() > 0.15;
+    const parentPhone = phoneOK ? `010-${String(1000+Math.floor(Math.random()*9000))}-${String(1000+Math.floor(Math.random()*9000))}` : null;
     // 변수별 기여도 시뮬레이션 (0~100 정규화)
     const contribution = {};
     (cls.includes('수학') ? equations[0] : (cls.includes('영어') ? equations[1] : equations[2])).terms.forEach(t=>{
