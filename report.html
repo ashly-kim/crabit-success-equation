@@ -712,7 +712,8 @@
   function openWizard(opts){
     opts = opts || {};
     wizStep = 1;
-    wizState = {eqIdx: opts.eqIdx ?? 0, students:new Set(), period:'auto', tone:'warm'};
+    wizState = {eqIdx: opts.eqIdx ?? 0, students:new Set(), period:'auto', tone:'warm', lockStudent: opts.lockStudent || null};
+    if(wizState.lockStudent) wizState.students.add(wizState.lockStudent.name);
     document.getElementById('wizard').classList.remove('hidden');
     document.body.style.overflow = 'hidden';
     renderWizStep();
