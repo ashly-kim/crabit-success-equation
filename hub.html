@@ -927,15 +927,18 @@
           </td>
           ${days.map((d,di)=>vars.map((v,vi)=>{
             const isTargetStart = v.isNew && si===0 && di===0;
+            const isCheck = v.unitType === 'check';
+            const dayEnd = vi===vars.length-1;
+            const dataAttr = isTargetStart ? 'data-target="1"' : '';
+            const colIdx = di*vars.length + vi;
+            if(isCheck){
+              const cls = dayEnd ? 'day-end' : '';
+              return `<td class="cell ${cls}" data-col="${colIdx}" ${dataAttr}><label class="cell-check"><input type="checkbox"/></label><div class="cell-handle"></div></td>`;
+            }
             const hasVal = Math.random() > 0.5 && !v.isNew;
             const val = hasVal ? randVal(v.id) : '';
-            const dayEnd = vi===vars.length-1;
-            const cls = [
-              hasVal ? 'filled' : '',
-              dayEnd ? 'day-end' : ''
-            ].join(' ');
-            const dataAttr = isTargetStart ? 'data-target="1"' : '';
-            return `<td class="cell ${cls}" ${dataAttr}><input value="${val}"/></td>`;
+            const cls = [hasVal ? 'filled' : '', dayEnd ? 'day-end' : ''].join(' ');
+            return `<td class="cell ${cls}" data-col="${colIdx}" ${dataAttr}><input type="text" value="${val}"/><div class="cell-handle"></div></td>`;
           }).join('')).join('')}
         </tr>`).join('')}</tbody>`;
     }
