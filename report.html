@@ -448,9 +448,18 @@
 
   // ===== 방정식 목록 (허브와 공유할 예정이지만 여기선 하드코딩) =====
   const equations = [
-    {id:'eq1', name:'중3 수학반 · 성적 향상', group:'중3 수학반', count:24, trust:78, version:2, color:'brand', formula:'예상 성적 = 0.42 × 복습시간 + 0.28 × 숙제이행률 + 0.19 × 출결률 + 62'},
-    {id:'eq2', name:'고1 영어반 · 모의고사 등급', group:'고1 영어반', count:22, trust:65, version:1, color:'accent', formula:'모의고사 등급 = -0.008 × 단어암기 + (-0.005) × 리스닝 + 3.1'},
-    {id:'eq3', name:'전체 · 재등록 예측', group:'전체 학생', count:76, trust:71, version:1, color:'ink', formula:'재등록 확률 = 0.18 × 만족도 + 0.12 × 성적변화 + 0.35'}
+    {id:'eq1', name:'중3 수학반 · 성적 향상', group:'중3 수학반', count:24, trust:78, version:2, color:'brand',
+     formula:'예상 성적 = 0.42 × 복습시간 + 0.28 × 숙제이행률 + 0.19 × 출결률 + 62',
+     y:'다음 시험 점수', yUnit:'점',
+     terms:[{name:'복습시간',beta:0.42,unit:'h/주'},{name:'숙제이행률',beta:0.28,unit:'%'},{name:'출결률',beta:0.19,unit:'%'}]},
+    {id:'eq2', name:'고1 영어반 · 모의고사 등급', group:'고1 영어반', count:22, trust:65, version:1, color:'accent',
+     formula:'모의고사 등급 = -0.008 × 단어암기 + (-0.005) × 리스닝 + 3.1',
+     y:'모의고사 등급', yUnit:'등급',
+     terms:[{name:'단어암기',beta:-0.008,unit:'개/일'},{name:'리스닝',beta:-0.005,unit:'분/일'}]},
+    {id:'eq3', name:'전체 · 재등록 예측', group:'전체 학생', count:76, trust:71, version:1, color:'ink',
+     formula:'재등록 확률 = 0.18 × 만족도 + 0.12 × 성적변화 + 0.35',
+     y:'재등록 확률', yUnit:'%',
+     terms:[{name:'만족도',beta:0.18,unit:'점'},{name:'성적변화',beta:0.12,unit:'점'}]}
   ];
 
   // ===== 학생 데이터 =====
