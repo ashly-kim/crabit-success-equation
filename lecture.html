@@ -172,25 +172,117 @@
         </div>
       </section>
 
-      <!-- 누구에게 추천 -->
-      <section class="grid md:grid-cols-2 gap-5">
-        <div class="bg-white rounded-3xl p-7 shadow-card ring-soft">
-          <div class="text-2xl mb-3">🎓</div>
-          <h3 class="text-xl font-bold">강의를 들으신 원장님</h3>
-          <ul class="mt-4 space-y-2 text-sm text-ink-700">
-            <li class="flex gap-2"><span class="text-brand-600 font-bold">·</span><span>수업에서 정한 <b>X-Factor를 그대로</b> 변수 장바구니에 담으세요</span></li>
-            <li class="flex gap-2"><span class="text-brand-600 font-bold">·</span><span>강의 5회차에서 만든 <b>90일 플랜</b>을 사이트로 옮겨오세요</span></li>
-            <li class="flex gap-2"><span class="text-brand-600 font-bold">·</span><span>대표님 강의의 <b>모든 개념(R²·β·다중공선성)</b>이 사이트에 자동 반영돼요</span></li>
-          </ul>
+      <!-- Before / After -->
+      <section>
+        <div class="mb-5">
+          <h2 class="text-[22px] font-extrabold">감에서 데이터로, 학원 운영이 이렇게 달라져요</h2>
+          <p class="text-sm text-ink-500 mt-1">회귀분석 기반 학원 경영의 Before / After</p>
         </div>
-        <div class="bg-white rounded-3xl p-7 shadow-card ring-soft">
-          <div class="text-2xl mb-3">🌱</div>
-          <h3 class="text-xl font-bold">강의를 안 들으신 원장님</h3>
-          <ul class="mt-4 space-y-2 text-sm text-ink-700">
-            <li class="flex gap-2"><span class="text-accent-500 font-bold">·</span><span>회귀분석을 <b>몰라도 사이트가 알아서</b> 돌려줍니다</span></li>
-            <li class="flex gap-2"><span class="text-accent-500 font-bold">·</span><span>"복습 1h = +3.2점" 같은 <b>해석된 결과</b>만 보시면 돼요</span></li>
-            <li class="flex gap-2"><span class="text-accent-500 font-bold">·</span><span>아래 <b>FAQ</b>에서 자주 묻는 질문 확인 가능</span></li>
-          </ul>
+
+        <div class="bg-white rounded-3xl shadow-card ring-soft overflow-hidden">
+          <!-- Header -->
+          <div class="grid grid-cols-[1.3fr_1fr_1fr] bg-gray-50 border-b border-gray-100">
+            <div class="px-6 py-4 font-bold text-sm text-ink-500">항목</div>
+            <div class="px-6 py-4 font-bold text-sm text-ink-500 text-center">Before · 감에 의존</div>
+            <div class="px-6 py-4 font-bold text-sm text-brand-600 text-center bg-brand-50">After · 데이터 기반 ✨</div>
+          </div>
+
+          <!-- rows -->
+          <div class="divide-y divide-gray-100">
+            <div class="grid grid-cols-[1.3fr_1fr_1fr] items-stretch">
+              <div class="px-6 py-5 font-semibold flex items-center gap-2">
+                <span class="text-xl">💬</span>
+                <span>학부모 상담</span>
+              </div>
+              <div class="px-6 py-5 text-sm text-ink-700 border-l border-gray-100">
+                "열심히 하고 있어요"<br/>
+                <span class="text-ink-500">추상적 · 체감 어려움</span>
+              </div>
+              <div class="px-6 py-5 text-sm text-ink-700 border-l border-gray-100 bg-brand-50/40">
+                "복습 1h 더 하면 +3.2점 예상"<br/>
+                <span class="text-brand-600 font-semibold">숫자로 설득 · 신뢰 형성</span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-[1.3fr_1fr_1fr] items-stretch">
+              <div class="px-6 py-5 font-semibold flex items-center gap-2">
+                <span class="text-xl">🎯</span>
+                <span>성장 동인 파악</span>
+              </div>
+              <div class="px-6 py-5 text-sm text-ink-700 border-l border-gray-100">
+                감으로 추정<br/>
+                <span class="text-ink-500">"아마 복습이 중요할 듯"</span>
+              </div>
+              <div class="px-6 py-5 text-sm text-ink-700 border-l border-gray-100 bg-brand-50/40">
+                β 값으로 명확<br/>
+                <span class="text-brand-600 font-semibold">복습 β=0.42 > 숙제 β=0.28</span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-[1.3fr_1fr_1fr] items-stretch">
+              <div class="px-6 py-5 font-semibold flex items-center gap-2">
+                <span class="text-xl">🚨</span>
+                <span>퇴원 위험 감지</span>
+              </div>
+              <div class="px-6 py-5 text-sm text-ink-700 border-l border-gray-100">
+                이탈 후 인지<br/>
+                <span class="text-ink-500">이미 늦은 대응</span>
+              </div>
+              <div class="px-6 py-5 text-sm text-ink-700 border-l border-gray-100 bg-brand-50/40">
+                사전 감지<br/>
+                <span class="text-brand-600 font-semibold">패턴으로 선제 상담</span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-[1.3fr_1fr_1fr] items-stretch">
+              <div class="px-6 py-5 font-semibold flex items-center gap-2">
+                <span class="text-xl">📊</span>
+                <span>강사 평가</span>
+              </div>
+              <div class="px-6 py-5 text-sm text-ink-700 border-l border-gray-100">
+                주관적 판단<br/>
+                <span class="text-ink-500">편차 · 갈등 소지</span>
+              </div>
+              <div class="px-6 py-5 text-sm text-ink-700 border-l border-gray-100 bg-brand-50/40">
+                부가가치 기반<br/>
+                <span class="text-brand-600 font-semibold">학생 조건 통제한 순수 기여도</span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-[1.3fr_1fr_1fr] items-stretch">
+              <div class="px-6 py-5 font-semibold flex items-center gap-2">
+                <span class="text-xl">📝</span>
+                <span>학생별 처방</span>
+              </div>
+              <div class="px-6 py-5 text-sm text-ink-700 border-l border-gray-100">
+                일괄 처방<br/>
+                <span class="text-ink-500">"복습 많이 하세요"</span>
+              </div>
+              <div class="px-6 py-5 text-sm text-ink-700 border-l border-gray-100 bg-brand-50/40">
+                맞춤 처방<br/>
+                <span class="text-brand-600 font-semibold">유형별 Quick Win 3가지</span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-[1.3fr_1fr_1fr] items-stretch">
+              <div class="px-6 py-5 font-semibold flex items-center gap-2">
+                <span class="text-xl">🔁</span>
+                <span>재등록 유도</span>
+              </div>
+              <div class="px-6 py-5 text-sm text-ink-700 border-l border-gray-100">
+                시즌마다 손이 많이 감<br/>
+                <span class="text-ink-500">전화·문자·재방문 요청</span>
+              </div>
+              <div class="px-6 py-5 text-sm text-ink-700 border-l border-gray-100 bg-brand-50/40">
+                성장 리포트가 자동 설득<br/>
+                <span class="text-brand-600 font-semibold">수치 있는 꾸준한 신뢰 누적</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-4 rounded-2xl bg-soft-navy p-5 text-sm">
+          💡 <b>핵심</b> — 추상적인 "감"에 의존하던 학원 운영이, 숫자로 설명 가능한 <b>데이터 기반 운영</b>으로 바뀝니다.
         </div>
       </section>
 
