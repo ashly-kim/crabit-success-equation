@@ -315,13 +315,12 @@
   function openDrawer(id){ document.getElementById(id).classList.add('on'); document.body.style.overflow='hidden'; }
   function closeDrawer(id){ document.getElementById(id).classList.remove('on'); document.body.style.overflow=''; }
   window.openDrawer = openDrawer; window.closeDrawer = closeDrawer;
-  document.getElementById('generateModal').onclick = e=>{ if(e.target.id==='generateModal') closeModal('generateModal'); };
 
   // ===== 방정식 목록 (허브와 공유할 예정이지만 여기선 하드코딩) =====
   const equations = [
-    {id:'eq1', name:'중3 수학반 · 성적 향상', group:'중3 수학반', count:24, trust:78, version:2, color:'brand'},
-    {id:'eq2', name:'고1 영어반 · 모의고사 등급', group:'고1 영어반', count:22, trust:65, version:1, color:'accent'},
-    {id:'eq3', name:'전체 · 재등록 예측', group:'전체 학생', count:76, trust:71, version:1, color:'ink'}
+    {id:'eq1', name:'중3 수학반 · 성적 향상', group:'중3 수학반', count:24, trust:78, version:2, color:'brand', formula:'예상 성적 = 0.42 × 복습시간 + 0.28 × 숙제이행률 + 0.19 × 출결률 + 62'},
+    {id:'eq2', name:'고1 영어반 · 모의고사 등급', group:'고1 영어반', count:22, trust:65, version:1, color:'accent', formula:'모의고사 등급 = -0.008 × 단어암기 + (-0.005) × 리스닝 + 3.1'},
+    {id:'eq3', name:'전체 · 재등록 예측', group:'전체 학생', count:76, trust:71, version:1, color:'ink', formula:'재등록 확률 = 0.18 × 만족도 + 0.12 × 성적변화 + 0.35'}
   ];
 
   // ===== 학생 데이터 =====
