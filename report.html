@@ -906,17 +906,28 @@
   window.closeStudentDetail = closeStudentDetail;
   window.startStudentReport = startStudentReport;
 
+  function activeStepSequence(){
+    return wizState.lockStudent ? [1,3,4] : [1,2,3,4];
+  }
   function renderWizStep(){
+    const seq = activeStepSequence();
+    const pos = seq.indexOf(wizStep) + 1;
+    const total = seq.length;
     document.querySelectorAll('.wiz-step').forEach(s=>s.classList.toggle('hidden', +s.dataset.step !== wizStep));
-    document.getElementById('wizProg').style.width = (wizStep/WIZ_STEPS*100)+'%';
-    document.getElementById('wizStepLabel').textContent = `${wizStep} / ${WIZ_STEPS}`;
-    document.getElementById('wizPrevBtn').disabled = wizStep === 1;
-    const titles = ['방정식 선택','대상 학생 확인','분석 기간 · 톤 설정','리포트 미리보기'];
-    document.getElementById('wizStepTitle').textContent = `${wizStep}. ${titles[wizStep-1]}`;
-    document.getElementById('wizNextBtn').textContent = wizStep === WIZ_STEPS ? '리포트 생성하기 ✓' : (wizStep === 3 ? '미리보기 →' : '다음 →');
-    document.getElementById('wizStepDots').innerHTML = [1,2,3,4].map(n=>`
-      <span class="w-8 h-8 rounded-full grid place-items-center text-xs font-bold ${n<wizStep?'bg-brand-500 text-white':n===wizStep?'bg-brand-500 text-white ring-4 ring-brand-100':'bg-gray-200 text-ink-500'}">${n}</span>
-    `).join('');
+    document.getElementById('wizProg').style.width = (pos/total*100)+'%';
+    document.getElementById('wizStepLabel').textContent = `${pos} / ${total}`;
+    document.getElementById('wizPrevBtn').disabled = wizStep === seq[0];
+    const titlesAll = {1:'방정식 선택',2:'대상 학생 확인',3:'분석 기간 · 톤 설정',4:'리포트 미리보기'};
+    document.getElementById('wizStepTitle').textContent = `${pos}. ${titlesAll[wizStep]}`;
+    const isLast = wizStep === seq[seq.length-1];
+    const isPreviewNext = wizStep === 3;
+    document.getElementById('wizNextBtn').textContent = isLast ? '리포트 생성하기 ✓' : (isPreviewNext ? '미리보기 →' : '다음 →');
+    document.getElementById('wizStepDots').innerHTML = seq.map((stepNum, i)=>{
+      const n = i+1;
+      const isCur = stepNum === wizStep;
+      const isPast = seq.indexOf(wizStep) > i;
+      return `<span class="w-8 h-8 rounded-full grid place-items-center text-xs font-bold ${isPast?'bg-brand-500 text-white':isCur?'bg-brand-500 text-white ring-4 ring-brand-100':'bg-gray-200 text-ink-500'}">${n}</span>`;
+    }).join('');
     if(wizStep === 1) renderWizStep1();
     if(wizStep === 2) renderWizStep2();
     if(wizStep === 3) renderWizStep3();
