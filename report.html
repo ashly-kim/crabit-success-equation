@@ -1257,10 +1257,16 @@
   });
 
   function wizNext(){
-    if(wizStep < WIZ_STEPS){ wizStep++; renderWizStep(); document.getElementById('wizard').scrollTo({top:0}); }
+    const seq = activeStepSequence();
+    const i = seq.indexOf(wizStep);
+    if(i < seq.length - 1){ wizStep = seq[i+1]; renderWizStep(); document.getElementById('wizard').scrollTo({top:0}); }
     else commitGeneration();
   }
-  function wizPrev(){ if(wizStep>1){ wizStep--; renderWizStep(); document.getElementById('wizard').scrollTo({top:0}); } }
+  function wizPrev(){
+    const seq = activeStepSequence();
+    const i = seq.indexOf(wizStep);
+    if(i > 0){ wizStep = seq[i-1]; renderWizStep(); document.getElementById('wizard').scrollTo({top:0}); }
+  }
   window.wizNext = wizNext; window.wizPrev = wizPrev;
 
   // ===== 리포트 생성 확정 =====
