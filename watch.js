@@ -1,13 +1,12 @@
-// Node 기본 모듈만 사용 - 추가 설치 불필요
+// 파일 변경 감지 → 자동 git commit + push (GitHub Pages 자동 배포)
 // 사용: node watch.js
+// 추가 설치 불필요 (Node 기본 모듈만 사용)
+
 const fs = require('fs');
 const path = require('path');
 const { spawn } = require('child_process');
 
-const SITE_ID = 'ba2c01c5-f779-499a-b8b9-fb7b707f310a';
-const PROXY = 'https://netlify-mcp.netlify.app/proxy/eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0..rkMMxlwvYrrTv22g.ZdN0uO5cAYDWwAWvZdO6k5oMjSyZyBni5IsdTJUQcffBu0Zqvbv_XTaWUvmBpX2ttKQdyi7xuWp4wSVqikhehW5_A2ZfBZV7xu16aY4TiZUsLU4C1U4b080v2yyexuIcZL22lyd1-mx3QakaK0T4tKpmr6v3oYeXzPaOb3EGlzDqto0RE7budiinBy9EIgNLmnRmlRxH9R_PhUdUEiC-RXpJk3yQ4zscFWauJaiy-EuPL2GHyfDAzhdY-RDxVjqIhk3DztzRgnGFQ_1kkRNHdTNrxQB1CrWLkIzlpJRE_d93_LmDjeNzU-egrvA4IQe70YXGmzxfq65hOF8HvvfGgacyvc7KScj1kiRtX9QIWP2nE7yPng.OkAbmCpMs9DIIcY5lBRoVA';
-const SITE_URL = 'https://crabit-success-equation.netlify.app';
-
+const SITE_URL = 'https://ashly-kim.github.io/crabit-success-equation/';
 const DIR = __dirname;
 const EXT = ['.html', '.js', '.css'];
 
@@ -15,45 +14,64 @@ let timer = null;
 let deploying = false;
 let pending = false;
 
-function ts() {
-  const d = new Date();
-  return d.toTimeString().slice(0, 8);
+function ts(){ return new Date().toTimeString().slice(0,8); }
+
+function run(cmd, args){
+  return new Promise((resolve, reject)=>{
+    const p = spawn(cmd, args, { cwd: DIR });
+    let out = '', err = '';
+    p.stdout.on('data', d => out += d);
+    p.stderr.on('data', d => err += d);
+    p.on('close', code => {
+      if(code === 0) resolve(out.trim());
+      else reject(new Error(err || `exit ${code}`));
+    });
+  });
 }
 
-function deploy() {
-  if (deploying) { pending = true; return; }
+async function deploy(){
+  if(deploying){ pending = true; return; }
   deploying = true;
   console.log(`\n🚀 [${ts()}] 배포 시작...`);
-  const proc = spawn('npx', ['-y', '@netlify/mcp@latest', '--site-id', SITE_ID, '--proxy-path', PROXY, '--no-wait'], {
-    cwd: DIR, stdio: 'inherit'
-  });
-  proc.on('close', (code) => {
-    deploying = false;
-    if (code === 0) console.log(`✅ [${ts()}] 완료 → ${SITE_URL}`);
-    else console.log(`❌ [${ts()}] 실패 (exit ${code})`);
-    console.log('─'.repeat(60));
-    if (pending) { pending = false; scheduleDeploy(); }
-  });
+  try {
+    await run('git', ['add', '-A']);
+    // 변경사항 있는지 확인
+    const status = await run('git', ['status', '--porcelain']);
+    if(!status){
+      console.log(`⏭️  [${ts()}] 변경 없음. 스킵`);
+    } else {
+      const msg = `Update ${new Date().toISOString()}`;
+      await run('git', ['commit', '-m', msg]);
+      await run('git', ['push', 'origin', 'main']);
+      console.log(`✅ [${ts()}] 푸시 완료 → 1~2분 후 반영`);
+      console.log(`   ${SITE_URL}`);
+    }
+  } catch(e){
+    console.log(`❌ [${ts()}] 실패: ${e.message}`);
+  }
+  deploying = false;
+  console.log('─'.repeat(60));
+  if(pending){ pending = false; scheduleDeploy(); }
 }
 
-function scheduleDeploy() {
+function scheduleDeploy(){
   clearTimeout(timer);
-  timer = setTimeout(deploy, 1500); // 1.5초 debounce
+  timer = setTimeout(deploy, 2000); // 2초 debounce
 }
 
-function watchDir(dir) {
+function watchDir(dir){
   fs.watch(dir, { recursive: false }, (event, filename) => {
-    if (!filename) return;
-    if (filename.startsWith('.')) return;
-    if (filename === 'watch.js') return;
+    if(!filename) return;
+    if(filename.startsWith('.')) return;
+    if(filename === 'watch.js' || filename === 'watch.log') return;
     const ext = path.extname(filename);
-    if (!EXT.includes(ext)) return;
+    if(!EXT.includes(ext)) return;
     console.log(`📝 [${ts()}] ${filename} 변경 감지`);
     scheduleDeploy();
   });
 }
 
-console.log('📡 파일 변경 감시 시작');
+console.log('📡 파일 변경 감시 시작 (GitHub Pages)');
 console.log(`📁 ${DIR}`);
 console.log(`🌐 ${SITE_URL}`);
 console.log(`👀 감시: ${EXT.join(', ')}`);
