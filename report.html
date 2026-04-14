@@ -994,7 +994,7 @@
     const p = reportPages[reportPageIdx];
     stage.innerHTML = renderReportPage(p.s, p.eq, p.periodLabel, p.tone);
     document.getElementById('reportPageIdx').textContent = reportPageIdx + 1;
-    fitA4(stage);
+    requestAnimationFrame(()=>fitA4(stage));
   }
 
   function navReport(dir){
