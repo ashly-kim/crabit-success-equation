@@ -1,0 +1,459 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>우리학원 성공방정식</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: { sans: ['Pretendard Variable','Pretendard','system-ui','sans-serif'] },
+        colors: {
+          brand: {
+            50:'#eef4ff', 100:'#dbe7ff', 200:'#b9d0ff', 300:'#8ab0ff',
+            400:'#5a8eff', 500:'#3a74ff', 600:'#2559e6', 700:'#1e48b8', 900:'#132a66'
+          },
+          accent: {
+            50:'#fff1f5', 100:'#ffdde7', 200:'#ffbccd', 300:'#fb93ad',
+            500:'#f04685', 600:'#d32e6c', 700:'#a62256'
+          },
+          ink: { 900:'#111827', 700:'#374151', 500:'#6b7280', 300:'#d1d5db' },
+          soft: {
+            navy:'#eef4ff', pink:'#ffe9ef', blush:'#fff1f4', mint:'#e3f7ee',
+            lemon:'#fff5d6', lilac:'#efe7ff', peach:'#ffe8d9'
+          }
+        },
+        boxShadow: {
+          card:'0 1px 2px rgba(17,24,39,.04), 0 8px 24px rgba(17,24,39,.06)',
+          soft:'0 1px 2px rgba(17,24,39,.04), 0 4px 12px rgba(17,24,39,.04)'
+        },
+        borderRadius: { '2xl':'1rem','3xl':'1.5rem' }
+      }
+    }
+  }
+</script>
+<style>
+  html,body{background:#f6f7fb}
+  .nav-item.active{background:#eef4ff;color:#2559e6;font-weight:600}
+  .nav-item.active svg{color:#2559e6}
+  .step-dot{width:10px;height:10px;border-radius:9999px;background:#d1d5db}
+  .step-dot.done{background:#2559e6}
+  .ring-soft{box-shadow:inset 0 0 0 1px #eef0f5}
+</style>
+</head>
+<body class="font-sans text-ink-900 antialiased">
+
+<div class="flex min-h-screen">
+
+  <!-- Sidebar -->
+  <aside class="w-64 shrink-0 bg-white border-r border-gray-100 hidden lg:flex flex-col">
+    <div class="px-6 py-6 flex items-center gap-2">
+      <div class="w-9 h-9 rounded-xl bg-brand-500 grid place-items-center text-white font-bold">우</div>
+      <div class="leading-tight">
+        <div class="font-bold text-lg">우리학원</div>
+        <div class="text-xs text-ink-500">성공방정식</div>
+      </div>
+    </div>
+    <nav class="px-3 mt-2 space-y-1 text-[15px]">
+      <a class="nav-item active flex items-center gap-3 px-3 py-2.5 rounded-xl text-ink-700" href="index.html">
+        <svg class="w-5 h-5 text-ink-500" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 12l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+        홈
+      </a>
+      <a class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-ink-700 hover:bg-gray-50" href="hub.html">
+        <svg class="w-5 h-5 text-ink-500" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
+        데이터 허브
+      </a>
+      <a class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-ink-700 hover:bg-gray-50" href="equation.html">
+        <svg class="w-5 h-5 text-ink-500" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 20V8M10 20V4M16 20v-6M22 20H2"/></svg>
+        성공방정식
+      </a>
+      <a class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-ink-700 hover:bg-gray-50" href="report.html">
+        <svg class="w-5 h-5 text-ink-500" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M7 3h10l3 4v14H4V7z"/><path d="M8 12h8M8 16h5"/></svg>
+        리포트카드
+      </a>
+      <a class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-ink-700 hover:bg-gray-50" href="lecture.html">
+        <svg class="w-5 h-5 text-ink-500" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 2l9 4v6c0 5-4 9-9 10-5-1-9-5-9-10V6z"/></svg>
+        강의 복습
+      </a>
+      <div class="px-3 pt-6 pb-2 text-xs font-semibold text-ink-500">계정</div>
+      <a class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-ink-700 hover:bg-gray-50" href="#">
+        <svg class="w-5 h-5 text-ink-500" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c2-4 6-6 8-6s6 2 8 6"/></svg>
+        내 학원 설정
+      </a>
+      <a class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-ink-700 hover:bg-gray-50" href="#">
+        <svg class="w-5 h-5 text-ink-500" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 00-.1-1.2l2-1.5-2-3.5-2.3.9a7 7 0 00-2-1.2L14 3h-4l-.6 2.5a7 7 0 00-2 1.2L5 5.8l-2 3.5 2 1.5A7 7 0 005 12c0 .4 0 .8.1 1.2l-2 1.5 2 3.5 2.3-.9a7 7 0 002 1.2L10 21h4l.6-2.5a7 7 0 002-1.2l2.3.9 2-3.5-2-1.5c.1-.4.1-.8.1-1.2z"/></svg>
+        환경설정
+      </a>
+    </nav>
+    <div class="mt-auto p-4">
+      <div class="rounded-2xl bg-soft-blush p-4">
+        <div class="text-sm font-semibold">Alumni 플랜</div>
+        <div class="text-xs text-ink-500 mt-1">첫 달 무료 · 수강생 전용</div>
+        <button class="mt-3 w-full bg-white text-brand-600 text-sm font-semibold py-2 rounded-lg border border-brand-100 hover:bg-brand-50">구독 관리</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="flex-1 min-w-0">
+    <!-- Topbar -->
+    <header class="bg-white border-b border-gray-100">
+      <div class="px-8 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-2 text-sm text-ink-500">
+          <span>홈</span>
+          <span>›</span>
+          <span class="text-ink-700 font-medium">대시보드</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <button class="relative w-10 h-10 rounded-full border border-gray-200 grid place-items-center hover:bg-gray-50">
+            <svg class="w-5 h-5 text-ink-700" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M18 16V11a6 6 0 10-12 0v5l-2 3h16z"/><path d="M10 20a2 2 0 004 0"/></svg>
+            <span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-pink-500"></span>
+          </button>
+          <div class="flex items-center gap-3 pl-3 border-l border-gray-100">
+            <div class="w-9 h-9 rounded-full bg-brand-100 text-brand-700 grid place-items-center font-bold">김</div>
+            <div class="leading-tight">
+              <div class="text-sm font-semibold">김원장 원장님</div>
+              <div class="text-xs text-ink-500">행복수학학원</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <div class="px-8 py-8 max-w-[1280px] mx-auto space-y-8">
+
+      <!-- Hero + Tester -->
+      <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2 bg-white rounded-3xl p-8 shadow-card ring-soft">
+          <div class="text-sm text-brand-600 font-semibold">안녕하세요, 김원장 원장님 👋</div>
+          <h1 class="mt-2 text-[34px] leading-tight font-extrabold">
+            <span class="text-brand-700">행복수학학원</span>만의 무기가 되어드릴게요.<br/>
+            원장님은 데이터만 입력해주세요.
+          </h1>
+          <p class="mt-3 text-ink-500 text-[15px]">
+            학원 고유의 성공방정식을 기반으로, 학생별 리포트카드와 학부모 알림톡까지 한 번에 생성됩니다.
+          </p>
+          <div class="mt-6 flex flex-wrap gap-3">
+            <button class="px-5 py-3 rounded-xl bg-brand-600 text-white font-semibold hover:bg-brand-700 shadow-soft">
+              데이터 입력하기
+            </button>
+            <button class="px-5 py-3 rounded-xl bg-white text-ink-700 font-semibold border border-gray-200 hover:bg-gray-50">
+              리포트 생성하기
+            </button>
+          </div>
+        </div>
+
+        <!-- Tester -->
+        <div class="bg-gradient-to-br from-soft-lilac to-soft-pink rounded-3xl p-7 shadow-card relative overflow-hidden">
+          <div class="absolute -right-6 -top-6 w-28 h-28 rounded-full bg-white/40 blur-xl"></div>
+          <div class="relative">
+            <div class="inline-flex items-center gap-2 text-sm font-semibold text-purple-700 bg-white/70 px-3 py-1 rounded-full">
+              🔮 예시 보기
+            </div>
+            <h3 class="mt-4 text-xl font-bold leading-snug">
+              데이터가 없어도 괜찮아요.<br/>예시 결과물을 먼저 볼 수 있어요.
+            </h3>
+            <p class="mt-2 text-sm text-ink-700/80">
+              샘플 학원 데이터로 성공방정식 · 리포트카드 · 알림톡까지 미리보기
+            </p>
+            <button class="mt-5 w-full bg-white text-purple-700 font-bold py-3 rounded-xl hover:bg-white/90">
+              테스터 열기 →
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3 Core Feature Cards -->
+      <section>
+        <div class="flex items-end justify-between mb-4">
+          <div>
+            <h2 class="text-xl font-bold">핵심 흐름 3단계</h2>
+            <p class="text-sm text-ink-500 mt-1">① 데이터 허브 → ② 성공방정식 → ③ 리포트카드 순서로 진행하세요</p>
+          </div>
+          <a href="#" class="text-sm text-brand-600 font-semibold">전체 보기</a>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
+
+          <!-- Data Hub -->
+          <div class="bg-white rounded-3xl p-7 shadow-card ring-soft flex flex-col h-full">
+            <div class="flex items-center justify-between">
+              <div class="w-12 h-12 rounded-2xl bg-soft-blush grid place-items-center text-2xl">🗂️</div>
+              <span class="text-xs font-bold text-brand-600 bg-brand-50 px-2.5 py-1 rounded-full">STEP 1</span>
+            </div>
+            <h3 class="mt-5 text-lg font-bold">데이터 허브</h3>
+            <p class="text-sm text-ink-500 mt-1 leading-relaxed">학생 명단과 관리 중인 데이터를 올려두는 공간이에요.</p>
+            <div class="mt-5 space-y-2 text-sm flex-1">
+              <div class="flex justify-between"><span class="text-ink-500">등록 학생</span><span class="font-semibold">24명</span></div>
+              <div class="flex justify-between"><span class="text-ink-500">관리 중인 변수</span><span class="font-semibold">5개</span></div>
+              <div class="flex justify-between"><span class="text-ink-500">최근 입력</span><span class="font-semibold">2일 전</span></div>
+            </div>
+            <button class="mt-6 w-full py-2.5 rounded-xl bg-gray-50 text-ink-700 font-semibold hover:bg-gray-100">바로 가기 →</button>
+          </div>
+
+          <!-- Equation Builder -->
+          <div class="bg-white rounded-3xl p-7 shadow-card ring-soft flex flex-col h-full border-2 border-brand-100">
+            <div class="flex items-center justify-between">
+              <div class="w-12 h-12 rounded-2xl bg-soft-lemon grid place-items-center text-2xl">📈</div>
+              <span class="text-xs font-bold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full">STEP 2</span>
+            </div>
+            <h3 class="mt-5 text-lg font-bold">성공방정식 빌더</h3>
+            <p class="text-sm text-ink-500 mt-1 leading-relaxed">우리 학원 데이터로 "성적을 올리는 공식"을 찾아드려요.</p>
+            <div class="mt-5 rounded-2xl bg-gray-50 p-4 text-sm flex-1">
+              <div class="text-ink-500 mb-1">현재 방정식 v2</div>
+              <div class="font-semibold">성적 = 0.42 × 복습 + 0.28 × 숙제 + 62</div>
+              <div class="mt-2 text-xs">신뢰도 <span class="text-emerald-600 font-bold">🟢 78%</span></div>
+            </div>
+            <button class="mt-6 w-full py-2.5 rounded-xl bg-brand-500 text-white font-semibold hover:bg-brand-600">방정식 업데이트 →</button>
+          </div>
+
+          <!-- Report Card -->
+          <div class="bg-white rounded-3xl p-7 shadow-card ring-soft flex flex-col h-full">
+            <div class="flex items-center justify-between">
+              <div class="w-12 h-12 rounded-2xl bg-soft-mint grid place-items-center text-2xl">💌</div>
+              <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full">STEP 3</span>
+            </div>
+            <h3 class="mt-5 text-lg font-bold">리포트카드 생성기</h3>
+            <p class="text-sm text-ink-500 mt-1 leading-relaxed">학생별 리포트를 만들고 학부모에게 알림톡으로 발송하세요.</p>
+            <div class="mt-5 space-y-2 text-sm flex-1">
+              <div class="flex justify-between"><span class="text-ink-500">대기 중</span><span class="font-semibold text-brand-600">18건</span></div>
+              <div class="flex justify-between"><span class="text-ink-500">최근 발송</span><span class="font-semibold">지난 달</span></div>
+              <div class="flex justify-between"><span class="text-ink-500">알림톡 크레딧</span><span class="font-semibold">287 / 300</span></div>
+            </div>
+            <button class="mt-6 w-full py-2.5 rounded-xl bg-gray-50 text-ink-700 font-semibold hover:bg-gray-100">리포트 만들기 →</button>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Two-column: 진행 현황 + 다음 할 일 -->
+      <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- Progress -->
+        <div class="lg:col-span-2 bg-white rounded-3xl p-7 shadow-card ring-soft">
+          <div class="flex items-center justify-between mb-5">
+            <h3 class="text-lg font-bold">이번 달 진행 현황</h3>
+            <span class="text-xs text-ink-500">2026년 4월</span>
+          </div>
+
+          <div class="space-y-5">
+            <!-- item -->
+            <div>
+              <div class="flex items-center justify-between text-sm mb-2">
+                <span class="font-semibold">데이터 입력</span>
+                <span class="text-ink-500">18 / 24명</span>
+              </div>
+              <div class="h-2 rounded-full bg-gray-100 overflow-hidden">
+                <div class="h-2 bg-brand-500" style="width:75%"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex items-center justify-between text-sm mb-2">
+                <span class="font-semibold">방정식 갱신</span>
+                <span class="text-ink-500">v2 사용 중</span>
+              </div>
+              <div class="h-2 rounded-full bg-gray-100 overflow-hidden">
+                <div class="h-2 bg-emerald-500" style="width:100%"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex items-center justify-between text-sm mb-2">
+                <span class="font-semibold">리포트카드 발송</span>
+                <span class="text-ink-500">0 / 18건</span>
+              </div>
+              <div class="h-2 rounded-full bg-gray-100 overflow-hidden">
+                <div class="h-2 bg-amber-400" style="width:5%"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Equation trend placeholder -->
+          <div class="mt-7 rounded-2xl bg-gray-50 p-5">
+            <div class="flex items-center justify-between mb-3">
+              <div class="text-sm font-semibold">우리 학원 방정식 변화</div>
+              <div class="text-xs text-ink-500">v1 → v2</div>
+            </div>
+            <svg viewBox="0 0 400 80" class="w-full h-20">
+              <polyline fill="none" stroke="#3a74ff" stroke-width="2.5" points="0,60 50,55 100,48 150,50 200,40 250,35 300,28 350,22 400,18"/>
+              <polyline fill="none" stroke="#9ca3af" stroke-width="2" stroke-dasharray="4 4" points="0,65 50,62 100,60 150,58 200,55 250,52 300,48 350,45 400,42"/>
+            </svg>
+            <div class="mt-2 flex gap-4 text-xs text-ink-500">
+              <span class="flex items-center gap-1"><span class="w-3 h-1.5 rounded-sm bg-brand-500"></span>예측 성적</span>
+              <span class="flex items-center gap-1"><span class="w-3 h-1.5 rounded-sm bg-gray-400"></span>이전 방정식</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Next actions -->
+        <div class="bg-white rounded-3xl p-7 shadow-card ring-soft">
+          <div class="flex items-center justify-between mb-5">
+            <h3 class="text-lg font-bold">다음 할 일</h3>
+            <a class="text-sm text-brand-600 font-semibold" href="#">전체</a>
+          </div>
+          <ul class="space-y-3">
+            <li class="flex items-start gap-3 p-3 rounded-xl hover:bg-gray-50">
+              <div class="w-9 h-9 rounded-xl bg-soft-blush grid place-items-center">📝</div>
+              <div class="flex-1">
+                <div class="text-sm font-semibold">이번 주 숙제이행률 입력</div>
+                <div class="text-xs text-ink-500 mt-0.5">금요일 오후 6시 · 주 1회</div>
+              </div>
+              <span class="text-[11px] text-amber-600 bg-amber-50 px-2 py-1 rounded-full font-semibold">D-2</span>
+            </li>
+            <li class="flex items-start gap-3 p-3 rounded-xl hover:bg-gray-50">
+              <div class="w-9 h-9 rounded-xl bg-soft-mint grid place-items-center">💌</div>
+              <div class="flex-1">
+                <div class="text-sm font-semibold">리포트카드 v3 발행 대기</div>
+                <div class="text-xs text-ink-500 mt-0.5">18명 · 알림톡 발송 준비</div>
+              </div>
+              <button class="text-xs text-brand-600 font-semibold">열기</button>
+            </li>
+            <li class="flex items-start gap-3 p-3 rounded-xl hover:bg-gray-50">
+              <div class="w-9 h-9 rounded-xl bg-soft-lemon grid place-items-center">📊</div>
+              <div class="flex-1">
+                <div class="text-sm font-semibold">4월 방정식 업데이트</div>
+                <div class="text-xs text-ink-500 mt-0.5">새 데이터 반영 · 3분 소요</div>
+              </div>
+              <button class="text-xs text-brand-600 font-semibold">실행</button>
+            </li>
+            <li class="flex items-start gap-3 p-3 rounded-xl hover:bg-gray-50">
+              <div class="w-9 h-9 rounded-xl bg-soft-peach grid place-items-center">🎓</div>
+              <div class="flex-1">
+                <div class="text-sm font-semibold">강의 4회차 복습</div>
+                <div class="text-xs text-ink-500 mt-0.5">학부모 언어 번역 · 12분</div>
+              </div>
+              <button class="text-xs text-brand-600 font-semibold">보기</button>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Recent reports -->
+      <section class="bg-white rounded-3xl p-7 shadow-card ring-soft">
+        <div class="flex items-center justify-between mb-5">
+          <div>
+            <h3 class="text-lg font-bold">최근 리포트카드</h3>
+            <p class="text-sm text-ink-500 mt-1">최근 생성된 학생별 리포트를 확인하고 학부모에게 발송하세요</p>
+          </div>
+          <div class="flex gap-2">
+            <button class="px-3 py-2 text-sm rounded-lg border border-gray-200 hover:bg-gray-50">전체 발송</button>
+            <button class="px-3 py-2 text-sm rounded-lg bg-brand-500 text-white hover:bg-brand-600">+ 새 리포트</button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          <!-- report item template -->
+          <div class="rounded-2xl border border-gray-100 p-5 hover:shadow-soft transition">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-soft-navy text-navy-700 font-bold grid place-items-center">김</div>
+                <div>
+                  <div class="font-semibold">김민재 학생</div>
+                  <div class="text-xs text-ink-500">중3 · 수학반</div>
+                </div>
+              </div>
+              <span class="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-1 rounded-full">v3</span>
+            </div>
+            <div class="mt-4 grid grid-cols-3 gap-2 text-center">
+              <div class="rounded-lg bg-gray-50 py-2">
+                <div class="text-[11px] text-ink-500">현재</div>
+                <div class="font-bold">72점</div>
+              </div>
+              <div class="rounded-lg bg-gray-50 py-2">
+                <div class="text-[11px] text-ink-500">전월비</div>
+                <div class="font-bold text-emerald-600">+4</div>
+              </div>
+              <div class="rounded-lg bg-gray-50 py-2">
+                <div class="text-[11px] text-ink-500">6주 예상</div>
+                <div class="font-bold">78~82</div>
+              </div>
+            </div>
+            <div class="mt-4 flex gap-2">
+              <button class="flex-1 py-2 text-sm rounded-lg bg-gray-50 hover:bg-gray-100">미리보기</button>
+              <button class="flex-1 py-2 text-sm rounded-lg bg-brand-500 text-white hover:bg-brand-600">알림톡 발송</button>
+            </div>
+          </div>
+
+          <div class="rounded-2xl border border-gray-100 p-5 hover:shadow-soft transition">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-soft-pink text-pink-700 font-bold grid place-items-center">박</div>
+                <div>
+                  <div class="font-semibold">박서연 학생</div>
+                  <div class="text-xs text-ink-500">중3 · 수학반</div>
+                </div>
+              </div>
+              <span class="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-1 rounded-full">v3</span>
+            </div>
+            <div class="mt-4 grid grid-cols-3 gap-2 text-center">
+              <div class="rounded-lg bg-gray-50 py-2">
+                <div class="text-[11px] text-ink-500">현재</div>
+                <div class="font-bold">85점</div>
+              </div>
+              <div class="rounded-lg bg-gray-50 py-2">
+                <div class="text-[11px] text-ink-500">전월비</div>
+                <div class="font-bold text-emerald-600">+2</div>
+              </div>
+              <div class="rounded-lg bg-gray-50 py-2">
+                <div class="text-[11px] text-ink-500">6주 예상</div>
+                <div class="font-bold">88~91</div>
+              </div>
+            </div>
+            <div class="mt-4 flex gap-2">
+              <button class="flex-1 py-2 text-sm rounded-lg bg-gray-50 hover:bg-gray-100">미리보기</button>
+              <button class="flex-1 py-2 text-sm rounded-lg bg-brand-500 text-white hover:bg-brand-600">알림톡 발송</button>
+            </div>
+          </div>
+
+          <div class="rounded-2xl border border-gray-100 p-5 hover:shadow-soft transition">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-soft-lemon text-amber-700 font-bold grid place-items-center">이</div>
+                <div>
+                  <div class="font-semibold">이도윤 학생</div>
+                  <div class="text-xs text-ink-500">중3 · 수학반</div>
+                </div>
+              </div>
+              <span class="text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-1 rounded-full">초안</span>
+            </div>
+            <div class="mt-4 grid grid-cols-3 gap-2 text-center">
+              <div class="rounded-lg bg-gray-50 py-2">
+                <div class="text-[11px] text-ink-500">현재</div>
+                <div class="font-bold">64점</div>
+              </div>
+              <div class="rounded-lg bg-gray-50 py-2">
+                <div class="text-[11px] text-ink-500">전월비</div>
+                <div class="font-bold text-rose-500">-1</div>
+              </div>
+              <div class="rounded-lg bg-gray-50 py-2">
+                <div class="text-[11px] text-ink-500">6주 예상</div>
+                <div class="font-bold">-</div>
+              </div>
+            </div>
+            <div class="mt-4 flex gap-2">
+              <button class="flex-1 py-2 text-sm rounded-lg bg-gray-50 hover:bg-gray-100">데이터 채우기</button>
+              <button class="flex-1 py-2 text-sm rounded-lg bg-gray-100 text-gray-400 cursor-not-allowed">🔒 발송 잠금</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer class="py-8 flex items-center justify-between text-xs text-ink-500">
+        <div>© 2026 CRABIT · 우리학원 성공방정식</div>
+        <div class="flex gap-4">
+          <a href="#" class="hover:text-ink-700">이용약관</a>
+          <a href="#" class="hover:text-ink-700">개인정보처리방침</a>
+          <a href="#" class="hover:text-ink-700">고객센터</a>
+        </div>
+      </footer>
+    </div>
+  </main>
+
+</div>
+
+</body>
+</html>

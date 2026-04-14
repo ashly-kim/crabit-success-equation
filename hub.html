@@ -1,0 +1,1447 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>데이터 허브 · 우리학원 성공방정식</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="shared.js"></script>
+<script>__applyTheme();</script>
+<style>
+  html,body{background:#f6f7fb}
+  .nav-item.active{background:#eef4ff;color:#2559e6;font-weight:600}
+  .nav-item.active svg{color:#2559e6}
+  .ring-soft{box-shadow:inset 0 0 0 1px #eef0f5}
+  .modal{position:fixed;inset:0;background:rgba(17,24,39,.55);display:none;align-items:center;justify-content:center;z-index:50;padding:20px}
+  .modal.on{display:flex;animation:fade .2s}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  .modal-box{animation:slideUp .3s cubic-bezier(.2,.8,.2,1)}
+  @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+
+  /* 입력 테이블 */
+  .grid-table{border-collapse:separate;border-spacing:0;table-layout:auto;width:auto}
+  .grid-table.mode-week{min-width:100%}
+  .grid-table th, .grid-table td{border-bottom:1px solid #f1f3f8;border-right:1px solid #f1f3f8;padding:0;position:relative;white-space:nowrap}
+
+  /* 일간 모드: 요일 그룹 구분선 (학생 이름 오른쪽 굵은선과 동일 강도) */
+  .grid-table.mode-day th.var-sub.day-end,
+  .grid-table.mode-day td.cell.day-end{border-right:2px solid #e5e7eb !important}
+  .grid-table.mode-day th.day-group{border-right:2px solid #e5e7eb !important}
+  .grid-table thead th{background:#f9fafc;font-size:14px;font-weight:600;color:#6b7280;padding:12px 14px;position:sticky;top:0;z-index:2}
+  .grid-table thead th.var-group{background:#f3f4f6;color:#374151;border-bottom:1px solid #e5e7eb;font-size:14px;text-align:center;padding:12px}
+  .grid-table thead th.var-group.in-eq{background:#ffe9ef;color:#a62256}
+  .grid-table thead th.day-sub{background:#f5f8ff;color:#4d67a8;font-weight:500;font-size:13px;padding:10px 6px}
+  .grid-table thead th.day-group{background:#f9fafc;color:#374151;border-bottom:1px solid #e5e7eb;font-size:14px;text-align:center;font-weight:600;padding:12px 12px}
+  .grid-table thead th.var-sub{background:#f3f4f6;font-weight:500;font-size:13px;padding:10px 6px;color:#6b7280}
+  .grid-table thead th.var-sub.in-eq{background:#ffe9ef;color:#a62256;font-weight:600}
+  .grid-table tbody tr:hover td{background:#fafbfe}
+  .grid-table .name-col{position:sticky;left:0;background:white;z-index:1;padding:14px 18px;font-weight:600;border-right:2px solid #e5e7eb}
+  .grid-table thead th.name-col{background:#f9fafc;z-index:3;text-align:center}
+  .grid-table tbody tr:hover .name-col{background:#fafbfe}
+  .grid-table td.cell{padding:0;position:relative}
+  .grid-table td.cell input{width:100%;height:52px;border:none;background:transparent;outline:none;text-align:center;font-weight:500;font-size:16px}
+  .grid-table td.cell input:focus{background:#fff7d6;box-shadow:inset 0 0 0 2px #f59e0b;border-radius:4px;font-weight:700}
+  .grid-table td.cell.filled input{color:#1a3065}
+
+  /* 일간 모드 - 셀 패딩으로 자동 조정 */
+  .grid-table.mode-day td.cell input{height:54px;font-size:16px;padding:0 14px;text-align:center}
+  /* 주간 모드 - 셀 너비 적당히 */
+  .grid-table.mode-week td.cell{padding:0 12px}
+  .grid-table.mode-week td.cell input{padding:0 8px}
+
+  .var-chip{transition:all .15s}
+  .var-chip.selected{background:#eef4ff;border-color:#5a8eff}
+
+  .date-nav{display:flex;gap:4px}
+  .date-nav button{width:36px;height:36px;border-radius:10px;border:1px solid #e5e7eb;background:white;color:#374151}
+  .date-nav button:hover{background:#f9fafc}
+
+  .add-var-btn{background:linear-gradient(90deg,#eef4ff,#fff1f5);border:2px dashed #b9d0ff;color:#2559e6;font-weight:600;transition:.2s}
+  .add-var-btn:hover{border-color:#5a8eff;background:linear-gradient(90deg,#dbe7ff,#ffdde7)}
+
+  .period-btn{color:#6b7280;transition:.2s;padding:6px 16px;font-size:13px;font-weight:600;border-radius:9999px}
+  .period-btn.on{background:white;color:#1e48b8;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+</style>
+</head>
+<body class="font-sans text-ink-900 antialiased">
+<div class="flex min-h-screen">
+  <div id="sidebar"></div>
+  <main class="flex-1 min-w-0">
+    <div id="topbar"></div>
+    <div class="px-8 py-8 max-w-[1400px] mx-auto space-y-8">
+
+      <!-- Header -->
+      <section>
+        <div class="text-sm text-brand-600 font-semibold">데이터 허브</div>
+        <h1 class="mt-2 text-[32px] leading-tight font-extrabold">
+          학생 데이터를 <span class="text-brand-600">한 곳에서</span> 기록하세요.
+        </h1>
+        <p class="mt-3 text-ink-500 text-[15px] max-w-3xl">
+          주간 단위로 기록할 데이터도, 매일 기록할 데이터도 괜찮아요. 변수마다 수집 주기가 달라도 분석할 때 자동으로 맞춰드립니다.
+        </p>
+      </section>
+
+      <!-- ============ 우리 학원 성공방정식 캐러셀 ============ -->
+      <section id="eqSection">
+        <div class="flex items-end justify-between mb-4 flex-wrap gap-3">
+          <div>
+            <h2 class="text-[22px] font-extrabold">우리 학원의 성공방정식</h2>
+            <p class="text-sm text-ink-500 mt-1">학생 그룹·목표별로 여러 방정식을 만들어 활용하세요.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="openEqBuilder('new')" class="px-4 py-2 rounded-xl bg-brand-500 text-white text-sm font-semibold hover:bg-brand-600">+ 신규 방정식</button>
+          </div>
+        </div>
+
+        <!-- 캐러셀: 양옆 다른 카드 살짝 보이게 -->
+        <div class="relative" id="eqCarouselWrap">
+          <!-- 좌우 nav -->
+          <button onclick="navEq(-1)" class="absolute left-2 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-white shadow-card grid place-items-center text-ink-700 hover:bg-gray-50 hover:scale-110 transition">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+          </button>
+          <button onclick="navEq(1)" class="absolute right-2 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-white shadow-card grid place-items-center text-ink-700 hover:bg-gray-50 hover:scale-110 transition">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+
+          <!-- 트랙: 양쪽 패딩 + 가운데 카드 풀, 좌우 살짝 -->
+          <div class="overflow-hidden mx-12">
+            <div id="eqTrack" class="flex gap-5 transition-transform duration-500" style="transform:translateX(0)"></div>
+          </div>
+
+          <!-- 도트 -->
+          <div id="eqDots" class="mt-4 flex justify-center gap-2"></div>
+        </div>
+
+        <!-- 방정식 없음 (전부 비었을 때) -->
+        <div id="eqEmpty" class="hidden bg-gradient-to-br from-soft-navy to-soft-blush rounded-3xl p-8 shadow-card ring-soft text-center">
+          <div class="text-5xl mb-3">📈</div>
+          <h2 class="text-2xl font-extrabold">아직 우리 학원만의 성공방정식이 없어요</h2>
+          <p class="mt-2 text-ink-700 max-w-xl mx-auto">학생 데이터로 회귀분석을 돌려보세요. <b>"무엇이 우리 학원 학생들의 성적을 가장 크게 올리는가"</b>를 숫자로 알려드릴게요.</p>
+          <button onclick="openEqBuilder('new')" class="mt-6 px-6 py-3 rounded-xl bg-brand-500 text-white font-bold hover:bg-brand-600 shadow-soft">
+            + 우리 학원만의 성공방정식 만들기
+          </button>
+          <div class="mt-4 text-xs text-ink-500">3분 안에 끝나요 · 미리 입력하신 데이터를 활용합니다</div>
+        </div>
+      </section>
+
+      <!-- 데이터 현황 (상단으로 이동) -->
+      <section class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="bg-white rounded-2xl p-5 shadow-card ring-soft">
+          <div class="text-xs text-ink-500 mb-1">등록 학생</div>
+          <div class="text-2xl font-extrabold">76<span class="text-base font-bold text-ink-500 ml-1">명</span></div>
+        </div>
+        <div class="bg-white rounded-2xl p-5 shadow-card ring-soft">
+          <div class="text-xs text-ink-500 mb-1">관리 변수</div>
+          <div class="text-2xl font-extrabold">5<span class="text-base font-bold text-ink-500 ml-1">개</span></div>
+        </div>
+        <div class="bg-white rounded-2xl p-5 shadow-card ring-soft">
+          <div class="text-xs text-ink-500 mb-1">누적 데이터</div>
+          <div class="text-2xl font-extrabold">1,248<span class="text-base font-bold text-ink-500 ml-1">건</span></div>
+        </div>
+        <div class="bg-white rounded-2xl p-5 shadow-card ring-soft">
+          <div class="text-xs text-ink-500 mb-1">다음 자동 리포트</div>
+          <div class="text-2xl font-extrabold">D-3</div>
+        </div>
+      </section>
+
+      <!-- ============ 입력 섹션 ============ -->
+      <section>
+        <!-- 제목: 카드 바깥 -->
+        <div class="flex items-end justify-between flex-wrap gap-3 mb-4">
+          <div>
+            <h2 class="text-[26px] font-extrabold">학생별 데이터를 입력해주세요</h2>
+            <p class="text-sm text-ink-500 mt-1">주기에 맞춰 꾸준히 채워주시면 분석할 때 자동으로 반영됩니다.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="openModal('alertModal')" class="px-4 py-2 rounded-xl bg-soft-blush border border-accent-200 text-accent-700 text-sm font-semibold hover:bg-accent-100 flex items-center gap-1.5">
+              🔔 데이터 기록 알림받기
+            </button>
+            <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full">자동 저장 중</span>
+          </div>
+        </div>
+
+        <!-- 카드 -->
+        <div class="bg-white rounded-3xl shadow-card ring-soft overflow-hidden">
+
+          <!-- Toolbar -->
+          <div class="flex items-center justify-between p-5 border-b border-gray-100 flex-wrap gap-4">
+            <!-- 왼쪽: 학생 그룹 -->
+            <div class="flex items-center gap-2">
+              <select class="px-4 h-10 rounded-xl border border-gray-200 text-sm font-semibold min-w-[180px]">
+                <option>전체 반 (76명)</option>
+                <option>중3 수학반 (24명)</option>
+                <option>중2 수학반 (18명)</option>
+                <option>고1 수학반 (22명)</option>
+                <option>중3 영어반 (12명)</option>
+              </select>
+            </div>
+
+            <!-- 오른쪽: 주기 토글 + 일정 탐색 -->
+            <div class="flex items-center gap-3">
+              <div class="inline-flex bg-gray-100 rounded-full p-1">
+                <button class="period-btn on" data-period="week">주간</button>
+                <button class="period-btn" data-period="day">일간</button>
+              </div>
+              <div class="date-nav">
+                <button title="이전"><svg class="w-4 h-4 mx-auto" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+                <div id="periodLabel" class="px-4 h-9 rounded-lg bg-gray-100 font-semibold text-sm flex items-center">2026년 4월 2주차</div>
+                <button title="다음"><svg class="w-4 h-4 mx-auto" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 테이블 -->
+          <div class="overflow-x-auto">
+            <table class="grid-table mode-week" id="inputTable"></table>
+          </div>
+
+          <!-- 하단 -->
+          <div class="p-5 border-t border-gray-100 flex items-center justify-between flex-wrap gap-3">
+            <div class="text-sm text-ink-500">
+              📌 입력하지 않은 주는 건너뛰셔도 괜찮아요. 회귀분석 시 해당 주는 자동으로 제외됩니다.
+              <span class="ml-3">이번 주 입력 <b class="text-brand-600" id="progressCount">0</b> / <b id="progressTotal">0</b>건</span>
+            </div>
+            <div class="flex gap-2">
+              <button class="px-4 py-2.5 text-sm rounded-xl border border-gray-200 font-semibold hover:bg-gray-50">📂 CSV 업로드</button>
+              <button class="px-5 py-2.5 text-sm rounded-xl bg-brand-500 text-white font-semibold hover:bg-brand-600">저장하고 마치기</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 관리 중인 변수 ============ -->
+      <section class="bg-white rounded-3xl p-7 shadow-card ring-soft">
+        <div class="flex items-center justify-between mb-5">
+          <div>
+            <h2 class="text-xl font-bold">관리 중인 변수</h2>
+            <p class="text-sm text-ink-500 mt-1">우리 학원에서 수집하고 있는 학생 데이터</p>
+          </div>
+          <button class="add-var-btn px-5 py-2.5 rounded-xl text-sm" onclick="openAddVarModal()">+ 변수 추가</button>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3" id="activeVars"></div>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<!-- ============ 성공방정식 빌더 사이드 드로어 (4단계) ============ -->
+<div id="eqDrawer" class="fixed inset-0 z-50 hidden">
+  <div class="absolute inset-0 bg-black/50" onclick="closeEqDrawer()"></div>
+  <div class="absolute right-0 top-0 h-full w-full max-w-3xl bg-white shadow-2xl flex flex-col" id="eqDrawerPanel" style="transform:translateX(100%);transition:transform .35s cubic-bezier(.2,.8,.2,1)">
+    <!-- Header -->
+    <div class="px-7 py-5 border-b border-gray-100 flex items-start justify-between">
+      <div>
+        <div class="text-xs tracking-widest font-bold text-brand-600">성공방정식 빌더</div>
+        <h2 class="text-xl font-extrabold mt-1">우리 학원만의 공식을 찾아볼게요</h2>
+      </div>
+      <button onclick="closeEqDrawer()" class="w-10 h-10 rounded-full hover:bg-gray-100 grid place-items-center text-2xl">×</button>
+    </div>
+
+    <!-- Step Progress -->
+    <div class="px-7 py-4 border-b border-gray-100 bg-gray-50">
+      <div class="flex items-center justify-between mb-2">
+        <div class="text-xs font-semibold">진행 단계 <span id="eqStepLabel" class="text-brand-600">1</span> / 8</div>
+        <div class="text-xs text-ink-500">3~5분 소요</div>
+      </div>
+      <div class="h-1.5 rounded-full bg-gray-200 overflow-hidden">
+        <div id="eqProgBar" class="h-1.5 bg-brand-500 transition-all" style="width:12.5%"></div>
+      </div>
+    </div>
+
+    <!-- Step Body (스크롤) -->
+    <div class="flex-1 overflow-y-auto px-7 py-6" id="eqBody">
+
+      <div class="eq-step" data-step="1">
+        <div class="text-xs tracking-widest font-bold text-brand-600 mb-2">STEP 1</div>
+        <h3 class="text-xl font-bold">무엇을 올리고 싶으세요?</h3>
+        <p class="mt-2 text-sm text-ink-500">개선하고 싶은 목표 변수(Y)를 선택해주세요.</p>
+        <div class="mt-5 grid grid-cols-2 gap-3">
+          <button class="eq-y-card vcard selected rounded-2xl border-2 border-brand-500 bg-brand-50 p-5 text-left">
+            <div class="text-2xl">📈</div><div class="mt-2 font-bold">성적</div>
+            <div class="text-xs text-ink-500 mt-0.5">다음 시험 점수</div>
+          </button>
+          <button class="eq-y-card vcard rounded-2xl border-2 border-gray-100 p-5 text-left hover:border-brand-300">
+            <div class="text-2xl">🔁</div><div class="mt-2 font-bold">재등록률</div>
+            <div class="text-xs text-ink-500 mt-0.5">이번 분기</div>
+          </button>
+          <button class="eq-y-card vcard rounded-2xl border-2 border-gray-100 p-5 text-left hover:border-brand-300">
+            <div class="text-2xl">✅</div><div class="mt-2 font-bold">출석률</div>
+            <div class="text-xs text-ink-500 mt-0.5">최근 평균</div>
+          </button>
+          <button class="eq-y-card vcard rounded-2xl border-2 border-gray-100 p-5 text-left hover:border-brand-300">
+            <div class="text-2xl">➕</div><div class="mt-2 font-bold">직접 입력</div>
+            <div class="text-xs text-ink-500 mt-0.5">우리 학원만의 목표</div>
+          </button>
+        </div>
+      </div>
+
+      <div class="eq-step hidden" data-step="2">
+        <div class="text-xs tracking-widest font-bold text-brand-600 mb-2">STEP 2</div>
+        <h3 class="text-xl font-bold">분석할 기간을 선택해주세요</h3>
+        <p class="mt-2 text-sm text-ink-500">선택하신 기간 안의 데이터로 회귀분석을 돌립니다.</p>
+        <div class="mt-5 grid grid-cols-2 gap-3">
+          <button class="eq-period rounded-xl border-2 border-gray-200 p-4 text-sm font-semibold hover:border-brand-300">최근 1개월</button>
+          <button class="eq-period rounded-xl border-2 border-brand-500 bg-brand-50 text-brand-700 p-4 text-sm font-semibold">최근 3개월</button>
+          <button class="eq-period rounded-xl border-2 border-gray-200 p-4 text-sm font-semibold hover:border-brand-300">최근 6개월</button>
+          <button class="eq-period rounded-xl border-2 border-gray-200 p-4 text-sm font-semibold hover:border-brand-300">최근 1년</button>
+        </div>
+        <div class="mt-4 rounded-xl bg-gray-50 p-4 flex items-center gap-2 text-sm">
+          <span class="text-ink-700">직접 선택:</span>
+          <input type="date" value="2026-01-14" class="px-3 py-2 rounded-lg border border-gray-200 text-sm"/>
+          <span class="text-ink-500">~</span>
+          <input type="date" value="2026-04-14" class="px-3 py-2 rounded-lg border border-gray-200 text-sm"/>
+        </div>
+      </div>
+
+      <div class="eq-step hidden" data-step="3">
+        <div class="text-xs tracking-widest font-bold text-brand-600 mb-2">STEP 3</div>
+        <h3 class="text-xl font-bold">원장님의 감(感)을 먼저 기록해볼게요</h3>
+        <p class="mt-2 text-sm text-ink-500">각 변수가 성적에 영향을 준다고 얼마나 체감하시나요?</p>
+        <div class="mt-5 space-y-3" id="eqIntuition"></div>
+      </div>
+
+      <div class="eq-step hidden" data-step="4">
+        <div class="text-xs tracking-widest font-bold text-brand-600 mb-2">STEP 4</div>
+        <h3 class="text-xl font-bold">데이터를 점검하고 있어요</h3>
+        <p class="mt-2 text-sm text-ink-500">선택하신 기간 안에서 분석 가능 여부를 자동 판정합니다.</p>
+        <div class="mt-5 space-y-2.5">
+          <div class="flex items-center gap-3 p-4 rounded-xl bg-soft-mint">
+            <div class="text-xl">✅</div>
+            <div class="flex-1"><div class="font-bold text-sm">숙제이행률</div><div class="text-xs text-ink-500">학생 24/24명 · 12주 누적</div></div>
+            <div class="text-emerald-700 font-bold text-xs">🟢 분석 가능</div>
+          </div>
+          <div class="flex items-center gap-3 p-4 rounded-xl bg-soft-mint">
+            <div class="text-xl">🕐</div>
+            <div class="flex-1"><div class="font-bold text-sm">복습시간</div><div class="text-xs text-ink-500">학생 22/24명 · 10주 누적</div></div>
+            <div class="text-emerald-700 font-bold text-xs">🟢 분석 가능</div>
+          </div>
+          <div class="flex items-center gap-3 p-4 rounded-xl bg-soft-mint">
+            <div class="text-xl">✅</div>
+            <div class="flex-1"><div class="font-bold text-sm">출결률</div><div class="text-xs text-ink-500">학생 24/24명 · 12주 누적</div></div>
+            <div class="text-emerald-700 font-bold text-xs">🟢 분석 가능</div>
+          </div>
+          <div class="flex items-center gap-3 p-4 rounded-xl bg-soft-lemon">
+            <div class="text-xl">🙋</div>
+            <div class="flex-1"><div class="font-bold text-sm">질문횟수</div><div class="text-xs text-ink-500">학생 18/24명 · 결측 6명</div></div>
+            <div class="text-amber-700 font-bold text-xs">🟡 조건부</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="eq-step hidden" data-step="5">
+        <div class="text-xs tracking-widest font-bold text-brand-600 mb-2">STEP 5</div>
+        <h3 class="text-xl font-bold">하나씩 돌려보며 감을 잡을게요</h3>
+        <p class="mt-2 text-sm text-ink-500">각 변수와 성적의 관계를 그림으로 먼저 보여드려요.</p>
+        <div class="mt-5 grid grid-cols-1 gap-4">
+          <div class="rounded-2xl border border-gray-100 p-5">
+            <div class="flex items-center justify-between mb-2">
+              <div class="font-bold text-sm">복습시간 → 성적</div>
+              <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">🟢 R²=0.61</span>
+            </div>
+            <svg viewBox="0 0 300 100" class="w-full h-24">
+              <g fill="#3a74ff"><circle cx="40" cy="80" r="3"/><circle cx="80" cy="70" r="3"/><circle cx="120" cy="55" r="3"/><circle cx="170" cy="42" r="3"/><circle cx="220" cy="30" r="3"/><circle cx="270" cy="18" r="3"/></g>
+              <line x1="30" y1="85" x2="280" y2="15" stroke="#f04685" stroke-width="2"/>
+            </svg>
+            <div class="mt-1 text-xs text-ink-700">복습 1시간당 <b class="text-brand-600">+3.2점</b></div>
+          </div>
+          <div class="rounded-2xl border border-gray-100 p-5">
+            <div class="flex items-center justify-between mb-2">
+              <div class="font-bold text-sm">숙제이행률 → 성적</div>
+              <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">🟢 R²=0.54</span>
+            </div>
+            <svg viewBox="0 0 300 100" class="w-full h-24">
+              <g fill="#3a74ff"><circle cx="40" cy="78" r="3"/><circle cx="90" cy="65" r="3"/><circle cx="140" cy="50" r="3"/><circle cx="200" cy="35" r="3"/><circle cx="260" cy="22" r="3"/></g>
+              <line x1="30" y1="80" x2="280" y2="20" stroke="#f04685" stroke-width="2"/>
+            </svg>
+            <div class="mt-1 text-xs text-ink-700">숙제이행률 1%p당 <b class="text-brand-600">+0.28점</b></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="eq-step hidden" data-step="6">
+        <div class="text-xs tracking-widest font-bold text-brand-600 mb-2">STEP 6</div>
+        <h3 class="text-xl font-bold">우리 학원만의 성공방정식이 완성됐어요</h3>
+        <p class="mt-2 text-sm text-ink-500">모든 변수를 한 번에 고려한 다중회귀 결과입니다.</p>
+        <div class="mt-5 rounded-3xl bg-gradient-to-br from-brand-50 to-soft-blush p-6 text-center">
+          <div class="text-xs tracking-widest font-bold text-brand-700 mb-2">우리학원 성공방정식</div>
+          <div class="text-xl font-extrabold leading-relaxed">
+            성적 = <span class="text-brand-600">0.42</span> × 복습 + <span class="text-brand-600">0.28</span> × 숙제 + <span class="text-brand-600">0.19</span> × 출석 + <span class="text-accent-600">62</span>
+          </div>
+          <div class="mt-4 inline-flex items-center gap-2 bg-white rounded-full px-3 py-1.5 text-sm font-semibold">
+            🟢 신뢰도 <span class="text-emerald-600">78%</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="eq-step hidden" data-step="7">
+        <div class="text-xs tracking-widest font-bold text-brand-600 mb-2">STEP 7</div>
+        <h3 class="text-xl font-bold">원장님의 감, 얼마나 맞았을까요?</h3>
+        <p class="mt-2 text-sm text-ink-500">STEP 3에서 기록하신 직관과 실제 데이터를 비교해볼게요.</p>
+        <div class="mt-5 space-y-2.5">
+          <div class="grid grid-cols-[1fr_auto_1fr_auto] items-center gap-3 p-3 rounded-xl border border-gray-100 text-sm">
+            <div><div class="font-bold">복습시간</div><div class="text-xs text-ink-500">직관 3/5</div></div>
+            <div class="text-ink-300">→</div>
+            <div><div class="font-bold text-brand-600">β 0.42 · 1위</div></div>
+            <span class="text-[10px] font-bold text-accent-700 bg-accent-50 px-2 py-0.5 rounded-full">✨ 과소평가</span>
+          </div>
+          <div class="grid grid-cols-[1fr_auto_1fr_auto] items-center gap-3 p-3 rounded-xl border border-gray-100 text-sm">
+            <div><div class="font-bold">숙제이행률</div><div class="text-xs text-ink-500">직관 5/5</div></div>
+            <div class="text-ink-300">→</div>
+            <div><div class="font-bold text-brand-600">β 0.28 · 2위</div></div>
+            <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">👍 일치</span>
+          </div>
+          <div class="grid grid-cols-[1fr_auto_1fr_auto] items-center gap-3 p-3 rounded-xl border border-gray-100 text-sm">
+            <div><div class="font-bold">출결률</div><div class="text-xs text-ink-500">직관 5/5</div></div>
+            <div class="text-ink-300">→</div>
+            <div><div class="font-bold text-brand-600">β 0.19 · 3위</div></div>
+            <span class="text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">⚠️ 과대평가</span>
+          </div>
+        </div>
+        <div class="mt-4 rounded-xl bg-soft-blush p-4 text-sm">
+          💡 원장님께서 가장 중요하다고 보신 "출석"보다, <b class="text-accent-600">복습</b>이 2배 넘게 강력했습니다.
+        </div>
+      </div>
+
+      <div class="eq-step hidden" data-step="8">
+        <div class="text-xs tracking-widest font-bold text-brand-600 mb-2">STEP 8</div>
+        <h3 class="text-xl font-bold">완성! 이제 저장하고 활용해볼까요?</h3>
+        <p class="mt-2 text-sm text-ink-500">이 방정식은 다음 업데이트 전까지 계속 사용됩니다.</p>
+        <div class="mt-5 rounded-3xl bg-white border-2 border-brand-100 p-6">
+          <div class="text-xs tracking-widest font-bold text-brand-700 mb-2">우리학원 성공방정식</div>
+          <div class="text-base font-extrabold">성적 = 복습 × 0.42 + 숙제 × 0.28 + 출석 × 0.19 + 62</div>
+          <div class="mt-3 rounded-lg bg-soft-navy p-3 text-xs">
+            💡 복습 1시간 늘리면 평균 <b>+3.2점</b> 예측
+          </div>
+          <div class="mt-3 text-[11px] text-ink-500">R² 0.78 · 학생 24명 · 2026.04.14 · v3</div>
+        </div>
+        <div class="mt-5 grid grid-cols-2 gap-2">
+          <button class="py-3 rounded-xl border border-gray-200 font-semibold text-sm hover:bg-gray-50">📄 PDF 저장</button>
+          <a href="report.html" class="text-center py-3 rounded-xl bg-brand-500 text-white font-semibold text-sm hover:bg-brand-600">리포트 만들기 →</a>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Footer Nav -->
+    <div class="px-7 py-4 border-t border-gray-100 flex items-center justify-between">
+      <button id="eqPrevBtn" class="px-5 py-2.5 rounded-xl border border-gray-200 font-semibold text-sm hover:bg-gray-50 disabled:opacity-30" disabled>← 이전</button>
+      <div class="text-xs text-ink-500"><span id="eqStepLabel2" class="font-bold text-brand-600">1</span> / 8</div>
+      <button id="eqNextBtn" class="px-5 py-2.5 rounded-xl bg-brand-500 text-white font-semibold text-sm hover:bg-brand-600">다음 →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 데이터 기록 알림받기 모달 ============ -->
+<div class="modal" id="alertModal">
+  <div class="modal-box bg-white rounded-3xl w-full max-w-2xl overflow-hidden">
+    <div class="p-7">
+      <div class="flex items-center justify-between mb-5">
+        <div>
+          <div class="text-xs tracking-widest font-bold text-accent-600">🔔 알림 설정</div>
+          <h2 class="text-2xl font-bold mt-1">언제 데이터 기록 알림을 받으시겠어요?</h2>
+          <p class="text-sm text-ink-500 mt-1">설정한 주기에 맞춰 입력하실 수 있도록 저희가 챙겨드릴게요.</p>
+        </div>
+        <button onclick="closeModal('alertModal')" class="w-10 h-10 rounded-full hover:bg-gray-100 grid place-items-center text-2xl">×</button>
+      </div>
+
+      <!-- 1. 알림 주기 -->
+      <div class="mb-5">
+        <label class="block text-sm font-bold mb-2">1. 알림 주기</label>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+          <button class="alert-cycle-opt rounded-xl border-2 border-gray-200 p-4 text-center hover:border-brand-300 text-sm font-semibold" data-c="day">매일</button>
+          <button class="alert-cycle-opt rounded-xl border-2 border-brand-500 bg-brand-50 text-brand-700 p-4 text-center text-sm font-semibold" data-c="week">매주</button>
+          <button class="alert-cycle-opt rounded-xl border-2 border-gray-200 p-4 text-center hover:border-brand-300 text-sm font-semibold" data-c="biweek">격주</button>
+          <button class="alert-cycle-opt rounded-xl border-2 border-gray-200 p-4 text-center hover:border-brand-300 text-sm font-semibold" data-c="month">매월</button>
+        </div>
+      </div>
+
+      <!-- 2. 요일 (주간 모드일 때만) -->
+      <div class="mb-5" id="alertDayRow">
+        <label class="block text-sm font-bold mb-2">2. 요일</label>
+        <div class="grid grid-cols-7 gap-2">
+          <button class="alert-day-opt rounded-xl border-2 border-gray-200 p-3 text-center text-sm font-semibold hover:border-brand-300" data-d="mon">월</button>
+          <button class="alert-day-opt rounded-xl border-2 border-gray-200 p-3 text-center text-sm font-semibold hover:border-brand-300" data-d="tue">화</button>
+          <button class="alert-day-opt rounded-xl border-2 border-gray-200 p-3 text-center text-sm font-semibold hover:border-brand-300" data-d="wed">수</button>
+          <button class="alert-day-opt rounded-xl border-2 border-gray-200 p-3 text-center text-sm font-semibold hover:border-brand-300" data-d="thu">목</button>
+          <button class="alert-day-opt rounded-xl border-2 border-brand-500 bg-brand-50 text-brand-700 p-3 text-center text-sm font-semibold" data-d="fri">금</button>
+          <button class="alert-day-opt rounded-xl border-2 border-gray-200 p-3 text-center text-sm font-semibold hover:border-brand-300" data-d="sat">토</button>
+          <button class="alert-day-opt rounded-xl border-2 border-gray-200 p-3 text-center text-sm font-semibold hover:border-brand-300" data-d="sun">일</button>
+        </div>
+      </div>
+
+      <!-- 3. 시각 -->
+      <div class="mb-5">
+        <label class="block text-sm font-bold mb-2">3. 알림 시각</label>
+        <div class="flex items-center gap-3">
+          <input type="time" value="18:00" class="px-4 py-3 rounded-xl border-2 border-gray-200 text-base font-semibold focus:border-brand-400 outline-none"/>
+          <div class="flex gap-2">
+            <button class="alert-time-preset px-3 py-2 rounded-lg border border-gray-200 text-xs font-semibold hover:bg-gray-50">아침 9:00</button>
+            <button class="alert-time-preset px-3 py-2 rounded-lg border border-gray-200 text-xs font-semibold hover:bg-gray-50">점심 12:00</button>
+            <button class="alert-time-preset px-3 py-2 rounded-lg border-2 border-brand-300 bg-brand-50 text-brand-700 text-xs font-semibold">저녁 18:00</button>
+            <button class="alert-time-preset px-3 py-2 rounded-lg border border-gray-200 text-xs font-semibold hover:bg-gray-50">밤 21:00</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. 채널 -->
+      <div class="mb-5">
+        <label class="block text-sm font-bold mb-2">4. 알림 채널 <span class="text-xs font-normal text-ink-500">· 중복 선택 가능</span></label>
+        <div class="grid grid-cols-3 gap-2">
+          <label class="alert-channel-opt rounded-xl border-2 border-brand-500 bg-brand-50 p-4 cursor-pointer flex items-center gap-2">
+            <input type="checkbox" checked class="w-4 h-4"/>
+            <span class="text-2xl">💬</span>
+            <span class="text-sm font-semibold text-brand-700">카카오톡</span>
+          </label>
+          <label class="alert-channel-opt rounded-xl border-2 border-gray-200 p-4 cursor-pointer flex items-center gap-2 hover:border-brand-300">
+            <input type="checkbox" class="w-4 h-4"/>
+            <span class="text-2xl">📧</span>
+            <span class="text-sm font-semibold">이메일</span>
+          </label>
+          <label class="alert-channel-opt rounded-xl border-2 border-gray-200 p-4 cursor-pointer flex items-center gap-2 hover:border-brand-300">
+            <input type="checkbox" class="w-4 h-4"/>
+            <span class="text-2xl">📱</span>
+            <span class="text-sm font-semibold">앱 푸시</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- 미리보기 -->
+      <div class="rounded-xl bg-gray-50 p-4 text-sm">
+        💡 <b>알림 미리보기</b><br/>
+        <span class="text-ink-700">매주 금요일 오후 6시 카카오톡으로 데이터 기록 알림을 받으십니다.</span>
+      </div>
+
+      <div class="mt-7 pt-5 border-t border-gray-100 flex items-center justify-between">
+        <button onclick="confirmTurnOff()" class="px-4 py-2.5 rounded-xl text-rose-600 font-semibold text-sm hover:bg-rose-50">알림 끄기</button>
+        <div class="flex gap-2">
+          <button onclick="closeModal('alertModal')" class="px-4 py-2.5 rounded-xl border border-gray-200 font-semibold text-sm hover:bg-gray-50">취소</button>
+          <button onclick="closeModal('alertModal')" class="px-5 py-2.5 rounded-xl bg-brand-500 text-white font-semibold text-sm hover:bg-brand-600">저장</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 변수 수정 모달 ============ -->
+<div class="modal" id="editVarModal">
+  <div class="modal-box bg-white rounded-3xl w-full max-w-lg overflow-hidden">
+    <div class="p-7">
+      <div class="flex items-center justify-between mb-5">
+        <div>
+          <div class="text-xs tracking-widest font-bold text-brand-600">변수 관리</div>
+          <h2 class="text-2xl font-bold mt-1" id="editVarTitle">복습시간</h2>
+        </div>
+        <button onclick="closeModal('editVarModal')" class="w-10 h-10 rounded-full hover:bg-gray-100 grid place-items-center text-2xl">×</button>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <label class="text-xs font-bold text-ink-500">변수 이름</label>
+          <input id="editVarName" class="mt-1 w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold"/>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs font-bold text-ink-500">단위</label>
+            <select id="editVarUnit" class="mt-1 w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm">
+              <option>0~100%</option><option>5점 척도</option><option>횟수</option><option>시간(분)</option><option>시간</option><option>점</option><option>회</option><option>O · X</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-xs font-bold text-ink-500">기록 주기</label>
+            <select id="editVarCycle" class="mt-1 w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm">
+              <option>매 수업</option><option>매일</option><option>매주</option><option>매월</option><option>시험마다</option>
+            </select>
+          </div>
+        </div>
+        <div class="rounded-xl bg-gray-50 p-4 text-xs text-ink-500">
+          📊 <b>현재 누적 데이터:</b> <span id="editVarCount">312건</span> · <b>수집 시작:</b> <span id="editVarStart">2025.09.01</span>
+        </div>
+      </div>
+
+      <div class="mt-7 pt-5 border-t border-gray-100 flex items-center justify-between">
+        <button onclick="openDeleteVarModal()" class="px-4 py-2.5 rounded-xl text-rose-600 font-semibold text-sm hover:bg-rose-50 flex items-center gap-1.5">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
+          변수 삭제
+        </button>
+        <div class="flex gap-2">
+          <button onclick="closeModal('editVarModal')" class="px-4 py-2.5 rounded-xl border border-gray-200 font-semibold text-sm hover:bg-gray-50">취소</button>
+          <button onclick="saveEditVar()" class="px-5 py-2.5 rounded-xl bg-brand-500 text-white font-semibold text-sm hover:bg-brand-600">저장</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 변수 삭제 모달 - Step 1: 옵션 선택 ============ -->
+<div class="modal" id="deleteVarModal">
+  <div class="modal-box bg-white rounded-3xl w-full max-w-xl overflow-hidden">
+    <div class="p-7">
+      <div class="flex items-center justify-between mb-2">
+        <div class="text-xs tracking-widest font-bold text-rose-600">삭제 확인</div>
+        <button onclick="closeModal('deleteVarModal')" class="w-10 h-10 rounded-full hover:bg-gray-100 grid place-items-center text-2xl">×</button>
+      </div>
+      <h2 class="text-2xl font-bold"><span id="delVarName">복습시간</span> 변수를 삭제할까요?</h2>
+      <p class="text-sm text-ink-500 mt-2">이전에 기록한 데이터를 어떻게 처리할지 선택해주세요.</p>
+
+      <div class="mt-6 space-y-3">
+        <button class="del-opt w-full text-left rounded-2xl border-2 border-gray-200 p-5 hover:border-emerald-500 transition" data-opt="keep">
+          <div class="flex items-start gap-3">
+            <div class="text-2xl">🗂️</div>
+            <div class="flex-1">
+              <div class="font-bold">이전 데이터는 남겨주세요</div>
+              <p class="mt-1 text-sm text-ink-500">기록한 값은 그대로 두고, 앞으로만 입력을 중단할게요. 이전 데이터를 활용한 리포트는 계속 만들 수 있어요.</p>
+            </div>
+          </div>
+        </button>
+        <button class="del-opt w-full text-left rounded-2xl border-2 border-gray-200 p-5 hover:border-rose-500 transition" data-opt="delete">
+          <div class="flex items-start gap-3">
+            <div class="text-2xl">🗑️</div>
+            <div class="flex-1">
+              <div class="font-bold">이전 데이터 모두 삭제해주세요</div>
+              <p class="mt-1 text-sm text-ink-500">변수 자체를 완전히 없애고, 입력했던 모든 값도 함께 지울게요.</p>
+            </div>
+          </div>
+        </button>
+      </div>
+
+      <div class="mt-6 pt-5 border-t border-gray-100 flex justify-end">
+        <button onclick="closeModal('deleteVarModal')" class="px-4 py-2.5 rounded-xl border border-gray-200 font-semibold text-sm hover:bg-gray-50">취소</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ Step 2-A: 데이터 보존 + 입력 중단 시점 설정 ============ -->
+<div class="modal" id="keepDataModal">
+  <div class="modal-box bg-white rounded-3xl w-full max-w-xl overflow-hidden">
+    <div class="p-7">
+      <div class="flex items-center justify-between mb-2">
+        <div class="text-xs tracking-widest font-bold text-brand-600">입력 중단 시점</div>
+        <button onclick="closeModal('keepDataModal')" class="w-10 h-10 rounded-full hover:bg-gray-100 grid place-items-center text-2xl">×</button>
+      </div>
+      <h2 class="text-2xl font-bold">언제부터 입력을 중단할까요?</h2>
+      <p class="text-sm text-ink-500 mt-2">선택하신 날짜 이후의 데이터부터는 기록하지 않습니다.</p>
+
+      <div class="mt-6 grid grid-cols-2 gap-3 mb-5">
+        <button class="stop-preset rounded-xl border-2 border-brand-500 bg-brand-50 text-brand-700 p-4 text-sm font-semibold" data-when="today">오늘부터</button>
+        <button class="stop-preset rounded-xl border border-gray-200 p-4 text-sm font-semibold hover:border-brand-400 hover:bg-brand-50" data-when="next-week">다음 주부터</button>
+        <button class="stop-preset rounded-xl border border-gray-200 p-4 text-sm font-semibold hover:border-brand-400 hover:bg-brand-50" data-when="next-month">다음 달부터</button>
+        <button class="stop-preset rounded-xl border border-gray-200 p-4 text-sm font-semibold hover:border-brand-400 hover:bg-brand-50" data-when="custom">직접 선택</button>
+      </div>
+
+      <div class="rounded-2xl bg-gray-50 p-4 flex items-center gap-3">
+        <span class="text-sm text-ink-700">중단 날짜:</span>
+        <input id="stopDate" type="date" class="px-3 py-2 rounded-lg border border-gray-200 text-sm" value="2026-04-14"/>
+        <span class="text-ink-500 text-sm">부터 미입력</span>
+      </div>
+
+      <div class="mt-5 p-4 rounded-xl bg-soft-blush text-sm">
+        ⚠️ <b>안내사항</b><br/>
+        앞으로 <b><span id="keepVarName">복습시간</span></b> 변수를 사용하는 리포트는 <b id="keepStopDate">2026.04.14</b> 이전 데이터만으로 추출됩니다.
+        그 이후 기간 데이터를 기반으로 한 리포트에서는 이 변수가 자동으로 제외돼요.
+      </div>
+
+      <div class="mt-7 pt-5 border-t border-gray-100 flex justify-end gap-2">
+        <button onclick="closeModal('keepDataModal')" class="px-4 py-2.5 rounded-xl border border-gray-200 font-semibold text-sm hover:bg-gray-50">취소</button>
+        <button onclick="confirmKeepDelete()" class="px-5 py-2.5 rounded-xl bg-brand-500 text-white font-semibold text-sm hover:bg-brand-600">변수 숨기기</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ Step 2-B: 완전 삭제 확인 ============ -->
+<div class="modal" id="hardDeleteModal">
+  <div class="modal-box bg-white rounded-3xl w-full max-w-xl overflow-hidden">
+    <div class="p-7">
+      <div class="flex items-center justify-between mb-2">
+        <div class="text-xs tracking-widest font-bold text-rose-600">완전 삭제</div>
+        <button onclick="closeModal('hardDeleteModal')" class="w-10 h-10 rounded-full hover:bg-gray-100 grid place-items-center text-2xl">×</button>
+      </div>
+      <h2 class="text-2xl font-bold text-rose-700">정말 모두 삭제하시겠어요?</h2>
+
+      <div class="mt-5 rounded-2xl border-2 border-rose-200 bg-rose-50 p-5 space-y-3">
+        <div class="flex items-start gap-2 text-sm">
+          <span class="text-rose-600 mt-0.5">⚠️</span>
+          <div><b>이전 데이터를 보유하고 있지 않게 됩니다.</b><br/><span class="text-rose-700"><b id="hardDelVarName">복습시간</b> 변수에 대해 입력하신 <b id="hardDelCount">312건</b>의 데이터가 모두 사라져요.</span></div>
+        </div>
+        <div class="flex items-start gap-2 text-sm">
+          <span class="text-rose-600 mt-0.5">⚠️</span>
+          <div><b>이전 기간을 기반으로 한 리포트를 더 이상 만들 수 없어요.</b><br/><span class="text-rose-700">이 변수가 포함된 모든 과거 기간 회귀분석 리포트는 생성이 불가능해집니다.</span></div>
+        </div>
+        <div class="flex items-start gap-2 text-sm">
+          <span class="text-rose-600 mt-0.5">⚠️</span>
+          <div><b>되돌릴 수 없어요.</b><br/><span class="text-rose-700">삭제된 데이터는 복구할 수 없습니다.</span></div>
+        </div>
+      </div>
+
+      <div class="mt-5 rounded-xl bg-gray-50 p-4 text-sm">
+        💡 데이터를 보존하고 싶으시면 <button class="text-brand-600 font-semibold underline" onclick="closeModal('hardDeleteModal');openModal('deleteVarModal')">"이전 데이터는 남겨주세요"</button> 옵션을 선택하세요.
+      </div>
+
+      <div class="mt-6 pt-5 border-t border-gray-100 flex justify-end gap-2">
+        <button onclick="closeModal('hardDeleteModal')" class="px-4 py-2.5 rounded-xl border border-gray-200 font-semibold text-sm hover:bg-gray-50">취소</button>
+        <button onclick="confirmHardDelete()" class="px-5 py-2.5 rounded-xl bg-rose-600 text-white font-semibold text-sm hover:bg-rose-700">완전 삭제</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 변수 추가 모달 ============ -->
+<div class="modal" id="addVarModal">
+  <div class="modal-box bg-white rounded-3xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+    <div class="p-7">
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <div class="text-xs tracking-widest font-bold text-brand-600" id="modalStepLabel">STEP 1 / 3</div>
+          <h2 class="text-2xl font-bold mt-1" id="modalTitle">어떤 변수를 추가하시나요?</h2>
+        </div>
+        <button onclick="closeAddVarModal()" class="w-10 h-10 rounded-full hover:bg-gray-100 grid place-items-center text-2xl">×</button>
+      </div>
+
+      <div class="addvar-step" data-s="1">
+        <p class="text-sm text-ink-500 mb-5">수업 시간에 정하신 X-Factor 중에서 담고 싶으신 변수를 골라주세요.</p>
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-3" id="varMenu"></div>
+      </div>
+
+      <!-- STEP 1.5: 우리 학원만의 변수 만들기 -->
+      <div class="addvar-step hidden" data-s="custom">
+        <p class="text-sm text-ink-500 mb-5">우리 학원에서만 관리하는 데이터를 직접 정의해주세요.</p>
+
+        <!-- 변수 이름 -->
+        <div class="mb-5">
+          <label class="block text-sm font-bold mb-2">1. 변수 이름</label>
+          <input id="customVarName" placeholder="예: 오답노트 작성률" class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 text-base font-semibold focus:border-brand-400 outline-none"/>
+        </div>
+
+        <!-- 단위 -->
+        <div class="mb-5">
+          <label class="block text-sm font-bold mb-2">2. 단위 <span class="text-xs font-normal text-ink-500">· 어떤 형식으로 기록하시나요?</span></label>
+          <div class="grid grid-cols-3 gap-2" id="unitToggle">
+            <button class="unit-opt rounded-xl border-2 border-gray-200 p-3 text-center hover:border-brand-300" data-u="percent">
+              <div class="text-2xl mb-1">📊</div><div class="text-sm font-semibold">0~100%</div>
+            </button>
+            <button class="unit-opt rounded-xl border-2 border-gray-200 p-3 text-center hover:border-brand-300" data-u="score">
+              <div class="text-2xl mb-1">⭐</div><div class="text-sm font-semibold">점수</div>
+            </button>
+            <button class="unit-opt rounded-xl border-2 border-gray-200 p-3 text-center hover:border-brand-300" data-u="count">
+              <div class="text-2xl mb-1">🔢</div><div class="text-sm font-semibold">횟수</div>
+            </button>
+            <button class="unit-opt rounded-xl border-2 border-gray-200 p-3 text-center hover:border-brand-300" data-u="time">
+              <div class="text-2xl mb-1">⏱️</div><div class="text-sm font-semibold">시간</div>
+            </button>
+            <button class="unit-opt rounded-xl border-2 border-gray-200 p-3 text-center hover:border-brand-300" data-u="ox">
+              <div class="text-2xl mb-1">⭕</div><div class="text-sm font-semibold">O · X</div>
+            </button>
+            <button class="unit-opt rounded-xl border-2 border-gray-200 p-3 text-center hover:border-brand-300" data-u="check">
+              <div class="text-2xl mb-1">✅</div><div class="text-sm font-semibold">체크박스</div>
+            </button>
+          </div>
+
+          <!-- 점수: 만점 척도 -->
+          <div id="unitScoreOpts" class="hidden mt-3 rounded-xl bg-gray-50 p-4">
+            <div class="text-sm font-semibold mb-2">📌 몇 점 만점인가요?</div>
+            <div class="flex gap-2 flex-wrap" id="scoreScale">
+              <button class="score-opt px-4 py-2 rounded-lg border-2 border-gray-200 bg-white text-sm font-semibold hover:border-brand-400" data-s="3">3점</button>
+              <button class="score-opt px-4 py-2 rounded-lg border-2 border-gray-200 bg-white text-sm font-semibold hover:border-brand-400" data-s="5">5점</button>
+              <button class="score-opt px-4 py-2 rounded-lg border-2 border-gray-200 bg-white text-sm font-semibold hover:border-brand-400" data-s="10">10점</button>
+              <button class="score-opt px-4 py-2 rounded-lg border-2 border-gray-200 bg-white text-sm font-semibold hover:border-brand-400" data-s="100">100점</button>
+              <div class="flex items-center gap-2">
+                <span class="text-sm text-ink-500">직접</span>
+                <input id="scoreCustom" type="number" placeholder="N" class="w-20 px-3 py-2 rounded-lg border-2 border-gray-200 text-sm font-semibold text-center"/>
+                <span class="text-sm text-ink-500">점 만점</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 시간: 단위 -->
+          <div id="unitTimeOpts" class="hidden mt-3 rounded-xl bg-gray-50 p-4">
+            <div class="text-sm font-semibold mb-2">📌 어떤 단위로 기록하시나요?</div>
+            <div class="flex gap-2" id="timeScale">
+              <button class="time-opt flex-1 py-2 rounded-lg border-2 border-gray-200 bg-white text-sm font-semibold hover:border-brand-400" data-t="sec">초 단위</button>
+              <button class="time-opt flex-1 py-2 rounded-lg border-2 border-gray-200 bg-white text-sm font-semibold hover:border-brand-400" data-t="min">분 단위</button>
+              <button class="time-opt flex-1 py-2 rounded-lg border-2 border-gray-200 bg-white text-sm font-semibold hover:border-brand-400" data-t="hour">시간 단위</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 기록 주기 -->
+        <div class="mb-5">
+          <label class="block text-sm font-bold mb-2">3. 기록 주기 <span class="text-xs font-normal text-ink-500">· 얼마나 자주 입력하시나요?</span></label>
+          <div class="grid grid-cols-5 gap-2" id="cycleToggle">
+            <button class="cycle-opt rounded-xl border-2 border-gray-200 p-3 text-center hover:border-brand-300 text-sm font-semibold" data-c="lesson">매 수업</button>
+            <button class="cycle-opt rounded-xl border-2 border-gray-200 p-3 text-center hover:border-brand-300 text-sm font-semibold" data-c="day">매일</button>
+            <button class="cycle-opt rounded-xl border-2 border-gray-200 p-3 text-center hover:border-brand-300 text-sm font-semibold" data-c="week">매주</button>
+            <button class="cycle-opt rounded-xl border-2 border-gray-200 p-3 text-center hover:border-brand-300 text-sm font-semibold" data-c="month">매월</button>
+            <button class="cycle-opt rounded-xl border-2 border-gray-200 p-3 text-center hover:border-brand-300 text-sm font-semibold" data-c="exam">시험마다</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="addvar-step hidden" data-s="2">
+        <p class="text-sm text-ink-500 mb-5"><b id="selectedVarName">복습시간</b>에 대한 데이터를 이미 가지고 계신가요?</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <button class="status-btn group rounded-2xl border-2 border-gray-200 p-6 text-left hover:border-emerald-500" data-status="have">
+            <div class="text-3xl">🟢</div>
+            <div class="mt-3 font-bold text-lg">이미 보유 중이에요</div>
+            <p class="mt-1 text-sm text-ink-500">엑셀이나 노트에 이미 기록해둔 데이터가 있어요. 바로 입력해서 리포트를 만들래요.</p>
+          </button>
+          <button class="status-btn group rounded-2xl border-2 border-gray-200 p-6 text-left hover:border-amber-500" data-status="new">
+            <div class="text-3xl">🟡</div>
+            <div class="mt-3 font-bold text-lg">지금부터 수집할게요</div>
+            <p class="mt-1 text-sm text-ink-500">데이터는 아직 없어요. 오늘부터 사이트에 꾸준히 기록해나갈게요.</p>
+          </button>
+        </div>
+      </div>
+
+      <div class="addvar-step hidden" data-s="3a">
+        <p class="text-sm text-ink-500 mb-5">언제부터 기록된 데이터를 가지고 계신가요? 그 시점부터 입력 칸이 열립니다.</p>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
+          <button class="date-preset rounded-xl border border-gray-200 p-4 text-sm font-semibold hover:border-brand-400 hover:bg-brand-50" data-preset="2w">최근 2주</button>
+          <button class="date-preset rounded-xl border border-gray-200 p-4 text-sm font-semibold hover:border-brand-400 hover:bg-brand-50" data-preset="1m">최근 1개월</button>
+          <button class="date-preset rounded-xl border-2 border-brand-500 bg-brand-50 text-brand-700 p-4 text-sm font-semibold" data-preset="3m">최근 3개월</button>
+          <button class="date-preset rounded-xl border border-gray-200 p-4 text-sm font-semibold hover:border-brand-400 hover:bg-brand-50" data-preset="6m">최근 6개월</button>
+        </div>
+        <div class="rounded-2xl bg-gray-50 p-4 flex items-center gap-3">
+          <span class="text-sm text-ink-700">직접 선택:</span>
+          <input type="date" class="px-3 py-2 rounded-lg border border-gray-200 text-sm" value="2026-01-14"/>
+          <span class="text-ink-500 text-sm">부터</span>
+        </div>
+        <div class="mt-5 p-4 rounded-xl bg-soft-blush text-sm">
+          💡 <b>선택하신 시점부터 현재까지의 입력 칸이 자동으로 열립니다.</b> 그 칸부터 데이터를 채워주시면 돼요.
+        </div>
+      </div>
+
+      <div class="addvar-step hidden" data-s="3b">
+        <p class="text-sm text-ink-500 mb-5">얼마나 자주 기록하실 예정인가요?</p>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
+          <button class="period-preset rounded-xl border border-gray-200 p-5 text-center hover:border-brand-400 hover:bg-brand-50"><div class="text-2xl mb-1">📅</div><div class="font-semibold">매일</div></button>
+          <button class="period-preset rounded-xl border-2 border-brand-500 bg-brand-50 p-5 text-center"><div class="text-2xl mb-1">📆</div><div class="font-semibold text-brand-700">매주</div></button>
+          <button class="period-preset rounded-xl border border-gray-200 p-5 text-center hover:border-brand-400 hover:bg-brand-50"><div class="text-2xl mb-1">🗓️</div><div class="font-semibold">매월</div></button>
+          <button class="period-preset rounded-xl border border-gray-200 p-5 text-center hover:border-brand-400 hover:bg-brand-50"><div class="text-2xl mb-1">📝</div><div class="font-semibold">시험마다</div></button>
+        </div>
+        <div class="rounded-xl bg-soft-blush p-4 text-sm">
+          🔔 <b>입력 알림을 받고 싶으세요?</b><br/>
+          상단 <b>"데이터 기록 알림받기"</b> 버튼에서 한 번에 설정하실 수 있어요. 변수마다 따로 설정하실 필요는 없습니다.
+        </div>
+      </div>
+
+      <div class="mt-8 pt-5 border-t border-gray-100 flex items-center justify-between">
+        <button id="modalPrev" class="px-4 py-2.5 rounded-xl border border-gray-200 font-semibold text-sm hover:bg-gray-50">← 이전</button>
+        <button id="modalNext" class="px-6 py-2.5 rounded-xl bg-brand-500 text-white font-semibold text-sm hover:bg-brand-600">다음 →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.getElementById('sidebar').outerHTML = __renderLayout('hub');
+  document.getElementById('topbar').outerHTML = __renderTopbar(['홈','데이터 허브']);
+
+  // ===== 학생 (12명 샘플) =====
+  const firstNames = ['민재','서연','하윤','지우','도윤','소율','지호','예진','준서','서윤','시우','지민'];
+  const surnames = ['김','박','이','최','정','강','조','윤','한','오','서','신'];
+  const classes = ['중3 수학반','중2 수학반','고1 수학반'];
+  const studentsOriginal = firstNames.map((n,i)=>({ n: surnames[i%surnames.length]+n, cls: classes[i%classes.length] }));
+  let students = [...studentsOriginal];
+  let sortMode = 0; // 0: 원본, 1: 가나다, 2: 역순
+
+  function cycleStudentSort(){
+    sortMode = (sortMode + 1) % 3;
+    const ind = document.getElementById('sortIndicator');
+    if(sortMode === 0){
+      students = [...studentsOriginal];
+      ind.textContent = '⇅';
+    } else if(sortMode === 1){
+      students = [...studentsOriginal].sort((a,b)=>a.n.localeCompare(b.n,'ko'));
+      ind.textContent = '↑';
+    } else {
+      students = [...studentsOriginal].sort((a,b)=>b.n.localeCompare(a.n,'ko'));
+      ind.textContent = '↓';
+    }
+    renderInputTable();
+  }
+  window.cycleStudentSort = cycleStudentSort;
+
+  // ===== 변수 =====
+  const availableVars = [
+    {id:'att', emoji:'✅', name:'출결률', unit:'%', cycle:'매 수업'},
+    {id:'hw', emoji:'📝', name:'숙제이행률', unit:'%', cycle:'매 수업'},
+    {id:'review', emoji:'🕐', name:'복습시간', unit:'시간', cycle:'매주'},
+    {id:'q', emoji:'🙋', name:'질문횟수', unit:'회', cycle:'매 수업'},
+    {id:'score', emoji:'📊', name:'시험 성적', unit:'점', cycle:'시험마다'},
+    {id:'counsel', emoji:'🗣️', name:'학생 상담', unit:'회', cycle:'매월'},
+    {id:'parent', emoji:'👨‍👩‍👧', name:'학부모 상담', unit:'회', cycle:'매월'},
+    {id:'self', emoji:'📚', name:'자습시간', unit:'시간', cycle:'매주'},
+    {id:'focus', emoji:'⭐', name:'수업 집중도', unit:'5점', cycle:'매 수업'}
+  ];
+  // inEq: true면 현재 방정식에 포함된 변수
+  let activeVars = [
+    {id:'att', inEq:true, beta:0.19},
+    {id:'hw', inEq:true, beta:0.28},
+    {id:'review', inEq:true, beta:0.42},
+    {id:'q', inEq:false},
+    {id:'score', inEq:true, isY:true}
+  ];
+
+  let currentMode = 'week';
+  const days = ['월','화','수','목','금','토','일'];
+  const dayDates = ['4/13','4/14','4/15','4/16','4/17','4/18','4/19'];
+
+  function randVal(id){
+    if(id==='att') return 85+Math.floor(Math.random()*15);
+    if(id==='hw') return 70+Math.floor(Math.random()*30);
+    if(id==='review') return (3+Math.random()*5).toFixed(1);
+    if(id==='q') return Math.floor(Math.random()*8);
+    if(id==='score') return 65+Math.floor(Math.random()*25);
+    if(id==='counsel'||id==='parent') return Math.floor(Math.random()*3);
+    if(id==='self') return (Math.random()*4).toFixed(1);
+    if(id==='focus') return (2+Math.random()*3).toFixed(1);
+    return '';
+  }
+
+  function renderInputTable(){
+    const vars = activeVars.map(a => ({...availableVars.find(v=>v.id===a.id), ...a}));
+    const table = document.getElementById('inputTable');
+    table.className = 'grid-table mode-' + currentMode;
+
+    let thead, tbody;
+    if(currentMode === 'week'){
+      thead = `<thead>
+        <tr>
+          <th class="name-col cursor-pointer hover:bg-gray-100" id="sortStudentBtn" onclick="cycleStudentSort()">
+            <div class="flex items-center justify-center gap-1">
+              <span class="text-[15px] font-bold text-ink-700">학생</span>
+              <span id="sortIndicator" class="text-xs text-ink-700">⇅</span>
+            </div>
+          </th>
+          ${vars.map(v=>`<th class="var-group ${v.inEq?'in-eq':''}" title="${v.cycle}">
+            <div class="flex items-center justify-center gap-1.5">
+              <span class="text-lg">${v.emoji}</span><span class="text-sm font-bold">${v.name}</span>
+              ${v.inEq?`<span class="text-[10px] font-bold bg-accent-500 text-white px-1.5 py-0.5 rounded-full ml-1">${v.isY?'Y':'β '+v.beta}</span>`:''}
+            </div>
+            <div class="text-[11px] font-normal mt-1 ${v.inEq?'text-accent-600':'text-ink-500'}">${v.unit} · ${v.cycle}</div>
+          </th>`).join('')}
+        </tr>
+      </thead>`;
+      tbody = `<tbody>${students.map((s,si)=>`
+        <tr>
+          <td class="name-col">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-full bg-soft-navy text-brand-700 font-bold grid place-items-center text-base">${s.n[0]}</div>
+              <div><div class="text-base font-semibold">${s.n}</div><div class="text-xs text-ink-500 mt-0.5">${s.cls}</div></div>
+            </div>
+          </td>
+          ${vars.map(v=>{
+            const isTargetStart = v.isNew && si===0;
+            const hasVal = Math.random() > 0.35 && !v.isNew;
+            const val = hasVal ? randVal(v.id) : '';
+            const cls = hasVal ? 'filled' : '';
+            const dataAttr = isTargetStart ? 'data-target="1"' : '';
+            return `<td class="cell ${cls}" ${dataAttr}><input value="${val}"/></td>`;
+          }).join('')}
+        </tr>`).join('')}</tbody>`;
+    } else {
+      // 일간 모드: 요일이 상단 그룹, 변수가 하위
+      thead = `<thead>
+        <tr>
+          <th class="name-col text-left" rowspan="2">학생</th>
+          ${days.map((d,di)=>`<th class="day-group" colspan="${vars.length}">
+            <div class="text-[15px] font-bold">${d}요일</div>
+            <div class="text-[11px] font-normal text-ink-500 mt-0.5">${dayDates[di]}</div>
+          </th>`).join('')}
+        </tr>
+        <tr>
+          ${days.map(()=>vars.map((v,vi)=>{
+            const dayEnd = vi===vars.length-1;
+            return `<th class="var-sub ${v.inEq?'in-eq':''} ${dayEnd?'day-end':''}" title="${v.name} · ${v.cycle}">
+              <div class="flex items-center justify-center gap-1"><span class="text-base">${v.emoji}</span><span class="text-[13px] font-semibold">${v.name}</span></div>
+            </th>`;
+          }).join('')).join('')}
+        </tr>
+      </thead>`;
+      tbody = `<tbody>${students.map((s,si)=>`
+        <tr>
+          <td class="name-col">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-full bg-soft-navy text-brand-700 font-bold grid place-items-center text-base">${s.n[0]}</div>
+              <div><div class="text-base font-semibold">${s.n}</div><div class="text-xs text-ink-500 mt-0.5">${s.cls}</div></div>
+            </div>
+          </td>
+          ${days.map((d,di)=>vars.map((v,vi)=>{
+            const isTargetStart = v.isNew && si===0 && di===0;
+            const hasVal = Math.random() > 0.5 && !v.isNew;
+            const val = hasVal ? randVal(v.id) : '';
+            const dayEnd = vi===vars.length-1;
+            const cls = [
+              hasVal ? 'filled' : '',
+              dayEnd ? 'day-end' : ''
+            ].join(' ');
+            const dataAttr = isTargetStart ? 'data-target="1"' : '';
+            return `<td class="cell ${cls}" ${dataAttr}><input value="${val}"/></td>`;
+          }).join('')).join('')}
+        </tr>`).join('')}</tbody>`;
+    }
+    table.innerHTML = thead + tbody;
+
+    const totalCells = currentMode==='week' ? students.length*vars.length : students.length*vars.length*7;
+    document.getElementById('progressTotal').textContent = totalCells;
+    updateProgress();
+    document.querySelectorAll('#inputTable input').forEach(el=>el.addEventListener('input', updateProgress));
+  }
+
+  function updateProgress(){
+    const filled = [...document.querySelectorAll('#inputTable input')].filter(x=>x.value && !x.disabled).length;
+    document.getElementById('progressCount').textContent = filled;
+  }
+
+  function renderActiveVars(){
+    const vars = activeVars.map(a => ({...availableVars.find(v=>v.id===a.id), ...a}));
+    document.getElementById('activeVars').innerHTML = vars.map((v,idx)=>{
+      const badge = v.inEq
+        ? (v.isY
+          ? '<span class="text-[10px] font-bold border border-accent-300 text-accent-600 bg-white px-2 py-0.5 rounded-full">🎯 결과 변수 Y</span>'
+          : `<span class="text-[10px] font-bold border border-brand-300 text-brand-700 bg-white px-2 py-0.5 rounded-full">방정식 포함 · β ${v.beta}</span>`)
+        : '<span class="text-[10px] font-bold border border-gray-200 text-ink-500 bg-white px-2 py-0.5 rounded-full">분석 후보</span>';
+      return `
+      <div class="rounded-2xl border-2 border-gray-100 bg-white p-4 hover:border-brand-300 hover:shadow-soft transition cursor-pointer relative" onclick="openEditVarModal(${idx})">
+        <div class="flex items-center justify-between">
+          <div class="text-2xl">${v.emoji}</div>
+          <div class="flex items-center gap-1.5">
+            ${v.isNew ? '<span class="text-[10px] font-bold bg-accent-100 text-accent-600 px-2 py-0.5 rounded-full">NEW</span>' : ''}
+            <svg class="w-4 h-4 text-ink-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+          </div>
+        </div>
+        <div class="mt-2 font-bold">${v.name}</div>
+        <div class="text-xs text-ink-500 mt-0.5">${v.unit} · ${v.cycle}</div>
+        <div class="mt-2.5">${badge}</div>
+      </div>`;
+    }).join('');
+  }
+
+  // ===== 공통 모달 헬퍼 =====
+  function openModal(id){ document.getElementById(id).classList.add('on'); }
+  function closeModal(id){ document.getElementById(id).classList.remove('on'); }
+  window.openModal = openModal;
+  window.closeModal = closeModal;
+  ['editVarModal','deleteVarModal','keepDataModal','hardDeleteModal','addVarModal','alertModal'].forEach(id=>{
+    document.getElementById(id).onclick = e=>{ if(e.target.id===id) closeModal(id); };
+  });
+  function confirmTurnOff(){ closeModal('alertModal'); }
+  window.confirmTurnOff = confirmTurnOff;
+
+  // ===== 성공방정식 사이드 드로어 =====
+  let eqStep = 1;
+  function openEqDrawer(){
+    eqStep = 1;
+    setEqStep(1);
+    renderEqIntuition();
+    const drawer = document.getElementById('eqDrawer');
+    drawer.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    setTimeout(()=>{ document.getElementById('eqDrawerPanel').style.transform = 'translateX(0)'; }, 10);
+  }
+  function closeEqDrawer(){
+    document.getElementById('eqDrawerPanel').style.transform = 'translateX(100%)';
+    document.body.style.overflow = '';
+    setTimeout(()=>{ document.getElementById('eqDrawer').classList.add('hidden'); }, 350);
+  }
+  window.openEqDrawer = openEqDrawer;
+  window.closeEqDrawer = closeEqDrawer;
+
+  function setEqStep(n){
+    eqStep = Math.max(1, Math.min(8, n));
+    document.querySelectorAll('.eq-step').forEach(p=>p.classList.toggle('hidden', +p.dataset.step !== eqStep));
+    document.getElementById('eqStepLabel').textContent = eqStep;
+    document.getElementById('eqStepLabel2').textContent = eqStep;
+    document.getElementById('eqProgBar').style.width = (eqStep/8*100)+'%';
+    document.getElementById('eqPrevBtn').disabled = eqStep === 1;
+    document.getElementById('eqNextBtn').textContent = eqStep === 8 ? '저장하고 마치기' : '다음 →';
+    document.getElementById('eqBody').scrollTop = 0;
+  }
+  document.getElementById('eqNextBtn').onclick = ()=>{
+    if(eqStep === 8){ closeEqDrawer(); return; }
+    setEqStep(eqStep + 1);
+  };
+  document.getElementById('eqPrevBtn').onclick = ()=> setEqStep(eqStep - 1);
+
+  // 직관 별점
+  function renderEqIntuition(){
+    const list = [
+      {emoji:'🕐', name:'복습시간', score:3},
+      {emoji:'📝', name:'숙제이행률', score:5},
+      {emoji:'✅', name:'출결률', score:5},
+      {emoji:'🙋', name:'질문횟수', score:4}
+    ];
+    const el = document.getElementById('eqIntuition');
+    el.innerHTML = list.map((v,idx)=>`
+      <div class="flex items-center gap-3 p-4 rounded-xl border border-gray-100">
+        <div class="text-xl">${v.emoji}</div>
+        <div class="flex-1">
+          <div class="font-bold text-sm">${v.name}</div>
+          <div class="text-[11px] text-ink-500">영향력 체감 점수</div>
+        </div>
+        <div class="flex gap-1" data-row="${idx}">
+          ${[1,2,3,4,5].map(s=>`<span class="eq-star text-2xl cursor-pointer ${s<=v.score?'text-amber-400':'text-gray-200'}" data-s="${s}">★</span>`).join('')}
+        </div>
+      </div>
+    `).join('');
+    el.addEventListener('click', e=>{
+      const st = e.target.closest('.eq-star'); if(!st) return;
+      const s = +st.dataset.s;
+      st.parentElement.querySelectorAll('.eq-star').forEach(x=>{
+        const ss = +x.dataset.s;
+        x.classList.toggle('text-amber-400', ss<=s);
+        x.classList.toggle('text-gray-200', ss>s);
+      });
+    });
+  }
+
+  // Y 카드 선택
+  document.querySelectorAll('.eq-y-card').forEach(c=>{
+    c.onclick = ()=>{
+      document.querySelectorAll('.eq-y-card').forEach(x=>{x.classList.remove('border-brand-500','bg-brand-50'); x.classList.add('border-gray-100')});
+      c.classList.remove('border-gray-100'); c.classList.add('border-brand-500','bg-brand-50');
+    };
+  });
+  // 기간 선택
+  document.querySelectorAll('.eq-period').forEach(b=>{
+    b.onclick = ()=>{
+      document.querySelectorAll('.eq-period').forEach(x=>{x.classList.remove('border-brand-500','bg-brand-50','text-brand-700'); x.classList.add('border-gray-200')});
+      b.classList.remove('border-gray-200'); b.classList.add('border-brand-500','bg-brand-50','text-brand-700');
+    };
+  });
+
+  // 데모용 상태 토글
+  function toggleEqState(){
+    document.getElementById('eqHave').classList.toggle('hidden');
+    document.getElementById('eqEmpty').classList.toggle('hidden');
+  }
+  window.toggleEqState = toggleEqState;
+
+  // 알림 모달 토글들
+  function bindAlertToggles(){
+    document.querySelectorAll('.alert-cycle-opt').forEach(b=>{
+      b.onclick = ()=>{
+        document.querySelectorAll('.alert-cycle-opt').forEach(x=>{x.classList.remove('border-brand-500','bg-brand-50','text-brand-700'); x.classList.add('border-gray-200')});
+        b.classList.remove('border-gray-200'); b.classList.add('border-brand-500','bg-brand-50','text-brand-700');
+        document.getElementById('alertDayRow').style.display = (b.dataset.c==='day') ? 'none' : '';
+      };
+    });
+    document.querySelectorAll('.alert-day-opt').forEach(b=>{
+      b.onclick = ()=>{
+        document.querySelectorAll('.alert-day-opt').forEach(x=>{x.classList.remove('border-brand-500','bg-brand-50','text-brand-700'); x.classList.add('border-gray-200')});
+        b.classList.remove('border-gray-200'); b.classList.add('border-brand-500','bg-brand-50','text-brand-700');
+      };
+    });
+    document.querySelectorAll('.alert-time-preset').forEach(b=>{
+      b.onclick = ()=>{
+        document.querySelectorAll('.alert-time-preset').forEach(x=>{x.classList.remove('border-2','border-brand-300','bg-brand-50','text-brand-700'); x.classList.add('border','border-gray-200')});
+        b.classList.remove('border','border-gray-200'); b.classList.add('border-2','border-brand-300','bg-brand-50','text-brand-700');
+      };
+    });
+    document.querySelectorAll('.alert-channel-opt').forEach(label=>{
+      const cb = label.querySelector('input[type="checkbox"]');
+      cb.onchange = ()=>{
+        if(cb.checked){ label.classList.remove('border-gray-200'); label.classList.add('border-brand-500','bg-brand-50'); }
+        else { label.classList.remove('border-brand-500','bg-brand-50'); label.classList.add('border-gray-200'); }
+      };
+    });
+  }
+  bindAlertToggles();
+
+  // ===== 변수 수정/삭제 =====
+  let editingVarIdx = null;
+
+  function openEditVarModal(idx){
+    editingVarIdx = idx;
+    const a = activeVars[idx];
+    const v = {...availableVars.find(x=>x.id===a.id), ...a};
+    document.getElementById('editVarTitle').textContent = v.name;
+    document.getElementById('editVarName').value = v.name;
+    // 단위 셀렉트
+    const unitSelect = document.getElementById('editVarUnit');
+    [...unitSelect.options].forEach(o=>{ o.selected = o.value===v.unit || o.text===v.unit; });
+    // 주기 셀렉트
+    const cycleSelect = document.getElementById('editVarCycle');
+    [...cycleSelect.options].forEach(o=>{ o.selected = o.text===v.cycle; });
+    // 누적 데이터 (가짜 숫자)
+    const fakeCount = (60+Math.floor(Math.random()*350));
+    document.getElementById('editVarCount').textContent = fakeCount + '건';
+    document.getElementById('editVarStart').textContent = '2025.09.01';
+    openModal('editVarModal');
+  }
+  window.openEditVarModal = openEditVarModal;
+
+  function saveEditVar(){
+    if(editingVarIdx===null) return;
+    closeModal('editVarModal');
+    renderActiveVars();
+    renderInputTable();
+  }
+  window.saveEditVar = saveEditVar;
+
+  function openDeleteVarModal(){
+    if(editingVarIdx===null) return;
+    const a = activeVars[editingVarIdx];
+    const v = {...availableVars.find(x=>x.id===a.id), ...a};
+    document.getElementById('delVarName').textContent = v.name;
+    document.getElementById('keepVarName').textContent = v.name;
+    document.getElementById('hardDelVarName').textContent = v.name;
+    document.getElementById('hardDelCount').textContent = document.getElementById('editVarCount').textContent;
+    closeModal('editVarModal');
+    openModal('deleteVarModal');
+  }
+  window.openDeleteVarModal = openDeleteVarModal;
+
+  document.querySelectorAll('.del-opt').forEach(b=>{
+    b.onclick = ()=>{
+      closeModal('deleteVarModal');
+      if(b.dataset.opt==='keep') openModal('keepDataModal');
+      else openModal('hardDeleteModal');
+    };
+  });
+
+  // 입력 중단 시점 프리셋
+  document.querySelectorAll('.stop-preset').forEach(b=>{
+    b.onclick = ()=>{
+      document.querySelectorAll('.stop-preset').forEach(x=>{x.classList.remove('border-2','border-brand-500','bg-brand-50','text-brand-700'); x.classList.add('border','border-gray-200')});
+      b.classList.remove('border','border-gray-200');
+      b.classList.add('border-2','border-brand-500','bg-brand-50','text-brand-700');
+      // 날짜 자동 세팅
+      const dateInput = document.getElementById('stopDate');
+      const today = new Date(2026,3,14);
+      let d = today;
+      if(b.dataset.when==='next-week') d = new Date(2026,3,21);
+      else if(b.dataset.when==='next-month') d = new Date(2026,4,1);
+      const iso = d.toISOString().slice(0,10);
+      if(b.dataset.when!=='custom') dateInput.value = iso;
+      document.getElementById('keepStopDate').textContent = iso.replace(/-/g,'.');
+    };
+  });
+  document.getElementById('stopDate').addEventListener('input', e=>{
+    document.getElementById('keepStopDate').textContent = e.target.value.replace(/-/g,'.');
+  });
+
+  function confirmKeepDelete(){
+    if(editingVarIdx===null) return;
+    activeVars.splice(editingVarIdx,1);
+    editingVarIdx = null;
+    closeModal('keepDataModal');
+    renderActiveVars();
+    renderInputTable();
+  }
+  window.confirmKeepDelete = confirmKeepDelete;
+
+  function confirmHardDelete(){
+    if(editingVarIdx===null) return;
+    activeVars.splice(editingVarIdx,1);
+    editingVarIdx = null;
+    closeModal('hardDeleteModal');
+    renderActiveVars();
+    renderInputTable();
+  }
+  window.confirmHardDelete = confirmHardDelete;
+
+  // ===== 변수 추가 Modal =====
+  let modalStep = 1;
+  let selectedVar = null;
+  let selectedStatus = null;
+
+  function openAddVarModal(){
+    modalStep = 1; selectedVar = null; selectedStatus = null;
+    showStep(1); renderVarMenu();
+    document.getElementById('addVarModal').classList.add('on');
+  }
+  function closeAddVarModal(){ document.getElementById('addVarModal').classList.remove('on'); }
+  window.openAddVarModal = openAddVarModal;
+  window.closeAddVarModal = closeAddVarModal;
+
+  function showStep(step){
+    document.querySelectorAll('.addvar-step').forEach(el=>el.classList.add('hidden'));
+    const stepKey = String(step);
+    document.querySelector(`.addvar-step[data-s="${stepKey}"]`).classList.remove('hidden');
+    const labels = {'1':'STEP 1 / 3','custom':'STEP 1.5 · 맞춤 변수','2':'STEP 2 / 3','3a':'STEP 3 / 3','3b':'STEP 3 / 3'};
+    const titles = {'1':'어떤 변수를 추가하시나요?','custom':'우리 학원만의 변수를 정의해주세요','2':'이미 데이터가 있으신가요?','3a':'언제부터 기록된 데이터인가요?','3b':'앞으로 어떤 주기로 기록하실까요?'};
+    document.getElementById('modalStepLabel').textContent = labels[stepKey];
+    document.getElementById('modalTitle').textContent = titles[stepKey];
+    document.getElementById('modalPrev').style.visibility = stepKey==='1' ? 'hidden' : 'visible';
+    document.getElementById('modalNext').textContent = (stepKey==='3a'||stepKey==='3b') ? '변수 추가 완료' : '다음 →';
+  }
+
+  function renderVarMenu(){
+    const activeIds = activeVars.map(v=>v.id);
+    const available = availableVars.filter(v=>!activeIds.includes(v.id));
+    const cards = available.map(v=>`
+      <div class="var-chip rounded-2xl border-2 border-gray-100 p-4 cursor-pointer hover:border-brand-300" data-id="${v.id}">
+        <div class="flex items-center justify-between">
+          <div class="text-2xl">${v.emoji}</div>
+          <div class="w-5 h-5 rounded-full border-2 border-gray-300 check"></div>
+        </div>
+        <div class="mt-3 font-bold">${v.name}</div>
+        <div class="text-xs text-ink-500 mt-0.5">${v.unit} · ${v.cycle}</div>
+      </div>
+    `).join('');
+    const customCard = `
+      <div class="var-chip-custom rounded-2xl border-2 border-dashed border-brand-200 bg-gradient-to-br from-soft-navy to-soft-blush p-4 cursor-pointer hover:border-brand-400 transition" id="customVarCard">
+        <div class="flex items-center justify-between">
+          <div class="text-2xl">➕</div>
+          <span class="text-[10px] font-bold text-brand-600">맞춤</span>
+        </div>
+        <div class="mt-3 font-bold text-brand-700">우리 학원만의<br/>변수 만들기</div>
+        <div class="text-xs text-ink-500 mt-0.5">이름·단위·주기 직접 정의</div>
+      </div>
+    `;
+    document.getElementById('varMenu').innerHTML = cards + customCard;
+
+    document.querySelectorAll('.var-chip').forEach(c=>{
+      c.onclick = ()=>{
+        document.querySelectorAll('.var-chip').forEach(x=>x.classList.remove('selected'));
+        c.classList.add('selected');
+        c.querySelector('.check').style.background = '#3a74ff';
+        c.querySelector('.check').style.borderColor = '#3a74ff';
+        selectedVar = availableVars.find(v=>v.id===c.dataset.id);
+        document.getElementById('selectedVarName').textContent = selectedVar.name;
+      };
+    });
+    document.getElementById('customVarCard').onclick = ()=>{
+      modalStep = 'custom';
+      showStep('custom');
+    };
+  }
+
+  document.querySelectorAll('.status-btn').forEach(b=>{
+    b.onclick = ()=>{
+      selectedStatus = b.dataset.status;
+      document.querySelectorAll('.status-btn').forEach(x=>x.style.borderColor='#e5e7eb');
+      b.style.borderColor = selectedStatus==='have' ? '#10b981' : '#f59e0b';
+      setTimeout(()=>{ modalStep = selectedStatus==='have' ? '3a' : '3b'; showStep(modalStep); }, 150);
+    };
+  });
+
+  // 단위 토글
+  let customUnit = null, customScore = null, customTime = null, customCycle = null;
+  document.querySelectorAll('.unit-opt').forEach(b=>{
+    b.onclick = ()=>{
+      document.querySelectorAll('.unit-opt').forEach(x=>{x.classList.remove('border-brand-500','bg-brand-50'); x.classList.add('border-gray-200')});
+      b.classList.remove('border-gray-200'); b.classList.add('border-brand-500','bg-brand-50');
+      customUnit = b.dataset.u;
+      document.getElementById('unitScoreOpts').classList.toggle('hidden', customUnit!=='score');
+      document.getElementById('unitTimeOpts').classList.toggle('hidden', customUnit!=='time');
+    };
+  });
+  document.querySelectorAll('.score-opt').forEach(b=>{
+    b.onclick = ()=>{
+      document.querySelectorAll('.score-opt').forEach(x=>{x.classList.remove('border-brand-500','bg-brand-50','text-brand-700'); x.classList.add('border-gray-200')});
+      b.classList.remove('border-gray-200'); b.classList.add('border-brand-500','bg-brand-50','text-brand-700');
+      customScore = b.dataset.s;
+      document.getElementById('scoreCustom').value = '';
+    };
+  });
+  document.getElementById('scoreCustom').addEventListener('input', e=>{
+    if(e.target.value){
+      document.querySelectorAll('.score-opt').forEach(x=>{x.classList.remove('border-brand-500','bg-brand-50','text-brand-700'); x.classList.add('border-gray-200')});
+      customScore = e.target.value;
+    }
+  });
+  document.querySelectorAll('.time-opt').forEach(b=>{
+    b.onclick = ()=>{
+      document.querySelectorAll('.time-opt').forEach(x=>{x.classList.remove('border-brand-500','bg-brand-50','text-brand-700'); x.classList.add('border-gray-200')});
+      b.classList.remove('border-gray-200'); b.classList.add('border-brand-500','bg-brand-50','text-brand-700');
+      customTime = b.dataset.t;
+    };
+  });
+  document.querySelectorAll('.cycle-opt').forEach(b=>{
+    b.onclick = ()=>{
+      document.querySelectorAll('.cycle-opt').forEach(x=>{x.classList.remove('border-brand-500','bg-brand-50','text-brand-700'); x.classList.add('border-gray-200')});
+      b.classList.remove('border-gray-200'); b.classList.add('border-brand-500','bg-brand-50','text-brand-700');
+      customCycle = b.dataset.c;
+    };
+  });
+
+  function buildUnitLabel(){
+    const map = {percent:'%', score: customScore?`${customScore}점 척도`:'점수', count:'회', time: ({sec:'초',min:'분',hour:'시간'}[customTime]||'시간'), ox:'O · X', check:'✅'};
+    return map[customUnit] || '';
+  }
+  function buildCycleLabel(){
+    return ({lesson:'매 수업',day:'매일',week:'매주',month:'매월',exam:'시험마다'}[customCycle]) || '';
+  }
+
+  document.getElementById('modalNext').onclick = ()=>{
+    if(modalStep===1){
+      if(!selectedVar){ alert('추가할 변수를 선택하시거나 "+ 우리 학원만의 변수 만들기"를 눌러주세요'); return; }
+      modalStep = 2; showStep(2);
+    } else if(modalStep==='custom'){
+      const name = document.getElementById('customVarName').value.trim();
+      if(!name){ alert('변수 이름을 입력해주세요'); return; }
+      if(!customUnit){ alert('단위를 선택해주세요'); return; }
+      if(customUnit==='score' && !customScore){ alert('몇 점 만점인지 선택해주세요'); return; }
+      if(customUnit==='time' && !customTime){ alert('시간 단위(초·분·시간)를 선택해주세요'); return; }
+      if(!customCycle){ alert('기록 주기를 선택해주세요'); return; }
+      // 커스텀 변수 등록
+      const newId = 'custom_' + Date.now();
+      availableVars.push({id:newId, emoji:'⭐', name, unit:buildUnitLabel(), cycle:buildCycleLabel()});
+      selectedVar = availableVars[availableVars.length-1];
+      document.getElementById('selectedVarName').textContent = selectedVar.name;
+      modalStep = 2; showStep(2);
+    } else if(modalStep===2){
+      // status-btn 클릭이 처리
+    } else {
+      activeVars.push({id:selectedVar.id, isNew:true});
+      closeAddVarModal();
+      renderActiveVars();
+      renderInputTable();
+      setTimeout(()=>{
+        const targetCell = document.querySelector('.cell[data-target="1"]');
+        if(targetCell){
+          targetCell.scrollIntoView({behavior:'smooth', inline:'center', block:'center'});
+          targetCell.querySelector('input').focus();
+        }
+      }, 300);
+    }
+  };
+  document.getElementById('modalPrev').onclick = ()=>{
+    if(modalStep==='3a'||modalStep==='3b'){ modalStep = 2; showStep(2); }
+    else if(modalStep===2){
+      // 직전이 custom이었는지 1이었는지: selectedVar의 id로 판단
+      if(selectedVar && selectedVar.id.startsWith('custom_')){ modalStep = 'custom'; showStep('custom'); }
+      else { modalStep = 1; showStep(1); }
+    }
+    else if(modalStep==='custom'){ modalStep = 1; showStep(1); }
+  };
+
+  document.querySelectorAll('.date-preset').forEach(b=>{
+    b.onclick = ()=>{
+      document.querySelectorAll('.date-preset').forEach(x=>{x.classList.remove('border-2','border-brand-500','bg-brand-50','text-brand-700'); x.classList.add('border','border-gray-200')});
+      b.classList.remove('border','border-gray-200');
+      b.classList.add('border-2','border-brand-500','bg-brand-50','text-brand-700');
+    };
+  });
+  document.querySelectorAll('.period-preset').forEach(b=>{
+    b.onclick = ()=>{
+      document.querySelectorAll('.period-preset').forEach(x=>{x.classList.remove('border-2','border-brand-500','bg-brand-50'); x.classList.add('border','border-gray-200')});
+      b.classList.remove('border','border-gray-200');
+      b.classList.add('border-2','border-brand-500','bg-brand-50');
+    };
+  });
+
+  // 주기 토글
+  document.querySelectorAll('.period-btn').forEach(b=>{
+    b.onclick = ()=>{
+      document.querySelectorAll('.period-btn').forEach(x=>x.classList.remove('on'));
+      b.classList.add('on');
+      currentMode = b.dataset.period;
+      const label = currentMode==='week' ? '2026년 4월 2주차' : '2026.04.13 ~ 04.19';
+      document.getElementById('periodLabel').textContent = label;
+      renderInputTable();
+    };
+  });
+
+  // 초기 렌더
+  renderActiveVars();
+  renderInputTable();
+</script>
+</body>
+</html>

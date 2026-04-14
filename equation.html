@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>성공방정식 빌더 · 우리학원 성공방정식</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="shared.js"></script>
+<script>__applyTheme();</script>
+<style>
+  html,body{background:#f6f7fb}
+  .nav-item.active{background:#eef4ff;color:#2559e6;font-weight:600}
+  .nav-item.active svg{color:#2559e6}
+  .ring-soft{box-shadow:inset 0 0 0 1px #eef0f5}
+
+  /* Step panel animations */
+  .step-panel{display:none;animation:fadeSlide .45s cubic-bezier(.2,.8,.2,1) both}
+  .step-panel.active{display:block}
+  @keyframes fadeSlide{
+    from{opacity:0;transform:translateY(12px)}
+    to{opacity:1;transform:none}
+  }
+  .step-dot{transition:all .3s}
+  .step-dot.active{background:#3a74ff;color:white;transform:scale(1.1)}
+  .step-dot.done{background:#dbe7ff;color:#1e48b8}
+  .bar-fill{transition:width .8s cubic-bezier(.2,.8,.2,1)}
+
+  /* Intuition stars */
+  .star{cursor:pointer;transition:all .15s;color:#d1d5db}
+  .star.on{color:#f59e0b;transform:scale(1.15)}
+
+  /* Variable card */
+  .vcard{transition:.2s}
+  .vcard.selected{border-color:#3a74ff;background:#eef4ff}
+
+  /* Pulse for loading */
+  .pulse-box{animation:pulse 1.2s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.55}}
+
+  /* Count up animation */
+  @keyframes popIn{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}
+  .pop-in{animation:popIn .5s ease-out both}
+</style>
+</head>
+<body class="font-sans text-ink-900 antialiased">
+<div class="flex min-h-screen">
+  <div id="sidebar"></div>
+  <main class="flex-1 min-w-0">
+    <div id="topbar"></div>
+    <div class="px-8 py-8 max-w-[1280px] mx-auto">
+
+      <!-- Header -->
+      <section class="mb-8">
+        <div class="text-sm text-brand-600 font-semibold">STEP 2 · 성공방정식 빌더</div>
+        <h1 class="mt-2 text-[32px] leading-tight font-extrabold">
+          우리 학원만의 <span class="text-brand-600">성공방정식</span>을 찾아볼까요?
+        </h1>
+        <p class="mt-2 text-ink-500 text-[15px]">
+          감에만 의존하던 학원 운영을, 우리 학원 데이터로 증명된 공식으로 바꿔드립니다.
+        </p>
+      </section>
+
+      <!-- Step progress -->
+      <section class="bg-white rounded-3xl p-6 shadow-card ring-soft mb-6">
+        <div class="flex items-center justify-between mb-3">
+          <div class="text-sm font-semibold">진행 단계 <span id="stepLabel" class="text-brand-600">1</span> / 8</div>
+          <div class="text-xs text-ink-500">예상 소요 12분</div>
+        </div>
+        <div class="flex items-center gap-1">
+          <!-- dots -->
+          <div class="flex items-center gap-1 flex-1" id="dots"></div>
+        </div>
+        <div class="mt-2 h-1.5 rounded-full bg-gray-100 overflow-hidden">
+          <div id="progBar" class="bar-fill h-1.5 bg-brand-500" style="width:12.5%"></div>
+        </div>
+      </section>
+
+      <!-- Main step container -->
+      <section class="bg-white rounded-3xl p-8 shadow-card ring-soft min-h-[520px]">
+
+        <!-- STEP 1: 목표(Y) 설정 -->
+        <div class="step-panel active" data-step="1">
+          <div class="text-xs tracking-widest font-bold text-brand-600 mb-2">STEP 1</div>
+          <h2 class="text-2xl font-bold">무엇을 올리고 싶으세요?</h2>
+          <p class="mt-2 text-ink-500">원장님이 개선하고 싶은 목표 변수(Y)를 선택해주세요. 이 값을 움직이는 원인을 앞으로 함께 찾아갑니다.</p>
+
+          <div class="mt-7 grid grid-cols-2 md:grid-cols-4 gap-4">
+            <button class="vcard selected rounded-2xl border-2 p-6 text-left hover:border-brand-400">
+              <div class="text-3xl">📈</div>
+              <div class="mt-3 font-bold text-lg">성적</div>
+              <div class="text-xs text-ink-500 mt-1">다음 시험 점수를 올리고 싶어요</div>
+            </button>
+            <button class="vcard rounded-2xl border-2 border-gray-100 p-6 text-left hover:border-brand-400">
+              <div class="text-3xl">🔁</div>
+              <div class="mt-3 font-bold text-lg">재등록</div>
+              <div class="text-xs text-ink-500 mt-1">이번 분기 재등록률을 높이고 싶어요</div>
+            </button>
+            <button class="vcard rounded-2xl border-2 border-gray-100 p-6 text-left hover:border-brand-400">
+              <div class="text-3xl">✅</div>
+              <div class="mt-3 font-bold text-lg">출석률</div>
+              <div class="text-xs text-ink-500 mt-1">학생들의 출석 집중도를 높이고 싶어요</div>
+            </button>
+            <button class="vcard rounded-2xl border-2 border-gray-100 p-6 text-left hover:border-brand-400">
+              <div class="text-3xl">➕</div>
+              <div class="mt-3 font-bold text-lg">직접 입력</div>
+              <div class="text-xs text-ink-500 mt-1">우리 학원만의 목표 변수</div>
+            </button>
+          </div>
+        </div>
+
+        <!-- STEP 2: X-Factor + 직관 -->
+        <div class="step-panel" data-step="2">
+          <div class="text-xs tracking-widest font-bold text-brand-600 mb-2">STEP 2</div>
+          <h2 class="text-2xl font-bold">원장님의 감(感)을 먼저 기록해볼게요</h2>
+          <p class="mt-2 text-ink-500">각 변수가 <b>성적</b>에 영향을 준다고 얼마나 체감하시나요? 이 직관은 STEP 7에서 실제 데이터와 비교됩니다.</p>
+
+          <div class="mt-6 space-y-3" id="intuitionList"></div>
+        </div>
+
+        <!-- STEP 3: 데이터 매핑 -->
+        <div class="step-panel" data-step="3">
+          <div class="text-xs tracking-widest font-bold text-brand-600 mb-2">STEP 3</div>
+          <h2 class="text-2xl font-bold">데이터를 점검하고 있어요</h2>
+          <p class="mt-2 text-ink-500">허브에 저장된 데이터 기준으로 분석 가능 여부를 자동 판정합니다.</p>
+
+          <div class="mt-6 space-y-3">
+            <div class="flex items-center gap-4 p-4 rounded-2xl bg-soft-mint">
+              <div class="text-2xl">✅</div>
+              <div class="flex-1">
+                <div class="font-bold">숙제이행률</div>
+                <div class="text-xs text-ink-500">학생 24/24명 · 12주 누적</div>
+              </div>
+              <div class="text-emerald-700 font-bold text-sm">🟢 분석 가능</div>
+            </div>
+            <div class="flex items-center gap-4 p-4 rounded-2xl bg-soft-mint">
+              <div class="text-2xl">🕐</div>
+              <div class="flex-1">
+                <div class="font-bold">복습시간</div>
+                <div class="text-xs text-ink-500">학생 22/24명 · 10주 누적</div>
+              </div>
+              <div class="text-emerald-700 font-bold text-sm">🟢 분석 가능</div>
+            </div>
+            <div class="flex items-center gap-4 p-4 rounded-2xl bg-soft-mint">
+              <div class="text-2xl">✅</div>
+              <div class="flex-1">
+                <div class="font-bold">출결률</div>
+                <div class="text-xs text-ink-500">학생 24/24명 · 12주 누적</div>
+              </div>
+              <div class="text-emerald-700 font-bold text-sm">🟢 분석 가능</div>
+            </div>
+            <div class="flex items-center gap-4 p-4 rounded-2xl bg-soft-lemon">
+              <div class="text-2xl">🙋</div>
+              <div class="flex-1">
+                <div class="font-bold">질문횟수</div>
+                <div class="text-xs text-ink-500">학생 18/24명 · 결측 6명</div>
+              </div>
+              <div class="text-amber-700 font-bold text-sm">🟡 조건부</div>
+            </div>
+          </div>
+
+          <div class="mt-6 rounded-2xl bg-soft-navy p-5">
+            <div class="text-sm"><b>표본 크기(n) 진단:</b> 학생 24명 × 변수 4개 → 단순회귀·소규모 다중회귀 가능. 권장 변수 수 3~5개.</div>
+          </div>
+        </div>
+
+        <!-- STEP 4: 단순회귀 체험 -->
+        <div class="step-panel" data-step="4">
+          <div class="text-xs tracking-widest font-bold text-brand-600 mb-2">STEP 4</div>
+          <h2 class="text-2xl font-bold">하나씩 돌려보며 감을 잡을게요</h2>
+          <p class="mt-2 text-ink-500">각 변수와 성적의 관계를 그림으로 먼저 보여드려요 (단순회귀).</p>
+
+          <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div class="rounded-2xl border border-gray-100 p-5">
+              <div class="flex items-center justify-between mb-2">
+                <div class="font-bold">복습시간 → 성적</div>
+                <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">🟢 R²=0.61</span>
+              </div>
+              <svg viewBox="0 0 300 140" class="w-full h-40">
+                <g fill="#3a74ff"><circle cx="40" cy="110" r="4"/><circle cx="70" cy="100" r="4"/><circle cx="90" cy="95" r="4"/><circle cx="120" cy="80" r="4"/><circle cx="140" cy="75" r="4"/><circle cx="170" cy="62" r="4"/><circle cx="195" cy="55" r="4"/><circle cx="220" cy="42" r="4"/><circle cx="250" cy="30" r="4"/><circle cx="275" cy="22" r="4"/></g>
+                <line x1="30" y1="115" x2="285" y2="20" stroke="#f04685" stroke-width="2"/>
+              </svg>
+              <div class="mt-2 text-sm text-ink-700">복습 1시간 늘어날 때마다 <b class="text-brand-600">+3.2점</b>이 오릅니다.</div>
+            </div>
+            <div class="rounded-2xl border border-gray-100 p-5">
+              <div class="flex items-center justify-between mb-2">
+                <div class="font-bold">숙제이행률 → 성적</div>
+                <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">🟢 R²=0.54</span>
+              </div>
+              <svg viewBox="0 0 300 140" class="w-full h-40">
+                <g fill="#3a74ff"><circle cx="40" cy="100" r="4"/><circle cx="80" cy="90" r="4"/><circle cx="110" cy="82" r="4"/><circle cx="140" cy="72" r="4"/><circle cx="170" cy="65" r="4"/><circle cx="200" cy="55" r="4"/><circle cx="230" cy="42" r="4"/><circle cx="260" cy="30" r="4"/></g>
+                <line x1="30" y1="108" x2="280" y2="25" stroke="#f04685" stroke-width="2"/>
+              </svg>
+              <div class="mt-2 text-sm text-ink-700">숙제 이행률 1%p 상승 시 <b class="text-brand-600">+0.28점</b> 상승.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 5: 다중회귀 실행 + 결과 -->
+        <div class="step-panel" data-step="5">
+          <div class="text-xs tracking-widest font-bold text-brand-600 mb-2">STEP 5</div>
+          <h2 class="text-2xl font-bold">우리 학원만의 성공방정식이 완성됐어요</h2>
+          <p class="mt-2 text-ink-500">모든 변수를 한 번에 고려한 다중회귀 결과입니다.</p>
+
+          <div class="mt-6 rounded-3xl bg-gradient-to-br from-brand-50 to-soft-blush p-8 text-center">
+            <div class="text-xs tracking-widest font-bold text-brand-700 mb-2">행복수학학원 성공방정식 v2</div>
+            <div class="text-3xl font-extrabold leading-relaxed pop-in">
+              <span class="text-ink-900">성적</span> =
+              <span class="text-brand-600">0.42</span> × 복습 +
+              <span class="text-brand-600">0.28</span> × 숙제 +
+              <span class="text-brand-600">0.19</span> × 출석 +
+              <span class="text-accent-600">62</span>
+            </div>
+            <div class="mt-5 inline-flex items-center gap-2 bg-white rounded-full px-4 py-2 text-sm font-semibold">
+              🟢 신뢰도 <span class="text-emerald-600">78%</span> · R² = 0.78
+            </div>
+          </div>
+
+          <div class="mt-6 text-sm text-ink-700 rounded-2xl bg-soft-navy p-4">
+            💡 <b>해석:</b> 복습시간을 학생당 주 1시간 늘리면 반 평균 성적이 <b>3.2점</b> 오를 것으로 예측됩니다.
+          </div>
+        </div>
+
+        <!-- STEP 6: 함정 진단 -->
+        <div class="step-panel" data-step="6">
+          <div class="text-xs tracking-widest font-bold text-brand-600 mb-2">STEP 6</div>
+          <h2 class="text-2xl font-bold">이 방정식, 믿어도 될까요?</h2>
+          <p class="mt-2 text-ink-500">회귀분석의 3대 함정을 자동으로 체크했습니다.</p>
+
+          <div class="mt-6 space-y-4">
+            <div class="flex items-start gap-4 rounded-2xl border border-gray-100 p-5">
+              <div class="text-2xl">✅</div>
+              <div class="flex-1">
+                <div class="font-bold">다중공선성 — 안전</div>
+                <div class="text-sm text-ink-500 mt-1">변수끼리 서로 겹치지 않아 각 효과가 독립적으로 해석됩니다.</div>
+              </div>
+              <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full">🟢 PASS</span>
+            </div>
+            <div class="flex items-start gap-4 rounded-2xl border border-gray-100 p-5">
+              <div class="text-2xl">⚠️</div>
+              <div class="flex-1">
+                <div class="font-bold">과적합 주의 — 변수 4개 vs 학생 24명</div>
+                <div class="text-sm text-ink-500 mt-1">표본이 크지는 않아, 다음 방정식은 학생 50명 이상 쌓고 만드시는 게 좋아요.</div>
+              </div>
+              <span class="text-xs font-bold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full">🟡 주의</span>
+            </div>
+            <div class="flex items-start gap-4 rounded-2xl border border-gray-100 p-5">
+              <div class="text-2xl">✅</div>
+              <div class="flex-1">
+                <div class="font-bold">p-value — 3개 변수 모두 유의미</div>
+                <div class="text-sm text-ink-500 mt-1">99% 신뢰 수준을 통과한 변수들로만 구성되었습니다.</div>
+              </div>
+              <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full">🟢 PASS</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 7: 직관 vs 데이터 -->
+        <div class="step-panel" data-step="7">
+          <div class="text-xs tracking-widest font-bold text-brand-600 mb-2">STEP 7</div>
+          <h2 class="text-2xl font-bold">원장님의 감, 얼마나 맞았을까요?</h2>
+          <p class="mt-2 text-ink-500">STEP 2에서 기록하신 직관과 실제 데이터를 비교해볼게요.</p>
+
+          <div class="mt-6 space-y-3">
+            <div class="grid grid-cols-[1fr_auto_1fr_auto] items-center gap-4 p-4 rounded-2xl border border-gray-100">
+              <div><div class="font-bold">복습시간</div><div class="text-xs text-ink-500">직관 3/5</div></div>
+              <div class="text-ink-300">→</div>
+              <div><div class="font-bold text-brand-600">β 0.42 · 1위</div><div class="text-xs text-ink-500">실제 1위</div></div>
+              <span class="text-xs font-bold text-accent-700 bg-accent-50 px-2.5 py-1 rounded-full">✨ 과소평가</span>
+            </div>
+            <div class="grid grid-cols-[1fr_auto_1fr_auto] items-center gap-4 p-4 rounded-2xl border border-gray-100">
+              <div><div class="font-bold">숙제이행률</div><div class="text-xs text-ink-500">직관 5/5</div></div>
+              <div class="text-ink-300">→</div>
+              <div><div class="font-bold text-brand-600">β 0.28 · 2위</div><div class="text-xs text-ink-500">실제 2위</div></div>
+              <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full">👍 일치</span>
+            </div>
+            <div class="grid grid-cols-[1fr_auto_1fr_auto] items-center gap-4 p-4 rounded-2xl border border-gray-100">
+              <div><div class="font-bold">출결률</div><div class="text-xs text-ink-500">직관 5/5</div></div>
+              <div class="text-ink-300">→</div>
+              <div><div class="font-bold text-brand-600">β 0.19 · 3위</div><div class="text-xs text-ink-500">실제 3위</div></div>
+              <span class="text-xs font-bold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full">⚠️ 과대평가</span>
+            </div>
+          </div>
+
+          <div class="mt-6 rounded-2xl bg-gradient-to-r from-soft-blush to-soft-lilac p-5">
+            <div class="font-bold mb-1">💡 인사이트</div>
+            <div class="text-sm text-ink-700">원장님께서 가장 중요하다고 보신 "출석"보다, <b class="text-accent-600">복습</b>이 2배 넘게 강력했습니다.</div>
+          </div>
+        </div>
+
+        <!-- STEP 8: 최종 카드 -->
+        <div class="step-panel" data-step="8">
+          <div class="text-xs tracking-widest font-bold text-brand-600 mb-2">STEP 8</div>
+          <h2 class="text-2xl font-bold">완성! 이제 저장하고 활용해볼까요?</h2>
+          <p class="mt-2 text-ink-500">이 방정식은 새 데이터가 쌓일 때까지 계속 사용됩니다.</p>
+
+          <div class="mt-6 rounded-3xl bg-white border-2 border-brand-100 shadow-card p-8">
+            <div class="text-xs tracking-widest font-bold text-brand-700 mb-2">행복수학학원 성공방정식</div>
+            <div class="text-xl font-extrabold leading-relaxed">
+              성적 = 복습 × 0.42 + 숙제 × 0.28 + 출석 × 0.19 + 62
+            </div>
+            <div class="mt-4 rounded-xl bg-soft-navy p-4 text-sm">
+              💡 복습시간을 학생당 주 1시간 늘리면 반 평균 성적이 <b>3.2점</b> 오를 것으로 예측됩니다.
+            </div>
+            <div class="mt-4 text-xs text-ink-500">R² 0.78 · 학생 24명 기반 · 2026.04.14 · v2</div>
+          </div>
+
+          <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-3">
+            <button class="py-3 rounded-xl border border-gray-200 font-semibold hover:bg-gray-50">📄 PDF 다운로드</button>
+            <button class="py-3 rounded-xl border border-gray-200 font-semibold hover:bg-gray-50">🔗 강사들과 공유</button>
+            <a href="report.html" class="text-center py-3 rounded-xl bg-brand-500 text-white font-semibold hover:bg-brand-600">리포트카드 만들기 →</a>
+          </div>
+        </div>
+
+        <!-- Nav -->
+        <div class="mt-10 flex items-center justify-between pt-6 border-t border-gray-100">
+          <button id="btnPrev" class="px-5 py-3 rounded-xl border border-gray-200 font-semibold text-ink-700 hover:bg-gray-50 disabled:opacity-30" disabled>← 이전</button>
+          <div class="text-sm text-ink-500"><span id="stepLabelBot" class="font-bold text-brand-600">1</span> / 8</div>
+          <button id="btnNext" class="px-5 py-3 rounded-xl bg-brand-500 text-white font-semibold hover:bg-brand-600">다음 →</button>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<script>
+  document.getElementById('sidebar').outerHTML = __renderLayout('equation');
+  document.getElementById('topbar').outerHTML = __renderTopbar(['홈','성공방정식 빌더']);
+
+  // Dots
+  const dotsWrap = document.getElementById('dots');
+  for(let i=1;i<=8;i++){
+    dotsWrap.insertAdjacentHTML('beforeend',`
+      <div class="flex-1 flex items-center gap-1">
+        <div class="step-dot w-8 h-8 rounded-full grid place-items-center text-xs font-bold bg-gray-100 text-ink-500 ${i===1?'active':''}" data-d="${i}">${i}</div>
+        ${i<8?'<div class="flex-1 h-0.5 bg-gray-100"></div>':''}
+      </div>
+    `);
+  }
+
+  // Intuition list
+  const xVars = [
+    {emoji:'🕐', name:'복습시간', score:3},
+    {emoji:'📝', name:'숙제이행률', score:5},
+    {emoji:'✅', name:'출결률', score:5},
+    {emoji:'🙋', name:'질문횟수', score:4}
+  ];
+  const il = document.getElementById('intuitionList');
+  il.innerHTML = xVars.map((v,idx)=>`
+    <div class="flex items-center gap-4 p-5 rounded-2xl border border-gray-100 hover:bg-gray-50">
+      <div class="text-2xl">${v.emoji}</div>
+      <div class="flex-1">
+        <div class="font-bold">${v.name}</div>
+        <div class="text-xs text-ink-500">이 변수가 성적에 영향을 준다고 체감하시나요?</div>
+      </div>
+      <div class="flex gap-1" data-row="${idx}">
+        ${[1,2,3,4,5].map(s=>`<span class="star text-3xl ${s<=v.score?'on':''}" data-s="${s}">★</span>`).join('')}
+      </div>
+    </div>
+  `).join('');
+  il.addEventListener('click', e=>{
+    const st = e.target.closest('.star'); if(!st) return;
+    const row = st.parentElement.dataset.row;
+    const s = +st.dataset.s;
+    xVars[row].score = s;
+    st.parentElement.querySelectorAll('.star').forEach(x=>{
+      x.classList.toggle('on', +x.dataset.s <= s);
+    });
+  });
+
+  // Step control
+  let cur = 1;
+  function setStep(n){
+    cur = Math.max(1,Math.min(8,n));
+    document.querySelectorAll('.step-panel').forEach(p=>p.classList.toggle('active', +p.dataset.step===cur));
+    document.querySelectorAll('.step-dot').forEach(d=>{
+      const i = +d.dataset.d;
+      d.classList.toggle('active', i===cur);
+      d.classList.toggle('done', i<cur);
+    });
+    document.getElementById('stepLabel').textContent = cur;
+    document.getElementById('stepLabelBot').textContent = cur;
+    document.getElementById('progBar').style.width = (cur/8*100)+'%';
+    document.getElementById('btnPrev').disabled = cur===1;
+    document.getElementById('btnNext').textContent = cur===8?'완료':'다음 →';
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+  document.getElementById('btnNext').onclick = ()=> cur<8 ? setStep(cur+1) : alert('방정식이 저장되었습니다!');
+  document.getElementById('btnPrev').onclick = ()=> setStep(cur-1);
+  document.querySelectorAll('.step-dot').forEach(d=>d.onclick=()=>setStep(+d.dataset.d));
+
+  // Variable card select
+  document.querySelectorAll('[data-step="1"] .vcard').forEach(c=>{
+    c.onclick = ()=>{
+      document.querySelectorAll('[data-step="1"] .vcard').forEach(x=>x.classList.remove('selected'));
+      c.classList.add('selected');
+    };
+  });
+</script>
+</body>
+</html>

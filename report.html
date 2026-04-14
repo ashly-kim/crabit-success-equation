@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>리포트카드 · 우리학원 성공방정식</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="shared.js"></script>
+<script>__applyTheme();</script>
+<style>
+  html,body{background:#f6f7fb}
+  .nav-item.active{background:#eef4ff;color:#2559e6;font-weight:600}
+  .nav-item.active svg{color:#2559e6}
+  .ring-soft{box-shadow:inset 0 0 0 1px #eef0f5}
+  .modal{position:fixed;inset:0;background:rgba(17,24,39,.55);display:none;align-items:center;justify-content:center;z-index:50;padding:20px}
+  .modal.on{display:flex;animation:fade .2s}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  .modal-box{animation:slideUp .3s cubic-bezier(.2,.8,.2,1)}
+  @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+  .tab-btn.active{background:white;color:#1e48b8;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+  .tone-btn.on{background:#eef4ff;border-color:#3a74ff;color:#1e48b8;font-weight:600}
+  .top-tab{padding:12px 4px;font-weight:600;color:#6b7280;border-bottom:2px solid transparent;transition:.15s;cursor:pointer}
+  .top-tab.on{color:#1e48b8;border-color:#3a74ff}
+  .row-btn{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;transition:.15s}
+  .row-btn:hover{background:#eef4ff;color:#2559e6}
+  .student-row{transition:.15s}
+  .student-row:hover{background:#f9fafc}
+  .expand{max-height:0;overflow:hidden;transition:max-height .35s ease}
+  .expand.open{max-height:600px}
+  .history-chip{width:28px;height:28px;border-radius:8px;display:inline-grid;place-items:center;margin-right:4px}
+</style>
+</head>
+<body class="font-sans text-ink-900 antialiased">
+<div class="flex min-h-screen">
+  <div id="sidebar"></div>
+  <main class="flex-1 min-w-0">
+    <div id="topbar"></div>
+    <div class="px-8 py-8 max-w-[1280px] mx-auto space-y-8">
+
+      <!-- Hero (배경 없음) -->
+      <section>
+        <div class="text-sm text-brand-600 font-semibold">STEP 3 · 리포트카드 생성기</div>
+        <h1 class="mt-2 text-[32px] leading-tight font-extrabold">
+          학생별 리포트를 만들고<br/>
+          학부모에게 <span class="text-brand-600">알림톡</span>으로 바로 보내세요.
+        </h1>
+        <p class="mt-3 text-ink-500 text-[15px] max-w-3xl">
+          지금 사용 중인 방정식 기준으로 리포트가 생성됩니다. 새 데이터가 쌓이면 자동으로 다음 버전으로 올라가요.
+        </p>
+      </section>
+
+      <!-- Top Tabs -->
+      <section>
+        <div class="flex items-center gap-8 border-b border-gray-200">
+          <div class="top-tab on" data-tab="gen">📝 리포트 생성 · 발송</div>
+          <div class="top-tab" data-tab="hist">📚 리포트 히스토리</div>
+        </div>
+      </section>
+
+      <!-- TAB 1: Generate / Send -->
+      <div class="top-pane" data-pane="gen">
+
+        <!-- Actions -->
+        <section class="bg-white rounded-3xl p-5 shadow-card ring-soft mb-6">
+          <div class="flex items-center justify-between flex-wrap gap-4">
+            <div class="flex items-center gap-2">
+              <input placeholder="🔍 학생 이름으로 검색" class="px-4 py-2.5 rounded-xl border border-gray-200 text-sm w-64"/>
+              <select class="px-4 py-2.5 rounded-xl border border-gray-200 text-sm">
+                <option>전체 반</option><option>중3 수학반</option><option>중2 수학반</option><option>고1 수학반</option>
+              </select>
+              <select class="px-4 py-2.5 rounded-xl border border-gray-200 text-sm">
+                <option>전체 학생</option><option>데이터 수집률 높은 순</option><option>최근 리포트순</option><option>리포트 미발행</option>
+              </select>
+            </div>
+            <div class="text-sm text-ink-500">
+              전체 <b class="text-ink-900">76명</b>
+            </div>
+          </div>
+        </section>
+
+        <!-- Student Table -->
+        <section class="bg-white rounded-3xl shadow-card ring-soft overflow-hidden">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="bg-gray-50 text-ink-500 text-[13px]">
+                <th class="px-5 py-3 text-left">학생</th>
+                <th class="px-5 py-3 text-left">반</th>
+                <th class="px-5 py-3 text-left">마지막 리포트 생성일</th>
+                <th class="px-5 py-3 text-left">데이터 수집 진행률</th>
+                <th class="px-5 py-3 text-center w-24">액션</th>
+              </tr>
+            </thead>
+            <tbody id="studentTable"></tbody>
+          </table>
+          <div class="px-5 py-4 flex items-center justify-between text-sm text-ink-500 border-t border-gray-100">
+            <div>총 <b class="text-ink-900">76</b>명 중 1~12번째</div>
+            <div class="flex gap-1">
+              <button class="w-8 h-8 rounded-lg border border-gray-200 hover:bg-gray-50">‹</button>
+              <button class="w-8 h-8 rounded-lg bg-brand-500 text-white">1</button>
+              <button class="w-8 h-8 rounded-lg hover:bg-gray-50">2</button>
+              <button class="w-8 h-8 rounded-lg hover:bg-gray-50">3</button>
+              <button class="w-8 h-8 rounded-lg hover:bg-gray-50">4</button>
+              <button class="w-8 h-8 rounded-lg hover:bg-gray-50">5</button>
+              <button class="w-8 h-8 rounded-lg hover:bg-gray-50">6</button>
+              <button class="w-8 h-8 rounded-lg hover:bg-gray-50">7</button>
+              <button class="w-8 h-8 rounded-lg border border-gray-200 hover:bg-gray-50">›</button>
+            </div>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- TAB 2: History -->
+      <div class="top-pane hidden" data-pane="hist">
+
+        <section class="bg-white rounded-3xl p-5 shadow-card ring-soft mb-6">
+          <div class="flex items-center justify-between flex-wrap gap-4">
+            <div class="flex items-center gap-2">
+              <input placeholder="🔍 학생 이름으로 검색" class="px-4 py-2.5 rounded-xl border border-gray-200 text-sm w-64" />
+              <select class="px-4 py-2.5 rounded-xl border border-gray-200 text-sm">
+                <option>전체 기간</option><option>최근 30일</option><option>최근 3개월</option><option>2026년</option>
+              </select>
+              <select class="px-4 py-2.5 rounded-xl border border-gray-200 text-sm">
+                <option>전체 전달 방식</option><option>카카오 알림톡</option><option>PDF 다운로드</option><option>둘 다</option>
+              </select>
+            </div>
+            <button class="px-4 py-2 text-sm rounded-lg border border-gray-200 hover:bg-gray-50 font-semibold">📥 CSV 내보내기</button>
+          </div>
+        </section>
+
+        <section class="bg-white rounded-3xl shadow-card ring-soft overflow-hidden">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="bg-gray-50 text-ink-500 text-[13px]">
+                <th class="px-5 py-3 text-left">리포트</th>
+                <th class="px-5 py-3 text-left">학생</th>
+                <th class="px-5 py-3 text-center">버전</th>
+                <th class="px-5 py-3 text-left">생성일</th>
+                <th class="px-5 py-3 text-center">방정식</th>
+                <th class="px-5 py-3 text-center">성적</th>
+                <th class="px-5 py-3 text-center">전달</th>
+                <th class="px-5 py-3 text-center w-24">액션</th>
+              </tr>
+            </thead>
+            <tbody id="historyTable"></tbody>
+          </table>
+          <div class="px-5 py-4 flex items-center justify-between text-sm text-ink-500 border-t border-gray-100">
+            <div>총 <b class="text-ink-900">46</b>건 중 1~10번째</div>
+            <div class="flex gap-1">
+              <button class="w-8 h-8 rounded-lg border border-gray-200 hover:bg-gray-50">‹</button>
+              <button class="w-8 h-8 rounded-lg bg-brand-500 text-white">1</button>
+              <button class="w-8 h-8 rounded-lg hover:bg-gray-50">2</button>
+              <button class="w-8 h-8 rounded-lg hover:bg-gray-50">3</button>
+              <button class="w-8 h-8 rounded-lg hover:bg-gray-50">4</button>
+              <button class="w-8 h-8 rounded-lg hover:bg-gray-50">5</button>
+              <button class="w-8 h-8 rounded-lg border border-gray-200 hover:bg-gray-50">›</button>
+            </div>
+          </div>
+        </section>
+
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- Modal: Report preview -->
+<div class="modal" id="modal">
+  <div class="modal-box bg-white rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+    <div class="p-7">
+      <div class="flex items-center justify-between mb-5">
+        <div>
+          <div class="text-xs tracking-widest font-bold text-brand-600">RC · <span id="mVer">v3</span></div>
+          <h2 class="text-2xl font-bold" id="mTitle">김민재 학생 리포트카드</h2>
+          <div class="text-sm text-ink-500 mt-1">2026.04.14 기준 · 누적 3개월 데이터</div>
+        </div>
+        <button onclick="closeModal()" class="w-10 h-10 rounded-full hover:bg-gray-100 grid place-items-center text-2xl">×</button>
+      </div>
+
+      <div class="inline-flex bg-gray-100 rounded-full p-1 mb-5">
+        <button class="tab-btn active px-4 py-2 rounded-full text-sm font-semibold" data-tab="report">리포트</button>
+        <button class="tab-btn px-4 py-2 rounded-full text-sm font-semibold" data-tab="script">상담 스크립트</button>
+        <button class="tab-btn px-4 py-2 rounded-full text-sm font-semibold" data-tab="send">학부모 발송</button>
+      </div>
+
+      <div class="tab-pane" data-pane="report">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-5">
+          <div class="rounded-2xl bg-soft-navy p-4"><div class="text-xs text-ink-500">현재</div><div class="text-xl font-bold">72점</div></div>
+          <div class="rounded-2xl bg-soft-mint p-4"><div class="text-xs text-ink-500">전월 대비</div><div class="text-xl font-bold text-emerald-600">+4점</div></div>
+          <div class="rounded-2xl bg-soft-blush p-4"><div class="text-xs text-ink-500">반 평균 대비</div><div class="text-xl font-bold">상위 45%</div></div>
+          <div class="rounded-2xl bg-soft-lemon p-4"><div class="text-xs text-ink-500">6주 후 예상</div><div class="text-xl font-bold">78~82</div></div>
+        </div>
+        <div class="space-y-4">
+          <div class="rounded-2xl border border-gray-100 p-5"><div class="text-xs font-bold text-brand-600">📍 WHERE</div><div class="mt-1 text-sm text-ink-700">현재 72점, 반 평균 75점 대비 3점 낮습니다. 지난 달 68점 대비 +4점으로 성장 중입니다.</div></div>
+          <div class="rounded-2xl border border-gray-100 p-5"><div class="text-xs font-bold text-brand-600">🔍 FOUND</div><div class="mt-1 text-sm text-ink-700">우리 학원 성공방정식 분석 결과, <b>복습시간 부족</b>이 주 성장 동인으로 확인됩니다. (β=0.42, 1위)</div></div>
+          <div class="rounded-2xl border border-gray-100 p-5"><div class="text-xs font-bold text-brand-600">✅ TODO</div><ul class="mt-2 space-y-1.5 text-sm text-ink-700 list-disc list-inside"><li>Quick Win 1: 주 복습시간 4h → 6h (현실적)</li><li>Quick Win 2: 단원별 오답노트 작성</li><li>Quick Win 3: 수업 중 질문 1회 이상</li><li>Strategic: 방학 중 개념 재정비 2주 집중</li></ul></div>
+          <div class="rounded-2xl border border-gray-100 p-5"><div class="text-xs font-bold text-brand-600">🎯 EXPECT</div><div class="mt-1 text-sm text-ink-700">위 To-Do를 유지할 경우 6주 뒤 <b>78~82점</b> 범위 예상.</div></div>
+        </div>
+      </div>
+
+      <div class="tab-pane hidden" data-pane="script">
+        <div class="mb-4 rounded-xl bg-amber-50 border border-amber-100 p-4 text-sm text-amber-900">⚠️ 이 탭은 <b>원장님 내부용</b>입니다. 학부모에게는 발송되지 않아요.</div>
+        <div class="space-y-4">
+          <div class="rounded-2xl border border-gray-100 p-5"><div class="text-sm font-semibold text-ink-500">Q1. 그래서 우리 아이 잘할 수 있나요?</div><div class="mt-2 text-[15px] leading-relaxed">"네, 어머님. 김민재 학생은 지난 3개월 동안 꾸준히 성장하고 있어요. 우리 학원 데이터 기반으로 현재 패턴을 유지하시면 6주 뒤 78~82점까지 올라갈 수 있을 것으로 보입니다."</div></div>
+          <div class="rounded-2xl border border-gray-100 p-5"><div class="text-sm font-semibold text-ink-500">Q2. 다른 학원은 이렇게 한다던데요?</div><div class="mt-2 text-[15px] leading-relaxed">"저희는 감으로 말씀드리지 않고, 학생별 실제 데이터를 3개월 이상 쌓아 분석한 결과를 바탕으로 처방을 드립니다."</div></div>
+          <div class="rounded-2xl border border-gray-100 p-5"><div class="text-sm font-semibold text-ink-500">Q3. 학원비 대비 효과가 있나요?</div><div class="mt-2 text-[15px] leading-relaxed">"복습시간 주 2시간 확보만으로도 다음 시험 +6점 수준이 예상됩니다."</div></div>
+        </div>
+      </div>
+
+      <div class="tab-pane hidden" data-pane="send">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div class="space-y-4">
+            <div>
+              <div class="text-sm font-semibold mb-2">학부모 말투 톤</div>
+              <div class="flex gap-2 flex-wrap">
+                <button class="tone-btn on px-4 py-2 rounded-full border-2 border-gray-200 text-sm">따뜻형</button>
+                <button class="tone-btn px-4 py-2 rounded-full border-2 border-gray-200 text-sm">친근형</button>
+                <button class="tone-btn px-4 py-2 rounded-full border-2 border-gray-200 text-sm">전문형</button>
+              </div>
+            </div>
+            <div>
+              <div class="text-sm font-semibold mb-2">전달 경로</div>
+              <div class="space-y-2">
+                <label class="flex items-center gap-2 rounded-xl border border-gray-200 p-3 text-sm"><input type="radio" name="ch" checked/> 💬 카카오 알림톡 (크레딧 1건 차감)</label>
+                <label class="flex items-center gap-2 rounded-xl border border-gray-200 p-3 text-sm"><input type="radio" name="ch"/> 🔗 비공개 링크만 생성</label>
+                <label class="flex items-center gap-2 rounded-xl border border-gray-200 p-3 text-sm"><input type="radio" name="ch"/> 📄 PDF만 다운로드</label>
+              </div>
+            </div>
+          </div>
+          <div class="rounded-3xl bg-yellow-300 p-4">
+            <div class="rounded-2xl bg-white p-5 shadow-card">
+              <div class="flex items-center gap-2 mb-3">
+                <div class="w-8 h-8 rounded-full bg-brand-500 text-white grid place-items-center text-xs font-bold">우</div>
+                <div class="text-sm font-semibold">우리학원 · 알림톡</div>
+              </div>
+              <div class="text-[13px] leading-relaxed whitespace-pre-line">[행복수학학원] 자녀 학습 리포트 v3 도착
+
+어머님, 김민재 학생의 4월 데이터 분석 리포트가 준비되었습니다.
+
+· 이번 달: 72점 (전월 대비 +4점 ↑)
+· 성장 동인: 복습시간 증가가 주효
+· 앞으로: 질문횟수 +2회 시 +3점 예상</div>
+              <div class="mt-3 pt-3 border-t border-gray-100 grid grid-cols-2 gap-2">
+                <button class="py-2 rounded-lg bg-gray-50 text-xs font-semibold">리포트 보기</button>
+                <button class="py-2 rounded-lg bg-gray-50 text-xs font-semibold">지난 리포트</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="mt-6 flex items-center justify-between">
+          <div class="text-sm text-ink-500">알림톡 크레딧 잔여 <b class="text-brand-600">287 / 300</b></div>
+          <button class="px-6 py-3 rounded-xl bg-brand-500 text-white font-semibold hover:bg-brand-600">지금 발송하기 →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.getElementById('sidebar').outerHTML = __renderLayout('report');
+  document.getElementById('topbar').outerHTML = __renderTopbar(['홈','리포트카드']);
+
+  // Students - 76명 생성
+  const firstNames = ['민재','서연','하윤','지우','도윤','소율','지호','예진','준서','서윤','시우','지민','현우','유진','서준','하은','연우','지안','채원','태윤','수빈','지훈','예은','성민','유나','우진','다은','준호','가은','민준','윤서','승현','주원','나연','은지','재민','수현','혜원','동욱','예지','정우','하진','지원','영훈','시은','재현','유준','소희','태민','보람','현진','혜린','광호','주아','한결','승우','예린','건우','수아','정민','가영','지석','윤아','민수','채은','도현','연재','기태','세빈','현수','유빈','진우','혜수','재우','소은','병훈'];
+  const classes = ['중3 수학반','중2 수학반','고1 수학반','중3 영어반','고2 수학반'];
+  const surnames = ['김','이','박','최','정','강','조','윤','장','임','한','오','서','신','권','황','송','안','홍','유','전','고'];
+
+  const sampleHist = [
+    {ver:'v3', date:'2026.04.14', eq:'v2', score:85, sent:['kakao','pdf']},
+    {ver:'v2', date:'2026.03.10', eq:'v2', score:83, sent:['kakao']},
+    {ver:'v1', date:'2026.02.08', eq:'v1', score:80, sent:['pdf']}
+  ];
+  const sampleHist2 = [
+    {ver:'v2', date:'2026.03.10', eq:'v2', score:75, sent:['kakao']},
+    {ver:'v1', date:'2026.02.08', eq:'v1', score:72, sent:['pdf']}
+  ];
+  const sampleHist3 = [
+    {ver:'v1', date:'2026.02.08', eq:'v1', score:68, sent:[]}
+  ];
+
+  // 76명 생성
+  const students = [];
+  for(let i=0;i<76;i++){
+    const sn = surnames[i%surnames.length];
+    const fn = firstNames[i%firstNames.length];
+    const cls = classes[i%classes.length];
+    // 데이터 수집률: 분포 만들기
+    const progress = [92,88,85,82,78,75,72,68,65,62,58,55,48,42,38,32,25,18,12,8][i%20];
+    // 마지막 리포트 생성일
+    const daysAgo = [2,5,8,12,15,18,22,25,30,35,42,50,60,75,null][i%15];
+    const lastDate = daysAgo==null ? null : new Date(2026,3,14-daysAgo);
+    const lastDateStr = lastDate ? `${lastDate.getFullYear()}.${String(lastDate.getMonth()+1).padStart(2,'0')}.${String(lastDate.getDate()).padStart(2,'0')}` : null;
+
+    students.push({
+      n: sn+fn,
+      cls,
+      progress,
+      lastReport: lastDateStr,
+      hist: progress>70 ? sampleHist : (progress>40 ? sampleHist2 : sampleHist3),
+      status: progress>40 ? 'ready' : 'draft',
+      ver: progress>70 ? 'v3' : (progress>40 ? 'v2' : '초안'),
+      cur: 60+Math.round(progress*0.3),
+      diff: progress>50 ? '+'+(Math.floor(Math.random()*5)+1) : (Math.random()>0.5?'+1':'-1'),
+      pred: progress>50 ? (70+Math.floor(Math.random()*10))+'~'+(75+Math.floor(Math.random()*10)) : '-'
+    });
+  }
+
+  function sentIcons(arr){
+    let out = '';
+    if(arr.includes('kakao')) out += `<span class="history-chip bg-yellow-100" title="알림톡 발송"><svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="#3a1d1d"><path d="M12 4C6.48 4 2 7.58 2 12c0 2.72 1.7 5.12 4.29 6.56-.18.66-.66 2.38-.76 2.75-.12.46.17.46.36.33.15-.1 2.4-1.63 3.35-2.28.91.13 1.82.19 2.76.19 5.52 0 10-3.58 10-8S17.52 4 12 4z"/></svg></span>`;
+    if(arr.includes('pdf')) out += `<span class="history-chip bg-brand-50 text-brand-600" title="PDF 다운로드"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg></span>`;
+    if(!arr.length) out = '<span class="text-ink-300 text-xs">—</span>';
+    return out;
+  }
+
+  // Student table rows - 첫 12명만 첫 페이지 표시
+  const st = document.getElementById('studentTable');
+  st.innerHTML = students.slice(0,12).map((s,i)=>{
+    const barColor = s.progress>=70?'bg-emerald-500':(s.progress>=40?'bg-amber-400':'bg-rose-400');
+    const barText = s.progress>=70?'text-emerald-700':(s.progress>=40?'text-amber-700':'text-rose-600');
+    return `
+    <tr class="student-row border-t border-gray-100 cursor-pointer" onclick="openModal(${i})">
+      <td class="px-5 py-4">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-full bg-soft-navy text-brand-700 font-bold grid place-items-center">${s.n[0]}</div>
+          <div>
+            <div class="font-semibold">${s.n}</div>
+            <div class="text-xs text-ink-500">이전 리포트 ${s.hist.length}건</div>
+          </div>
+        </div>
+      </td>
+      <td class="px-5 py-4 text-ink-700">${s.cls}</td>
+      <td class="px-5 py-4 text-ink-700">${s.lastReport || '<span class="text-ink-300">— 미생성</span>'}</td>
+      <td class="px-5 py-4">
+        <div class="flex items-center gap-3 min-w-[200px]">
+          <div class="flex-1 h-2 rounded-full bg-gray-100 overflow-hidden">
+            <div class="h-2 ${barColor}" style="width:${s.progress}%"></div>
+          </div>
+          <span class="text-sm font-bold ${barText} w-12 text-right">${s.progress}%</span>
+        </div>
+      </td>
+      <td class="px-5 py-4 text-center" onclick="event.stopPropagation()">
+        <button class="row-btn text-ink-500 hover:text-brand-600 inline-grid" title="리포트 열기" onclick="openModal(${i})">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <path d="M7 3h10l3 4v14H4V7z"/><path d="M8 12h8M8 16h5"/>
+          </svg>
+        </button>
+      </td>
+    </tr>`;
+  }).join('');
+
+  // History table (flat list, sorted by date desc)
+  const historyRows = [];
+  students.forEach(s=>s.hist.forEach(h=>historyRows.push({...h, name:s.n, cls:s.cls})));
+  historyRows.sort((a,b)=>b.date.localeCompare(a.date));
+  document.getElementById('historyTable').innerHTML = historyRows.slice(0,10).map(h=>`
+    <tr class="border-t border-gray-100 hover:bg-gray-50">
+      <td class="px-5 py-4">
+        <div class="flex items-center gap-2">
+          <div class="w-9 h-9 rounded-lg bg-brand-50 text-brand-600 grid place-items-center">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M7 3h10l3 4v14H4V7z"/><path d="M8 12h8M8 16h5"/></svg>
+          </div>
+          <div class="font-semibold">리포트카드</div>
+        </div>
+      </td>
+      <td class="px-5 py-4"><div class="font-semibold">${h.name}</div><div class="text-xs text-ink-500">${h.cls}</div></td>
+      <td class="px-5 py-4 text-center"><span class="text-[11px] font-bold bg-brand-50 text-brand-700 px-2 py-1 rounded-full">${h.ver}</span></td>
+      <td class="px-5 py-4 text-ink-700">${h.date}</td>
+      <td class="px-5 py-4 text-center text-ink-700">${h.eq}</td>
+      <td class="px-5 py-4 text-center font-semibold">${h.score}점</td>
+      <td class="px-5 py-4 text-center">${sentIcons(h.sent)}</td>
+      <td class="px-5 py-4 text-center">
+        <button class="row-btn text-ink-500 hover:text-brand-600 inline-grid" title="열람">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </td>
+    </tr>
+  `).join('');
+
+  // Top tab switching
+  document.querySelectorAll('.top-tab').forEach(t=>{
+    t.onclick = ()=>{
+      document.querySelectorAll('.top-tab').forEach(x=>x.classList.remove('on'));
+      t.classList.add('on');
+      document.querySelectorAll('.top-pane').forEach(p=>p.classList.toggle('hidden', p.dataset.pane!==t.dataset.tab));
+    };
+  });
+
+  // Modal
+  function openModal(i, tabIdx){
+    const s = students[i];
+    document.getElementById('mTitle').textContent = `${s.n} 학생 리포트카드`;
+    document.getElementById('mVer').textContent = s.ver;
+    document.getElementById('modal').classList.add('on');
+    setTab(tabIdx||0);
+  }
+  window.openModal = openModal;
+  function closeModal(){ document.getElementById('modal').classList.remove('on'); }
+  window.closeModal = closeModal;
+  document.getElementById('modal').onclick = e=>{ if(e.target.id==='modal') closeModal(); };
+  function setTab(idx){
+    document.querySelectorAll('.modal .tab-btn').forEach((t,i)=>t.classList.toggle('active', i===idx));
+    document.querySelectorAll('.modal .tab-pane').forEach((p,i)=>p.classList.toggle('hidden', i!==idx));
+  }
+  document.querySelectorAll('.modal .tab-btn').forEach((b,i)=>b.onclick = ()=>setTab(i));
+  document.querySelectorAll('.tone-btn').forEach(b=>b.onclick = ()=>{
+    document.querySelectorAll('.tone-btn').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on');
+  });
+</script>
+</body>
+</html>

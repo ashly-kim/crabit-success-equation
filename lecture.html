@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>사용 가이드 · 우리학원 성공방정식</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="shared.js"></script>
+<script>__applyTheme();</script>
+<style>
+  html,body{background:#f6f7fb}
+  .nav-item.active{background:#eef4ff;color:#2559e6;font-weight:600}
+  .nav-item.active svg{color:#2559e6}
+  .ring-soft{box-shadow:inset 0 0 0 1px #eef0f5}
+  .step-circle{width:64px;height:64px;border-radius:9999px;display:grid;place-items:center;font-size:28px;font-weight:800;flex-shrink:0;background:#eef4ff;color:#2559e6}
+  .arrow-down{display:flex;justify-content:center;color:#cbd5e1;font-size:24px;margin:8px 0}
+  .formula-card{background:linear-gradient(135deg,#eef4ff 0%,#fff1f5 100%);border:1px dashed #b9d0ff}
+  .accordion-item.open .acc-content{max-height:500px;padding-top:12px}
+  .accordion-item.open .acc-arrow{transform:rotate(90deg)}
+  .acc-content{max-height:0;overflow:hidden;transition:max-height .35s ease, padding .35s ease}
+  .acc-arrow{transition:transform .25s}
+</style>
+</head>
+<body class="font-sans text-ink-900 antialiased">
+<div class="flex min-h-screen">
+  <div id="sidebar"></div>
+  <main class="flex-1 min-w-0">
+    <div id="topbar"></div>
+    <div class="px-8 py-8 max-w-[1200px] mx-auto space-y-10">
+
+      <!-- Hero -->
+      <section>
+        <div class="text-sm text-brand-600 font-semibold">📖 사용 가이드</div>
+        <h1 class="mt-2 text-[34px] leading-tight font-extrabold">
+          처음 오셨나요? <span class="text-brand-600">5분</span>이면 충분합니다.
+        </h1>
+        <p class="mt-3 text-ink-500 text-[16px] max-w-2xl">
+          이 사이트가 원장님께 어떻게 도움이 되는지, 그리고 어떻게 사용하시면 되는지 차근차근 알려드릴게요.
+        </p>
+      </section>
+
+      <!-- 한 줄 컨셉 -->
+      <section class="bg-white rounded-3xl p-8 shadow-card ring-soft">
+        <div class="grid md:grid-cols-3 gap-6 items-center">
+          <div class="md:col-span-2">
+            <div class="text-sm font-bold text-accent-600 mb-2">우리학원 성공방정식이란?</div>
+            <h2 class="text-2xl font-extrabold leading-tight">
+              <span class="text-brand-600">학생 데이터</span>로<br/>
+              <span class="text-brand-600">우리 학원만의 성공 공식</span>을 찾고,<br/>
+              학부모에게 <span class="text-accent-500">숫자로 설득</span>하는 도구
+            </h2>
+          </div>
+          <div class="formula-card rounded-2xl p-6 text-center">
+            <div class="text-xs text-brand-700 font-bold mb-2">우리 학원 성공방정식 예시</div>
+            <div class="text-base font-extrabold text-ink-900 leading-relaxed">
+              성적 = <span class="text-brand-600">0.42</span> × 복습<br/>
+              + <span class="text-brand-600">0.28</span> × 숙제<br/>
+              + <span class="text-brand-600">0.19</span> × 출석<br/>
+              + 62
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 회귀분석 1분 개념 -->
+      <section>
+        <div class="flex items-end justify-between mb-5">
+          <div>
+            <h2 class="text-[22px] font-extrabold">회귀분석, 1분이면 이해돼요</h2>
+            <p class="text-sm text-ink-500 mt-1">강의를 안 들어보셨어도 괜찮아요. 핵심만 짚어드릴게요.</p>
+          </div>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-4">
+          <div class="bg-white rounded-2xl p-6 shadow-card ring-soft">
+            <div class="text-3xl mb-3">🚗</div>
+            <div class="font-bold text-lg">가속 페달처럼 생각하세요</div>
+            <p class="text-sm text-ink-500 mt-2 leading-relaxed">
+              <b>X(원인)</b>를 밟으면 <b>Y(결과)</b>가 움직여요.<br/>
+              "복습 시간"을 늘리면 → "성적"이 올라가는 식이죠.
+            </p>
+          </div>
+          <div class="bg-white rounded-2xl p-6 shadow-card ring-soft">
+            <div class="text-3xl mb-3">📐</div>
+            <div class="font-bold text-lg">기울기 = 학원의 경쟁력</div>
+            <p class="text-sm text-ink-500 mt-2 leading-relaxed">
+              "복습 1시간 더 = 성적 +3.2점" 같이 <b>1단위가 몇 점을 만드는지</b>를 숫자로 알려줘요. 이게 우리 학원만의 무기.
+            </p>
+          </div>
+          <div class="bg-white rounded-2xl p-6 shadow-card ring-soft">
+            <div class="text-3xl mb-3">💬</div>
+            <div class="font-bold text-lg">학부모 설득의 무기</div>
+            <p class="text-sm text-ink-500 mt-2 leading-relaxed">
+              감으로 "열심히 합니다"가 아니라, <b>"복습 +1시간이면 다음 시험 +3.2점 예상"</b>을 자신있게 말할 수 있어요.
+            </p>
+          </div>
+        </div>
+
+        <div class="mt-4 bg-soft-navy rounded-2xl p-5 text-sm">
+          🎓 <b>강의를 들으셨다면</b> — 본 사이트의 모든 기능이 강의 2~5회차 내용을 그대로 구현한 것입니다. 강의에서 만든 X-Factor를 그대로 사이트에 옮기시면 돼요.
+        </div>
+      </section>
+
+      <!-- 핵심 흐름 3단계 -->
+      <section>
+        <div class="flex items-end justify-between mb-5">
+          <h2 class="text-[22px] font-extrabold">사이트 사용 흐름 3단계</h2>
+        </div>
+
+        <div class="bg-white rounded-3xl p-8 shadow-card ring-soft space-y-2">
+          <!-- Step 1 -->
+          <div class="flex gap-5 items-start">
+            <div class="step-circle">1</div>
+            <div class="flex-1">
+              <div class="flex items-center gap-2 flex-wrap">
+                <h3 class="text-xl font-bold">학생 데이터를 입력하세요</h3>
+                <a href="hub.html" class="text-xs text-brand-600 font-semibold bg-brand-50 px-2.5 py-1 rounded-full hover:bg-brand-100">데이터 허브 바로가기 →</a>
+              </div>
+              <p class="text-ink-500 mt-2 leading-relaxed">
+                관리하시는 학생들의 출결률·숙제이행률·복습시간 같은 데이터를 한 곳에 입력해두세요. 이미 엑셀에 있는 데이터는 한 번에 올리실 수 있고, 매일/매주 들어와서 추가하셔도 됩니다.
+              </p>
+              <div class="mt-3 flex flex-wrap gap-2 text-xs">
+                <span class="px-2.5 py-1 rounded-full bg-soft-navy text-brand-700 font-semibold">📊 변수 관리</span>
+                <span class="px-2.5 py-1 rounded-full bg-soft-navy text-brand-700 font-semibold">🔔 입력 알림</span>
+                <span class="px-2.5 py-1 rounded-full bg-soft-navy text-brand-700 font-semibold">📂 CSV 업로드</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="arrow-down">↓</div>
+
+          <!-- Step 2 -->
+          <div class="flex gap-5 items-start">
+            <div class="step-circle">2</div>
+            <div class="flex-1">
+              <div class="flex items-center gap-2 flex-wrap">
+                <h3 class="text-xl font-bold">우리 학원만의 성공방정식을 만드세요</h3>
+                <a href="equation.html" class="text-xs text-brand-600 font-semibold bg-brand-50 px-2.5 py-1 rounded-full hover:bg-brand-100">방정식 빌더 바로가기 →</a>
+              </div>
+              <p class="text-ink-500 mt-2 leading-relaxed">
+                입력하신 데이터로 회귀분석이 자동으로 돌아갑니다. 우리 학원에서 어떤 X-Factor가 학생들의 성적·재등록에 가장 큰 영향을 주는지 한눈에 보실 수 있어요.
+              </p>
+              <div class="mt-3 flex flex-wrap gap-2 text-xs">
+                <span class="px-2.5 py-1 rounded-full bg-soft-navy text-brand-700 font-semibold">📅 분석 기간 선택</span>
+                <span class="px-2.5 py-1 rounded-full bg-soft-navy text-brand-700 font-semibold">📈 변수 영향력 비교</span>
+                <span class="px-2.5 py-1 rounded-full bg-soft-navy text-brand-700 font-semibold">⚠️ 함정 자동 진단</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="arrow-down">↓</div>
+
+          <!-- Step 3 -->
+          <div class="flex gap-5 items-start">
+            <div class="step-circle">3</div>
+            <div class="flex-1">
+              <div class="flex items-center gap-2 flex-wrap">
+                <h3 class="text-xl font-bold">학생별 리포트를 학부모에게 발송하세요</h3>
+                <a href="report.html" class="text-xs text-brand-600 font-semibold bg-brand-50 px-2.5 py-1 rounded-full hover:bg-brand-100">리포트카드 바로가기 →</a>
+              </div>
+              <p class="text-ink-500 mt-2 leading-relaxed">
+                만들어진 방정식을 기반으로 학생별 맞춤 리포트가 자동 생성됩니다. 학부모 상담 스크립트도 같이 만들어드리고, 카카오 알림톡으로 바로 발송하실 수 있어요.
+              </p>
+              <div class="mt-3 flex flex-wrap gap-2 text-xs">
+                <span class="px-2.5 py-1 rounded-full bg-soft-navy text-brand-700 font-semibold">📝 자동 리포트</span>
+                <span class="px-2.5 py-1 rounded-full bg-soft-navy text-brand-700 font-semibold">🗣️ 상담 스크립트</span>
+                <span class="px-2.5 py-1 rounded-full bg-soft-navy text-brand-700 font-semibold">💬 카카오 알림톡</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 누구에게 추천 -->
+      <section class="grid md:grid-cols-2 gap-5">
+        <div class="bg-white rounded-3xl p-7 shadow-card ring-soft">
+          <div class="text-2xl mb-3">🎓</div>
+          <h3 class="text-xl font-bold">강의를 들으신 원장님</h3>
+          <ul class="mt-4 space-y-2 text-sm text-ink-700">
+            <li class="flex gap-2"><span class="text-brand-600 font-bold">·</span><span>수업에서 정한 <b>X-Factor를 그대로</b> 변수 장바구니에 담으세요</span></li>
+            <li class="flex gap-2"><span class="text-brand-600 font-bold">·</span><span>강의 5회차에서 만든 <b>90일 플랜</b>을 사이트로 옮겨오세요</span></li>
+            <li class="flex gap-2"><span class="text-brand-600 font-bold">·</span><span>대표님 강의의 <b>모든 개념(R²·β·다중공선성)</b>이 사이트에 자동 반영돼요</span></li>
+          </ul>
+        </div>
+        <div class="bg-white rounded-3xl p-7 shadow-card ring-soft">
+          <div class="text-2xl mb-3">🌱</div>
+          <h3 class="text-xl font-bold">강의를 안 들으신 원장님</h3>
+          <ul class="mt-4 space-y-2 text-sm text-ink-700">
+            <li class="flex gap-2"><span class="text-accent-500 font-bold">·</span><span>회귀분석을 <b>몰라도 사이트가 알아서</b> 돌려줍니다</span></li>
+            <li class="flex gap-2"><span class="text-accent-500 font-bold">·</span><span>"복습 1h = +3.2점" 같은 <b>해석된 결과</b>만 보시면 돼요</span></li>
+            <li class="flex gap-2"><span class="text-accent-500 font-bold">·</span><span>아래 <b>FAQ</b>에서 자주 묻는 질문 확인 가능</span></li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- FAQ -->
+      <section>
+        <h2 class="text-[22px] font-extrabold mb-5">자주 묻는 질문</h2>
+
+        <div class="bg-white rounded-3xl shadow-card ring-soft divide-y divide-gray-100">
+          <div class="accordion-item">
+            <button class="w-full p-6 flex items-center justify-between text-left hover:bg-gray-50 transition" onclick="toggleAcc(this)">
+              <div>
+                <div class="text-xs font-semibold text-brand-600 mb-1">개념</div>
+                <div class="font-bold text-lg">회귀분석이 뭔가요?</div>
+              </div>
+              <span class="acc-arrow text-2xl text-ink-300">›</span>
+            </button>
+            <div class="acc-content px-6 pb-6 text-ink-700 leading-relaxed">
+              어떤 원인(X)이 어떤 결과(Y)를 얼마나 만드는지 <b>숫자로 보여주는 분석법</b>이에요. 우리 학원에선 "복습시간이 성적을 얼마나 올리는지", "출석률이 재등록률에 어떤 영향을 주는지" 같은 걸 알 수 있어요. 사이트가 자동으로 돌려주니까 원장님은 결과만 보시면 됩니다.
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <button class="w-full p-6 flex items-center justify-between text-left hover:bg-gray-50 transition" onclick="toggleAcc(this)">
+              <div>
+                <div class="text-xs font-semibold text-brand-600 mb-1">개념</div>
+                <div class="font-bold text-lg">β(베타)는 무슨 의미인가요?</div>
+              </div>
+              <span class="acc-arrow text-2xl text-ink-300">›</span>
+            </button>
+            <div class="acc-content px-6 pb-6 text-ink-700 leading-relaxed">
+              <b>β = "X가 1만큼 늘면 Y가 몇 점 오르는가"</b>예요.<br/>
+              예: β=0.42인 복습시간 → 복습 1시간 더 하면 성적 +0.42점.<br/>
+              <b>숫자가 클수록 영향력이 큰 변수</b>입니다. 학원의 우선순위를 정할 때 가장 중요해요.
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <button class="w-full p-6 flex items-center justify-between text-left hover:bg-gray-50 transition" onclick="toggleAcc(this)">
+              <div>
+                <div class="text-xs font-semibold text-brand-600 mb-1">데이터</div>
+                <div class="font-bold text-lg">데이터를 얼마나 모아야 분석이 되나요?</div>
+              </div>
+              <span class="acc-arrow text-2xl text-ink-300">›</span>
+            </button>
+            <div class="acc-content px-6 pb-6 text-ink-700 leading-relaxed">
+              학생 수가 많을수록 좋아요. 일반적으로 <b>학생 30명 이상 + 변수 3~5개 + 시험 2~3회분</b>이면 의미 있는 분석이 가능합니다. 부족해도 일단 시작하시면 사이트가 <b>"이만큼 더 모이면 분석 가능"</b>이라고 안내해드려요.
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <button class="w-full p-6 flex items-center justify-between text-left hover:bg-gray-50 transition" onclick="toggleAcc(this)">
+              <div>
+                <div class="text-xs font-semibold text-brand-600 mb-1">데이터</div>
+                <div class="font-bold text-lg">변수마다 수집 주기가 다른데 괜찮나요?</div>
+              </div>
+              <span class="acc-arrow text-2xl text-ink-300">›</span>
+            </button>
+            <div class="acc-content px-6 pb-6 text-ink-700 leading-relaxed">
+              네, 출결은 매일·복습은 주간·성적은 시험마다 같이 주기가 달라도 돼요. <b>분석할 때 같은 기간으로 자동 평균 처리</b>됩니다. 원장님은 그냥 편한 주기로 입력만 해주세요.
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <button class="w-full p-6 flex items-center justify-between text-left hover:bg-gray-50 transition" onclick="toggleAcc(this)">
+              <div>
+                <div class="text-xs font-semibold text-brand-600 mb-1">활용</div>
+                <div class="font-bold text-lg">학부모 알림톡은 어떻게 보내나요?</div>
+              </div>
+              <span class="acc-arrow text-2xl text-ink-300">›</span>
+            </button>
+            <div class="acc-content px-6 pb-6 text-ink-700 leading-relaxed">
+              리포트카드 탭에서 학생을 선택하시고 발송 버튼을 누르시면 됩니다. <b>자동으로 학부모 친화적 문구로 변환</b>되고, 카카오 알림톡으로 바로 전송돼요. Alumni 플랜은 매월 알림톡 크레딧 300건이 포함됩니다.
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <button class="w-full p-6 flex items-center justify-between text-left hover:bg-gray-50 transition" onclick="toggleAcc(this)">
+              <div>
+                <div class="text-xs font-semibold text-brand-600 mb-1">강의</div>
+                <div class="font-bold text-lg">대표님 강의도 들어보고 싶어요</div>
+              </div>
+              <span class="acc-arrow text-2xl text-ink-300">›</span>
+            </button>
+            <div class="acc-content px-6 pb-6 text-ink-700 leading-relaxed">
+              <b>김상철 대표님의 "AI 시대, 데이터로 이기는 원장의 무기"</b> 강의는 회귀분석을 우리 학원에 어떻게 적용하는지 5회차로 깊이 있게 다룹니다. 강의 수강 후 사이트를 사용하시면 효용이 훨씬 커져요.
+              <a href="#" class="block mt-3 text-brand-600 font-bold hover:underline">강의 자세히 보기 →</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CTA -->
+      <section class="rounded-3xl bg-gradient-to-r from-brand-500 to-brand-700 text-white p-8 shadow-card">
+        <div class="flex items-center gap-6 flex-wrap">
+          <div class="flex-1 min-w-[260px]">
+            <div class="text-sm font-semibold opacity-80">준비 되셨나요?</div>
+            <div class="mt-1 text-2xl font-extrabold">바로 학생 데이터부터 입력해보세요</div>
+            <p class="mt-2 text-sm opacity-80">5분이면 첫 입력이 끝나고, 다음 시험 때부터는 학부모 상담이 달라져요.</p>
+          </div>
+          <a href="hub.html" class="px-6 py-4 rounded-2xl bg-white text-brand-600 font-extrabold text-base hover:bg-gray-50 shadow-lg">데이터 입력하러 가기 →</a>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<script>
+  document.getElementById('sidebar').outerHTML = __renderLayout('lecture');
+  document.getElementById('topbar').outerHTML = __renderTopbar(['홈','사용 가이드']);
+
+  function toggleAcc(btn){
+    const item = btn.parentElement;
+    item.classList.toggle('open');
+  }
+  window.toggleAcc = toggleAcc;
+</script>
+</body>
+</html>
