@@ -1021,7 +1021,7 @@
       id: 'g_' + Date.now(),
       dateTime: fmtNow(),
       eq, periodLabel, tone,
-      students: reportPages.map(p => ({...p.s, kakao:'pending', pdf:false}))
+      students: reportPages.map(p => ({...p.s, kakao: p.s.phoneOK ? 'pending' : 'noPhone', kakaoAt:null, pdf:false}))
     };
     generations.push(g);
     renderHistory(); // 백그라운드 갱신
