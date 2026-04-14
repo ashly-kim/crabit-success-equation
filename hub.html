@@ -1486,7 +1486,7 @@
       if(!customCycle){ alert('기록 주기를 선택해주세요'); return; }
       // 커스텀 변수 등록
       const newId = 'custom_' + Date.now();
-      availableVars.push({id:newId, emoji:'⭐', name, unit:buildUnitLabel(), cycle:buildCycleLabel()});
+      availableVars.push({id:newId, emoji:'⭐', name, unit:buildUnitLabel(), cycle:buildCycleLabel(), unitType:customUnit});
       selectedVar = availableVars[availableVars.length-1];
       document.getElementById('selectedVarName').textContent = selectedVar.name;
       modalStep = 2; showStep(2);
