@@ -827,53 +827,371 @@
   function selectWizTone(id){ wizState.tone = id; renderWizStep3(); }
   window.selectWizTone = selectWizTone;
 
-  function renderWizStep4(){
+  // ===== A4 리포트 페이지 렌더 (재사용 컴포넌트) =====
+  function renderReportPage(s, eq, periodLabel, tone){
+    const trendMax = Math.max(...s.trend);
+    const trendMin = Math.min(...s.trend);
+    const trendPath = s.trend.map((v,i)=>{
+      const x = (i/(s.trend.length-1))*100;
+      const y = 100 - ((v - trendMin)/Math.max(1,trendMax-trendMin))*100;
+      return `${i===0?'M':'L'}${x.toFixed(1)},${y.toFixed(1)}`;
+    }).join(' ');
+    const trendArea = trendPath + ` L100,100 L0,100 Z`;
+    const yLabel = eq.y || '예측 결과';
+    const yUnit = eq.yUnit || '';
+    const curLabel = s.status==='red' ? '—' : `${s.cur}${yUnit}`;
+    const predLabel = s.status==='red' ? '데이터 부족' : `${s.predLow}~${s.predHigh}${yUnit}`;
+    const diffSign = s.diff?.includes?.('+') ? '+' : '';
+    const feedback = tone.sample.replace('{name}', s.name);
+    const today = '2026.04.14';
+    return `
+    <div class="a4-page">
+      <div class="a4-inner">
+        <!-- 헤더 -->
+        <div class="flex items-start justify-between border-b-2 border-brand-500 pb-4 mb-5">
+          <div>
+            <div class="text-[11px] font-bold text-brand-600 tracking-widest">PERSONAL REPORT</div>
+            <div class="text-[24px] font-extrabold mt-1">${s.name} 학생 학습 리포트</div>
+            <div class="text-[12px] text-ink-500 mt-1">${s.cls} · 분석 기간: ${periodLabel} · 발행일 ${today}</div>
+          </div>
+          <div class="text-right">
+            <div class="text-[11px] text-ink-500">발행</div>
+            <div class="font-extrabold text-brand-600 text-[15px] mt-0.5">행복수학학원</div>
+            <div class="text-[10px] text-ink-500 mt-0.5">우리학원 성공방정식</div>
+          </div>
+        </div>
+
+        <!-- 적용 방정식 + 신뢰도 -->
+        <div class="rounded-xl bg-soft-navy p-4 mb-5">
+          <div class="text-[11px] font-bold text-brand-600 mb-1">적용 성공방정식 · v${eq.version} · 신뢰도 ${eq.trust}%</div>
+          <div class="text-[14px] font-extrabold text-ink-900 leading-snug">${eq.formula}</div>
+        </div>
+
+        <!-- 핵심 예측 -->
+        <h2>핵심 예측</h2>
+        <div class="grid grid-cols-3 gap-3 mb-5">
+          <div class="rounded-xl bg-gray-50 p-4">
+            <div class="text-[11px] text-ink-500">현재 ${yLabel}</div>
+            <div class="text-[24px] font-extrabold text-ink-900 mt-1">${curLabel}</div>
+            <div class="text-[11px] text-ink-500 mt-1">최근 분석 시점 기준</div>
+          </div>
+          <div class="rounded-xl bg-brand-50 p-4 border border-brand-100">
+            <div class="text-[11px] text-brand-600 font-bold">다음 시험 예측</div>
+            <div class="text-[24px] font-extrabold text-brand-700 mt-1">${predLabel}</div>
+            <div class="text-[11px] text-brand-600 mt-1">현 패턴 유지 가정</div>
+          </div>
+          <div class="rounded-xl bg-gray-50 p-4">
+            <div class="text-[11px] text-ink-500">변화 추이</div>
+            <div class="text-[24px] font-extrabold ${s.diff?.includes?.('+')?'text-emerald-600':'text-rose-500'} mt-1">${s.status==='red'?'—':diffSign+s.diff}</div>
+            <div class="text-[11px] text-ink-500 mt-1">직전 대비</div>
+          </div>
+        </div>
+
+        <!-- 변수 기여도 -->
+        <h2>${yLabel}에 영향을 준 변수</h2>
+        <div class="rounded-xl border border-gray-100 p-4 mb-5">
+          ${eq.terms.map(t=>{
+            const c = s.contribution[t.name] ?? 50;
+            return `<div class="bar-row">
+              <div class="bar-label">${t.name}</div>
+              <div class="bar-track"><div class="bar-fill" style="width:${c}%"></div></div>
+              <div class="bar-val">β ${t.beta}</div>
+            </div>`;
+          }).join('')}
+          <div class="text-[11px] text-ink-500 mt-3">β값이 클수록 ${yLabel}에 미치는 영향이 큽니다. 막대 길이는 이 학생의 해당 변수 활동 수준입니다.</div>
+        </div>
+
+        <!-- 학습 추이 -->
+        <h2>최근 ${s.trend.length}주 학습 추이</h2>
+        <div class="rounded-xl border border-gray-100 p-4 mb-5">
+          <svg class="spark" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <path d="${trendArea}" fill="rgba(58,116,255,.12)"/>
+            <path d="${trendPath}" fill="none" stroke="#3a74ff" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
+          </svg>
+          <div class="flex justify-between text-[10px] text-ink-500 mt-1.5"><span>${s.trend.length}주 전</span><span>현재</span></div>
+        </div>
+
+        <!-- 핵심 인사이트 -->
+        <h2>핵심 인사이트</h2>
+        <div class="rounded-xl bg-soft-lemon/60 border border-amber-100 p-4 mb-5">
+          <div class="text-[14px] font-semibold ${s.insightColor} leading-relaxed">💡 ${s.insight}</div>
+        </div>
+
+        <!-- Next Action -->
+        <h2>추천 다음 액션</h2>
+        <div class="rounded-xl border border-gray-100 p-2 mb-5">
+          ${s.nextActions.map((a,i)=>`<div class="next-action-item">
+            <div class="num">${i+1}</div>
+            <div class="text-[13px] leading-relaxed text-ink-700 pt-0.5">${a}</div>
+          </div>`).join('')}
+        </div>
+
+        <!-- 개인 피드백 -->
+        <h2>개인 피드백</h2>
+        <div class="rounded-xl bg-brand-50 border border-brand-100 p-5 mb-5">
+          <div class="text-[14px] leading-relaxed text-ink-900">${feedback}</div>
+          <div class="text-[10px] text-ink-500 mt-2">— ${s.cls} 담당</div>
+        </div>
+
+        <!-- 푸터 -->
+        <div class="mt-auto pt-5 border-t border-gray-100 flex items-center justify-between text-[10px] text-ink-500">
+          <div>본 리포트는 행복수학학원의 우리학원 성공방정식(v${eq.version})으로 자동 생성되었습니다.</div>
+          <div>page 1</div>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  // ===== Step 4: A4 캐러셀 =====
+  let reportPageIdx = 0;
+  let reportPages = []; // [{s, eq, periodLabel, tone}]
+
+  function buildReportPages(){
     const eq = equations[wizState.eqIdx];
     const tone = tones.find(t=>t.id === wizState.tone);
     const need = wizState.period === '3m' ? 3 : wizState.period === '6m' ? 6 : 0;
     const sel = eligibleStudents().filter(s=>wizState.students.has(s.name));
     const final = need ? sel.filter(s=>s.months >= need) : sel;
-    if(final.length === 0){
-      document.getElementById('wizPreviewList').innerHTML = '<div class="bg-white rounded-2xl p-10 text-center text-ink-500">조건에 맞는 학생이 없어요. 이전 단계로 돌아가 설정을 바꿔주세요.</div>';
+    return final.map(s=>{
+      const periodLabel = need ? `최근 ${need}개월` : `최근 ${s.months}개월 (자동)`;
+      return {s, eq, periodLabel, tone};
+    });
+  }
+
+  function renderWizStep4(){
+    reportPages = buildReportPages();
+    reportPageIdx = 0;
+    if(reportPages.length === 0){
+      document.getElementById('reportStage').innerHTML = '<div class="bg-white rounded-2xl p-10 text-center text-ink-500 w-full">조건에 맞는 학생이 없어요. 이전 단계로 돌아가 설정을 바꿔주세요.</div>';
+      document.getElementById('reportPageTotal').textContent = '0';
+      document.getElementById('reportPageIdx').textContent = '0';
       return;
     }
-    document.getElementById('wizPreviewList').innerHTML = final.map(s=>{
-      const msg = tone.sample.replace('{name}', s.name);
-      const periodLabel = need ? `최근 ${need}개월` : `최근 ${s.months}개월 (자동)`;
-      return `
-      <div class="bg-white rounded-3xl shadow-card ring-soft p-6">
-        <div class="flex items-start justify-between gap-4 mb-5 flex-wrap">
-          <div class="flex items-center gap-3">
-            <div class="w-12 h-12 rounded-full bg-soft-navy text-brand-700 font-bold grid place-items-center text-lg">${s.name[0]}</div>
-            <div>
-              <div class="font-extrabold text-[18px]">${s.name} 학생 · 리포트카드</div>
-              <div class="text-xs text-ink-500 mt-0.5">${s.cls} · ${eq.name} · ${periodLabel}</div>
-            </div>
-          </div>
-          <div class="flex gap-2">
-            <button class="px-3 py-2 text-xs rounded-lg border border-gray-200 hover:bg-gray-50 font-semibold">📄 PDF</button>
-            <button class="px-3 py-2 text-xs rounded-lg bg-yellow-300 text-yellow-900 font-bold hover:bg-yellow-400">💬 알림톡 발송</button>
-          </div>
-        </div>
-        <div class="grid md:grid-cols-3 gap-3 mb-4">
-          <div class="rounded-xl bg-gray-50 p-4"><div class="text-xs text-ink-500">현재 예측</div><div class="font-extrabold mt-1 text-[17px]">${s.status==='red'?'데이터 부족':s.cur+'점'}</div></div>
-          <div class="rounded-xl bg-gray-50 p-4"><div class="text-xs text-ink-500">6주 후 예측</div><div class="font-extrabold mt-1 text-[17px]">${s.status==='red'?'-':s.predLow+'~'+s.predHigh+'점'}</div></div>
-          <div class="rounded-xl bg-gray-50 p-4"><div class="text-xs text-ink-500">핵심 인사이트</div><div class="font-semibold mt-1 text-[13px] ${s.insightColor}">${s.insight}</div></div>
-        </div>
-        <div class="rounded-xl bg-brand-50 border border-brand-100 p-5">
-          <div class="text-xs font-bold text-brand-600 mb-1.5">리포트 문구 · ${tone.name}</div>
-          <div class="text-[15px] leading-relaxed">${msg}</div>
-        </div>
-      </div>`;
-    }).join('');
+    document.getElementById('reportPageTotal').textContent = reportPages.length;
+    drawCurrentReportPage();
   }
+
+  function drawCurrentReportPage(){
+    const stage = document.getElementById('reportStage');
+    const p = reportPages[reportPageIdx];
+    stage.innerHTML = renderReportPage(p.s, p.eq, p.periodLabel, p.tone);
+    document.getElementById('reportPageIdx').textContent = reportPageIdx + 1;
+    fitA4(stage);
+  }
+
+  function navReport(dir){
+    if(reportPages.length === 0) return;
+    reportPageIdx = (reportPageIdx + dir + reportPages.length) % reportPages.length;
+    drawCurrentReportPage();
+  }
+  window.navReport = navReport;
+
+  // A4 페이지를 컨테이너에 맞게 transform scale
+  function fitA4(stage){
+    const page = stage.querySelector('.a4-page');
+    if(!page) return;
+    const parent = stage.getBoundingClientRect();
+    const availW = parent.width - 16;
+    const scale = Math.min(1, availW / 794);
+    page.style.transform = `scale(${scale})`;
+    // 컨테이너 높이 조정 (스케일된 높이로)
+    stage.style.height = (1123 * scale + 20) + 'px';
+  }
+  window.addEventListener('resize', ()=>{
+    const wizStage = document.getElementById('reportStage');
+    if(wizStage && !document.getElementById('wizard').classList.contains('hidden') && wizStep === 4) fitA4(wizStage);
+    const rvStage = document.getElementById('rvStage');
+    if(rvStage && !document.getElementById('reportViewer').classList.contains('hidden')) fitA4(rvStage);
+  });
 
   function wizNext(){
     if(wizStep < WIZ_STEPS){ wizStep++; renderWizStep(); document.getElementById('wizard').scrollTo({top:0}); }
-    else { alert(`${document.querySelectorAll('#wizPreviewList > div').length}건의 리포트가 발송되었어요!`); closeWizard(); }
+    else commitGeneration();
   }
   function wizPrev(){ if(wizStep>1){ wizStep--; renderWizStep(); document.getElementById('wizard').scrollTo({top:0}); } }
   window.wizNext = wizNext; window.wizPrev = wizPrev;
+
+  // ===== 리포트 생성 확정 =====
+  function commitGeneration(){
+    if(reportPages.length === 0){ alert('조건에 맞는 학생이 없어 리포트를 만들 수 없어요.'); return; }
+    const eq = reportPages[0].eq;
+    const periodLabel = reportPages[0].periodLabel.includes('자동') ? '자동 (학생별 최대)' : reportPages[0].periodLabel;
+    const tone = reportPages[0].tone;
+    const g = {
+      id: 'g_' + Date.now(),
+      dateTime: fmtNow(),
+      eq, periodLabel, tone,
+      students: reportPages.map(p => ({...p.s, kakao:'pending', pdf:false}))
+    };
+    generations.push(g);
+    closeWizard();
+    // 히스토리 탭으로 이동
+    document.querySelectorAll('.top-tab').forEach(x=>{
+      x.classList.toggle('on', x.dataset.tab === 'hist');
+    });
+    document.querySelectorAll('.top-pane').forEach(p=>p.classList.toggle('hidden', p.dataset.pane !== 'hist'));
+    renderHistory();
+    setTimeout(()=>openGenDetail(g.id), 200);
+  }
+
+  // ===== 생성건 상세 풀페이지 =====
+  let currentGen = null;
+  let gdSelected = new Set();
+
+  function openGenDetail(id){
+    const g = generations.find(x=>x.id === id);
+    if(!g) return;
+    currentGen = g;
+    gdSelected = new Set();
+    document.getElementById('gdTitle').textContent = `${g.eq.name} · ${g.students.length}건`;
+    document.getElementById('gdMeta').textContent = `${g.dateTime} · 분석 기간 ${g.periodLabel} · 톤 ${tones.find(t=>t.id===g.tone).name}`;
+    renderGdList();
+    document.getElementById('genDetail').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeGenDetail(){
+    document.getElementById('genDetail').classList.add('hidden');
+    document.body.style.overflow = '';
+    currentGen = null;
+  }
+  window.openGenDetail = openGenDetail; window.closeGenDetail = closeGenDetail;
+
+  function statusIcons(s){
+    let out = '<div class="flex items-center gap-1.5">';
+    // 알림톡
+    if(s.kakao === 'sent'){
+      out += `<span class="send-status-icon bg-yellow-100" title="알림톡 발송됨"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="#3a1d1d"><path d="M12 4C6.48 4 2 7.58 2 12c0 2.72 1.7 5.12 4.29 6.56-.18.66-.66 2.38-.76 2.75-.12.46.17.46.36.33.15-.1 2.4-1.63 3.35-2.28.91.13 1.82.19 2.76.19 5.52 0 10-3.58 10-8S17.52 4 12 4z"/></svg></span>`;
+    } else if(s.kakao === 'fail'){
+      out += `<span class="send-status-icon bg-rose-100 text-rose-600" title="알림톡 발송 실패"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/></svg></span>`;
+    } else if(s.kakao === 'noPhone'){
+      out += `<span class="send-status-icon bg-gray-100 text-ink-500" title="학부모 전화번호 미등록">📵</span>`;
+    }
+    if(s.pdf){
+      out += `<span class="send-status-icon bg-brand-50 text-brand-600" title="PDF 다운로드됨"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg></span>`;
+    }
+    out += '</div>';
+    return out;
+  }
+
+  function renderGdList(){
+    const g = currentGen;
+    document.getElementById('gdReportList').innerHTML = g.students.map((s,i)=>{
+      const checked = gdSelected.has(i);
+      const phoneWarn = s.kakao === 'noPhone'
+        ? '<span class="text-[11px] font-bold text-rose-700 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-full ml-2">📵 학부모 번호 미등록</span>'
+        : '';
+      return `
+      <div class="bg-white rounded-2xl shadow-card ring-soft p-4 flex items-center gap-4 hover:bg-gray-50 transition cursor-pointer" onclick="openReportViewer(${i})">
+        <input type="checkbox" ${checked?'checked':''} onclick="event.stopPropagation()" onchange="gdToggle(${i}, this.checked)"/>
+        <div class="w-11 h-11 rounded-full bg-soft-navy text-brand-700 font-bold grid place-items-center">${s.name[0]}</div>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center flex-wrap"><span class="font-extrabold text-[16px]">${s.name}</span>${phoneWarn}</div>
+          <div class="text-xs text-ink-500 mt-0.5">${s.cls} · 예측 ${s.status==='red'?'데이터 부족':s.cur+(g.eq.yUnit||'')}</div>
+        </div>
+        ${statusIcons(s)}
+        <button class="ml-2 px-3 py-1.5 text-xs rounded-lg border border-gray-200 hover:bg-gray-50 font-semibold" onclick="event.stopPropagation();openReportViewer(${i})">열어보기 →</button>
+      </div>`;
+    }).join('');
+    updateGdSelCount();
+  }
+
+  function gdToggle(idx, checked){
+    if(checked) gdSelected.add(idx); else gdSelected.delete(idx);
+    updateGdSelCount();
+    document.getElementById('gdSelectAll').checked = gdSelected.size === currentGen.students.length;
+  }
+  function gdToggleAll(checked){
+    gdSelected = new Set();
+    if(checked) currentGen.students.forEach((_,i)=>gdSelected.add(i));
+    renderGdList();
+  }
+  function updateGdSelCount(){
+    document.getElementById('gdSelCount').textContent = gdSelected.size;
+  }
+  window.gdToggle = gdToggle; window.gdToggleAll = gdToggleAll;
+
+  // ===== 단일 리포트 뷰어 =====
+  let rvList = []; let rvIdx = 0;
+  function openReportViewer(startIdx){
+    rvList = currentGen.students.map(s => ({s, eq: currentGen.eq, periodLabel: currentGen.periodLabel, tone: tones.find(t=>t.id===currentGen.tone)}));
+    rvIdx = startIdx;
+    document.getElementById('rvTotal').textContent = rvList.length;
+    drawRv();
+    document.getElementById('reportViewer').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeReportViewer(){
+    document.getElementById('reportViewer').classList.add('hidden');
+    document.body.style.overflow = currentGen ? 'hidden' : '';
+  }
+  function drawRv(){
+    const p = rvList[rvIdx];
+    document.getElementById('rvTitle').textContent = `${p.s.name} 학생 학습 리포트`;
+    document.getElementById('rvIdx').textContent = rvIdx + 1;
+    const stage = document.getElementById('rvStage');
+    stage.innerHTML = renderReportPage(p.s, p.eq, p.periodLabel, p.tone);
+    fitA4(stage);
+  }
+  function rvNav(dir){
+    rvIdx = (rvIdx + dir + rvList.length) % rvList.length;
+    drawRv();
+  }
+  window.openReportViewer = openReportViewer;
+  window.closeReportViewer = closeReportViewer;
+  window.rvNav = rvNav;
+
+  // ===== 알림톡 발송 =====
+  function openKakaoSendModal(){
+    if(gdSelected.size === 0){ alert('발송할 리포트를 먼저 선택해주세요.'); return; }
+    // 전화번호 미등록 자동 제외 안내
+    const eligible = [...gdSelected].filter(i => currentGen.students[i].kakao !== 'noPhone' && currentGen.students[i].phoneOK);
+    document.getElementById('ksmCount').textContent = eligible.length;
+    openModal('kakaoSendModal');
+  }
+  function confirmKakaoSend(){
+    closeModal('kakaoSendModal');
+    let success = 0, fail = 0;
+    const failNames = [];
+    [...gdSelected].forEach(i=>{
+      const s = currentGen.students[i];
+      if(!s.phoneOK || s.kakao === 'noPhone') return; // 자동 제외
+      // 95% 성공 시뮬레이션
+      if(Math.random() > 0.05){ s.kakao = 'sent'; success++; }
+      else { s.kakao = 'fail'; fail++; failNames.push(s.name); }
+    });
+    document.getElementById('krmSuccess').textContent = success;
+    document.getElementById('krmFail').textContent = fail;
+    const failBox = document.getElementById('krmFailList');
+    if(fail > 0){
+      failBox.classList.remove('hidden');
+      failBox.innerHTML = failNames.map(n=>`<div class="flex items-center justify-between text-rose-700"><span><b>${n}</b> 학생</span><span class="text-rose-500">발송 실패 · 재시도 권장</span></div>`).join('');
+    } else {
+      failBox.classList.add('hidden');
+    }
+    openModal('kakaoResultModal');
+  }
+  function closeKakaoResult(){
+    closeModal('kakaoResultModal');
+    renderGdList();
+  }
+  window.openKakaoSendModal = openKakaoSendModal;
+  window.confirmKakaoSend = confirmKakaoSend;
+  window.closeKakaoResult = closeKakaoResult;
+
+  // ===== PDF ZIP 다운로드 =====
+  function openPdfZipModal(){
+    if(gdSelected.size === 0){ alert('다운로드할 리포트를 먼저 선택해주세요.'); return; }
+    document.getElementById('pzmCount').textContent = gdSelected.size;
+    openModal('pdfZipModal');
+  }
+  function confirmPdfZip(){
+    closeModal('pdfZipModal');
+    [...gdSelected].forEach(i=>{ currentGen.students[i].pdf = true; });
+    renderGdList();
+    setTimeout(()=>alert(`${gdSelected.size}개 PDF가 ZIP으로 다운로드되었습니다. (시연용)`), 100);
+  }
+  window.openPdfZipModal = openPdfZipModal;
+  window.confirmPdfZip = confirmPdfZip;
 </script>
 </body>
 </html>
