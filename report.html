@@ -743,12 +743,15 @@
     document.getElementById('wizStudentList').innerHTML = list.map(s=>{
       const checked = wizState.students.has(s.name);
       const dot = s.status==='green'?'🟢 예측 가능':s.status==='yellow'?'🟡 주의 필요':'🔴 데이터 부족';
+      const phoneChip = s.phoneOK
+        ? ''
+        : '<span class="text-[11px] font-bold text-rose-700 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-full ml-2">📵 학부모 번호 미등록 · 알림톡 발송 불가</span>';
       return `
       <label class="flex items-center gap-4 px-6 py-4 cursor-pointer hover:bg-gray-50">
         <input type="checkbox" ${checked?'checked':''} class="w-5 h-5" onchange="toggleStudent('${s.name}', this.checked)"/>
         <div class="w-10 h-10 rounded-full bg-soft-navy text-brand-700 font-bold grid place-items-center">${s.name[0]}</div>
         <div class="flex-1">
-          <div class="font-semibold text-[15px]">${s.name}</div>
+          <div class="flex items-center flex-wrap"><span class="font-semibold text-[15px]">${s.name}</span>${phoneChip}</div>
           <div class="text-xs text-ink-500 mt-0.5">${s.cls} · 데이터 ${s.months}개월 · ${dot}</div>
         </div>
       </label>`;
