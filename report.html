@@ -723,12 +723,187 @@
   }
   window.openWizard = openWizard; window.closeWizard = closeWizard;
 
-  function startWizardForStudent(idx){
-    const s = students[idx];
-    const eqIdx = equations.findIndex(e=>e.id === s.eq.id);
-    openWizard({eqIdx: Math.max(0, eqIdx)});
+  // ===== 학생 상세 풀페이지 =====
+  let currentStudentIdx = null;
+
+  function applicableEquations(s){
+    return equations.filter(eq => eq.group === '전체 학생' || s.cls === eq.group);
   }
-  window.startWizardForStudent = startWizardForStudent;
+
+  function tinySpark(arr, color){
+    color = color || '#3a74ff';
+    const max = Math.max(...arr), min = Math.min(...arr);
+    const path = arr.map((v,i)=>{
+      const x = (i/(arr.length-1))*100;
+      const y = 100 - ((v-min)/Math.max(1,max-min))*100;
+      return `${i===0?'M':'L'}${x.toFixed(1)},${y.toFixed(1)}`;
+    }).join(' ');
+    return `<svg viewBox="0 0 100 100" preserveAspectRatio="none" class="w-full h-12">
+      <path d="${path} L100,100 L0,100 Z" fill="${color}" opacity=".12"/>
+      <path d="${path}" fill="none" stroke="${color}" stroke-width="1.6" vector-effect="non-scaling-stroke" stroke-linejoin="round" stroke-linecap="round"/>
+    </svg>`;
+  }
+
+  function openStudentDetail(idx){
+    currentStudentIdx = idx;
+    const s = students[idx];
+    document.getElementById('sdTitle').textContent = `${s.name} 학생`;
+    const apEq = applicableEquations(s);
+
+    // 변수 카드 (방정식의 변수들을 사용)
+    const varCards = s.eq.terms.map(t=>{
+      const arr = Array.from({length:8},()=>30+Math.floor(Math.random()*60));
+      const cur = arr[arr.length-1];
+      const prev = arr[arr.length-2];
+      const delta = cur - prev;
+      const deltaSign = delta >= 0 ? '+' : '';
+      const deltaColor = delta >= 0 ? 'text-emerald-600' : 'text-rose-500';
+      return `
+      <div class="bg-white rounded-2xl shadow-card ring-soft p-5">
+        <div class="flex items-start justify-between mb-2">
+          <div>
+            <div class="text-xs text-ink-500">${t.unit}</div>
+            <div class="text-base font-extrabold mt-0.5">${t.name}</div>
+          </div>
+          <span class="text-[10px] font-bold text-brand-600 bg-brand-50 px-2 py-0.5 rounded-full">β ${t.beta}</span>
+        </div>
+        <div class="flex items-end justify-between mb-2">
+          <div>
+            <div class="text-2xl font-extrabold text-ink-900">${cur}</div>
+            <div class="text-[11px] ${deltaColor} font-bold mt-0.5">${deltaSign}${delta} (직전 주 대비)</div>
+          </div>
+          <div class="text-right">
+            <div class="text-[11px] text-ink-500">평균</div>
+            <div class="text-sm font-bold text-ink-700">${Math.round(arr.reduce((a,b)=>a+b,0)/arr.length)}</div>
+          </div>
+        </div>
+        ${tinySpark(arr)}
+        <div class="flex justify-between text-[10px] text-ink-500 mt-1"><span>8주 전</span><span>이번 주</span></div>
+      </div>`;
+    }).join('');
+
+    // 인사이트 자동 생성
+    const insights = [];
+    s.eq.terms.forEach(t => {
+      const c = s.contribution[t.name] ?? 50;
+      if(c > 70) insights.push({txt:`<b>${t.name}</b>이 학원 평균 대비 우수 (활동 지수 ${c}). β ${t.beta} 효과를 잘 살리고 있어요.`, tone:'good'});
+      else if(c < 40) insights.push({txt:`<b>${t.name}</b> 활동 지수 ${c}로 낮음. β ${t.beta} 변수라 개선 시 ${s.eq.y} 향상에 직결됩니다.`, tone:'bad'});
+    });
+    if(s.status==='green') insights.push({txt:`최근 추세가 우상향 — 다음 시험 ${s.predLow}~${s.predHigh}${s.eq.yUnit||'점'} 예측.`, tone:'good'});
+    if(s.status==='yellow') insights.push({txt:`주의 구간. 1~2개 변수의 회복으로 추세 반전 가능.`, tone:'warn'});
+    if(s.status==='red') insights.push({txt:`데이터 보유 ${s.months}개월로 부족. 4주 이상 추가 누적 후 재분석 권장.`, tone:'bad'});
+    while(insights.length < 3) insights.push({txt:`전체 변수 균형 양호 — 현 패턴 유지 권장.`, tone:'neutral'});
+
+    const insightHtml = insights.slice(0,3).map(i=>{
+      const cls = i.tone==='good'?'bg-emerald-50 border-emerald-100 text-emerald-800':
+                  i.tone==='warn'?'bg-amber-50 border-amber-100 text-amber-800':
+                  i.tone==='bad'?'bg-rose-50 border-rose-100 text-rose-800':
+                  'bg-gray-50 border-gray-100 text-ink-700';
+      const ico = i.tone==='good'?'✅':i.tone==='warn'?'⚠️':i.tone==='bad'?'🚨':'💡';
+      return `<div class="rounded-xl ${cls} border p-4 text-[14px] leading-relaxed"><span class="mr-2">${ico}</span>${i.txt}</div>`;
+    }).join('');
+
+    // 적용 가능 방정식 칩
+    const eqHtml = apEq.map(eq=>`
+      <div class="rounded-xl border-2 ${eq.id===s.eq.id?'border-brand-500 bg-brand-50':'border-gray-200 bg-white'} p-4">
+        <div class="flex items-center gap-2 mb-1">
+          <span class="text-[10px] font-bold text-brand-600 bg-white px-2 py-0.5 rounded-full">v${eq.version}</span>
+          <span class="text-[11px] text-ink-500">신뢰도 ${eq.trust}%</span>
+          ${eq.id===s.eq.id?'<span class="text-[10px] font-bold bg-brand-500 text-white px-2 py-0.5 rounded-full ml-auto">현재 적용</span>':''}
+        </div>
+        <div class="font-extrabold text-[15px]">${eq.name}</div>
+        <div class="text-[12px] text-ink-700 mt-1">${eq.formula}</div>
+      </div>`).join('');
+
+    // Next Action
+    const nextHtml = s.nextActions.map((a,i)=>`
+      <div class="flex gap-3 p-3 border-b border-gray-100 last:border-b-0">
+        <div class="w-7 h-7 rounded-full bg-brand-500 text-white font-extrabold text-xs grid place-items-center flex-shrink-0">${i+1}</div>
+        <div class="text-[14px] text-ink-700 leading-relaxed pt-1">${a}</div>
+      </div>`).join('');
+
+    const statusBadge = {
+      green:`<span class="inline-flex items-center text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full">🟢 예측 가능</span>`,
+      yellow:`<span class="inline-flex items-center text-xs font-bold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full">🟡 주의 필요</span>`,
+      red:`<span class="inline-flex items-center text-xs font-bold text-rose-700 bg-rose-50 px-2.5 py-1 rounded-full">🔴 데이터 부족</span>`
+    }[s.status];
+
+    document.getElementById('sdBody').innerHTML = `
+      <!-- 프로필 카드 -->
+      <section class="bg-white rounded-3xl shadow-card ring-soft p-7">
+        <div class="flex items-start gap-5 flex-wrap">
+          <div class="w-16 h-16 rounded-full bg-soft-navy text-brand-700 font-extrabold grid place-items-center text-2xl flex-shrink-0">${s.name[0]}</div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-3 flex-wrap">
+              <div class="text-[24px] font-extrabold">${s.name}</div>
+              ${statusBadge}
+            </div>
+            <div class="text-sm text-ink-500 mt-1">${s.cls} · 데이터 보유 ${s.months}개월</div>
+          </div>
+          <div class="grid grid-cols-3 gap-4 text-sm">
+            <div><div class="text-[11px] text-ink-500">현재 ${s.eq.y||'예측'}</div><div class="font-extrabold text-[18px] mt-0.5">${s.status==='red'?'—':s.cur+(s.eq.yUnit||'')}</div></div>
+            <div><div class="text-[11px] text-ink-500">다음 시험 예측</div><div class="font-extrabold text-[18px] mt-0.5 text-brand-600">${s.status==='red'?'—':s.predLow+'~'+s.predHigh+(s.eq.yUnit||'')}</div></div>
+            <div><div class="text-[11px] text-ink-500">학부모 연락처</div><div class="font-bold text-[14px] mt-1 ${s.parentPhone?'':'text-rose-600'}">${s.parentPhone || '📵 미등록'}</div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 적용 가능 방정식 -->
+      <section>
+        <h3 class="text-lg font-extrabold mb-3">이 학생에게 적용 가능한 방정식 <span class="text-sm font-semibold text-ink-500 ml-1">${apEq.length}개</span></h3>
+        <div class="grid md:grid-cols-${Math.min(apEq.length,2)} gap-3">${eqHtml}</div>
+      </section>
+
+      <!-- 수집된 데이터 -->
+      <section>
+        <h3 class="text-lg font-extrabold mb-3">수집된 데이터 <span class="text-sm font-semibold text-ink-500 ml-1">최근 8주</span></h3>
+        <div class="grid md:grid-cols-3 gap-4">${varCards}</div>
+      </section>
+
+      <!-- 인사이트 -->
+      <section>
+        <h3 class="text-lg font-extrabold mb-3">원장님이 주목할 인사이트</h3>
+        <div class="space-y-3">${insightHtml}</div>
+      </section>
+
+      <!-- 다음 액션 -->
+      <section class="bg-white rounded-3xl shadow-card ring-soft p-2">
+        <h3 class="text-lg font-extrabold px-5 pt-5 pb-3">추천 다음 액션</h3>
+        ${nextHtml}
+      </section>
+
+      <!-- 하단 CTA 한 번 더 -->
+      <section class="rounded-3xl bg-gradient-to-br from-brand-500 to-brand-600 p-7 text-white">
+        <div class="flex items-center justify-between gap-4 flex-wrap">
+          <div>
+            <div class="text-sm font-bold opacity-90">학부모 상담 / 학생 피드백 준비가 필요하신가요?</div>
+            <div class="text-[20px] font-extrabold mt-1">${s.name} 학생만의 리포트카드를 바로 만들어보세요.</div>
+          </div>
+          <button onclick="startStudentReport()" class="px-5 py-3 rounded-xl bg-white text-brand-700 font-extrabold hover:bg-brand-50 shadow flex items-center gap-2">
+            리포트 생성하기 →
+          </button>
+        </div>
+      </section>
+    `;
+
+    document.getElementById('studentDetail').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeStudentDetail(){
+    document.getElementById('studentDetail').classList.add('hidden');
+    document.body.style.overflow = '';
+    currentStudentIdx = null;
+  }
+  function startStudentReport(){
+    if(currentStudentIdx == null) return;
+    const s = students[currentStudentIdx];
+    const apEq = applicableEquations(s);
+    const eqIdx = equations.findIndex(e=>e.id === apEq[0].id);
+    openWizard({eqIdx: Math.max(0, eqIdx), lockStudent: s});
+  }
+  window.openStudentDetail = openStudentDetail;
+  window.closeStudentDetail = closeStudentDetail;
+  window.startStudentReport = startStudentReport;
 
   function renderWizStep(){
     document.querySelectorAll('.wiz-step').forEach(s=>s.classList.toggle('hidden', +s.dataset.step !== wizStep));
