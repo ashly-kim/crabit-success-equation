@@ -382,6 +382,29 @@
   </div>
 </div>
 
+<!-- ============ 학생 상세 풀페이지 ============ -->
+<div id="studentDetail" class="hidden fixed inset-0 bg-[#f6f7fb] z-40 overflow-y-auto">
+  <div class="sticky top-0 bg-white/95 backdrop-blur border-b border-gray-100 z-10">
+    <div class="max-w-[1100px] mx-auto px-8 py-4 flex items-center justify-between gap-4">
+      <div class="flex items-center gap-4">
+        <button onclick="closeStudentDetail()" class="w-10 h-10 rounded-xl hover:bg-gray-100 grid place-items-center text-ink-500" title="닫기">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <div>
+          <div class="text-xs tracking-widest font-bold text-brand-600">학생 상세 분석</div>
+          <div class="text-[20px] font-extrabold" id="sdTitle">—</div>
+        </div>
+      </div>
+      <button onclick="startStudentReport()" class="px-5 py-3 rounded-xl bg-brand-500 text-white font-bold hover:bg-brand-600 shadow-soft flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        이 학생의 리포트 생성하기
+      </button>
+    </div>
+  </div>
+
+  <div class="max-w-[1100px] mx-auto px-8 py-8 pb-16 space-y-6" id="sdBody"></div>
+</div>
+
 <!-- ============ 단일 리포트 풀페이지 뷰어 ============ -->
 <div id="reportViewer" class="hidden fixed inset-0 bg-[#0f1729]/85 z-50 overflow-y-auto">
   <div class="sticky top-0 bg-white/95 backdrop-blur border-b border-gray-100">
