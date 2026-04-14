@@ -292,11 +292,24 @@
       </div>
     </div>
 
-    <!-- STEP 4: 미리보기 -->
+    <!-- STEP 4: A4 풀페이지 미리보기 (좌우 화살표 + 페이지 표시) -->
     <div class="wiz-step hidden" data-step="4">
-      <h2 class="text-[30px] font-extrabold mb-2">리포트 미리보기</h2>
-      <p class="text-ink-500 text-[16px] mb-8">생성될 리포트를 학생별로 확인한 뒤 발송 방식을 결정하세요.</p>
-      <div id="wizPreviewList" class="space-y-4"></div>
+      <div class="flex items-end justify-between mb-5 flex-wrap gap-3">
+        <div>
+          <h2 class="text-[30px] font-extrabold mb-2">리포트 미리보기</h2>
+          <p class="text-ink-500 text-[16px]">A4 사이즈로 출력될 리포트를 좌우 화살표로 넘기며 모두 확인하세요.</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <button onclick="navReport(-1)" class="w-11 h-11 rounded-full bg-white shadow-card grid place-items-center hover:bg-gray-50">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+          </button>
+          <div class="text-sm font-semibold text-ink-700"><span id="reportPageIdx">1</span> / <span id="reportPageTotal">1</span></div>
+          <button onclick="navReport(1)" class="w-11 h-11 rounded-full bg-white shadow-card grid place-items-center hover:bg-gray-50">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="a4-stage" id="reportStage"></div>
     </div>
 
   </div>
