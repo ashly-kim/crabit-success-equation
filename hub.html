@@ -1034,7 +1034,11 @@
   }
 
   function updateProgress(){
-    const filled = [...document.querySelectorAll('#inputTable input')].filter(x=>x.value && !x.disabled).length;
+    const filled = [...document.querySelectorAll('#inputTable input')].filter(x=>{
+      if(x.disabled) return false;
+      if(x.type === 'checkbox') return x.checked;
+      return x.value;
+    }).length;
     document.getElementById('progressCount').textContent = filled;
   }
 
