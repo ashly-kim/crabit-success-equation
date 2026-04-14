@@ -104,9 +104,11 @@
             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
           </button>
 
-          <!-- 트랙: 양쪽 패딩 + 가운데 카드 풀, 좌우 살짝 -->
-          <div class="overflow-hidden mx-12">
-            <div id="eqTrack" class="flex gap-5 transition-transform duration-500" style="transform:translateX(0)"></div>
+          <!-- 트랙: 가운데 풀폭 + 좌우 카드 살짝 엿보임 -->
+          <div class="mx-12 px-8" style="overflow:hidden">
+            <div class="relative" style="overflow:visible">
+              <div id="eqTrack" class="flex gap-5 transition-transform duration-500 ease-out" style="transform:translateX(0)"></div>
+            </div>
           </div>
 
           <!-- 도트 -->
