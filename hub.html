@@ -254,119 +254,118 @@
     <!-- Step Body (스크롤) -->
     <div class="flex-1 overflow-y-auto px-7 py-6" id="eqBody">
 
+      <!-- STEP 1 · 대상 (Who) -->
       <div class="eq-step" data-step="1">
-        <div class="text-xs tracking-widest font-bold text-brand-600 mb-2">STEP 1</div>
-        <h3 class="text-xl font-bold">무엇을 올리고 싶으세요?</h3>
-        <p class="mt-2 text-sm text-ink-500">개선하고 싶은 목표 변수(Y)를 선택해주세요.</p>
+        <div class="text-xs tracking-widest font-bold text-brand-600 mb-2">STEP 1 · 대상</div>
+        <h3 class="text-xl font-bold">이 방정식은 누구에게 적용할까요?</h3>
+        <p class="mt-2 text-sm text-ink-500">같은 환경의 학생들끼리 묶어야 정확한 분석이 됩니다.</p>
+
+        <div class="mt-5">
+          <label class="block text-sm font-bold mb-2">분석 그룹 선택 <span class="text-xs font-normal text-ink-500">· 복수 선택 가능</span></label>
+          <div class="grid grid-cols-2 gap-2" id="eqGroupList">
+            <button class="eq-group rounded-xl border-2 border-brand-500 bg-brand-50 text-brand-700 p-3 text-sm font-semibold" data-g="m3math">중3 수학반 <span class="text-xs font-normal">(24명)</span></button>
+            <button class="eq-group rounded-xl border-2 border-gray-200 p-3 text-sm font-semibold hover:border-brand-300" data-g="m2math">중2 수학반 <span class="text-xs font-normal">(18명)</span></button>
+            <button class="eq-group rounded-xl border-2 border-gray-200 p-3 text-sm font-semibold hover:border-brand-300" data-g="h1math">고1 수학반 <span class="text-xs font-normal">(22명)</span></button>
+            <button class="eq-group rounded-xl border-2 border-gray-200 p-3 text-sm font-semibold hover:border-brand-300" data-g="m3eng">중3 영어반 <span class="text-xs font-normal">(12명)</span></button>
+            <button class="eq-group rounded-xl border-2 border-gray-200 p-3 text-sm font-semibold hover:border-brand-300" data-g="all">전체 학생 <span class="text-xs font-normal">(76명)</span></button>
+          </div>
+        </div>
+
+        <div class="mt-5 rounded-xl bg-soft-navy p-4 text-sm">
+          💡 <b>분석 대상:</b> <span id="eqTargetSummary" class="text-brand-600 font-bold">중3 수학반 · 24명</span><br/>
+          <span class="text-xs text-ink-500">통계적으로 의미 있으려면 최소 15명 이상 권장해요.</span>
+        </div>
+
+        <div class="mt-5">
+          <label class="block text-sm font-bold mb-2">방정식 이름 <span class="text-xs font-normal text-ink-500">· 선택사항 · 자동 생성됨</span></label>
+          <input id="eqName" placeholder="예: 중3 수학반 · 성적 향상 v1" class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 text-sm focus:border-brand-400 outline-none"/>
+        </div>
+      </div>
+
+      <!-- STEP 2 · 목표 (Y) -->
+      <div class="eq-step hidden" data-step="2">
+        <div class="text-xs tracking-widest font-bold text-brand-600 mb-2">STEP 2 · 목표</div>
+        <h3 class="text-xl font-bold">이 그룹의 무엇을 올리고 싶으세요?</h3>
+        <p class="mt-2 text-sm text-ink-500">개선하고 싶은 결과(Y)를 선택해주세요.</p>
+
         <div class="mt-5 grid grid-cols-2 gap-3">
-          <button class="eq-y-card vcard selected rounded-2xl border-2 border-brand-500 bg-brand-50 p-5 text-left">
+          <button class="eq-y-card rounded-2xl border-2 border-brand-500 bg-brand-50 p-5 text-left">
             <div class="text-2xl">📈</div><div class="mt-2 font-bold">성적</div>
             <div class="text-xs text-ink-500 mt-0.5">다음 시험 점수</div>
           </button>
-          <button class="eq-y-card vcard rounded-2xl border-2 border-gray-100 p-5 text-left hover:border-brand-300">
+          <button class="eq-y-card rounded-2xl border-2 border-gray-100 p-5 text-left hover:border-brand-300">
             <div class="text-2xl">🔁</div><div class="mt-2 font-bold">재등록률</div>
             <div class="text-xs text-ink-500 mt-0.5">이번 분기</div>
           </button>
-          <button class="eq-y-card vcard rounded-2xl border-2 border-gray-100 p-5 text-left hover:border-brand-300">
+          <button class="eq-y-card rounded-2xl border-2 border-gray-100 p-5 text-left hover:border-brand-300">
             <div class="text-2xl">✅</div><div class="mt-2 font-bold">출석률</div>
             <div class="text-xs text-ink-500 mt-0.5">최근 평균</div>
           </button>
-          <button class="eq-y-card vcard rounded-2xl border-2 border-gray-100 p-5 text-left hover:border-brand-300">
+          <button class="eq-y-card rounded-2xl border-2 border-gray-100 p-5 text-left hover:border-brand-300">
             <div class="text-2xl">➕</div><div class="mt-2 font-bold">직접 입력</div>
             <div class="text-xs text-ink-500 mt-0.5">우리 학원만의 목표</div>
           </button>
         </div>
-      </div>
 
-      <div class="eq-step hidden" data-step="2">
-        <div class="text-xs tracking-widest font-bold text-brand-600 mb-2">STEP 2</div>
-        <h3 class="text-xl font-bold">분석할 기간을 선택해주세요</h3>
-        <p class="mt-2 text-sm text-ink-500">선택하신 기간 안의 데이터로 회귀분석을 돌립니다.</p>
-        <div class="mt-5 grid grid-cols-2 gap-3">
-          <button class="eq-period rounded-xl border-2 border-gray-200 p-4 text-sm font-semibold hover:border-brand-300">최근 1개월</button>
-          <button class="eq-period rounded-xl border-2 border-brand-500 bg-brand-50 text-brand-700 p-4 text-sm font-semibold">최근 3개월</button>
-          <button class="eq-period rounded-xl border-2 border-gray-200 p-4 text-sm font-semibold hover:border-brand-300">최근 6개월</button>
-          <button class="eq-period rounded-xl border-2 border-gray-200 p-4 text-sm font-semibold hover:border-brand-300">최근 1년</button>
-        </div>
-        <div class="mt-4 rounded-xl bg-gray-50 p-4 flex items-center gap-2 text-sm">
-          <span class="text-ink-700">직접 선택:</span>
-          <input type="date" value="2026-01-14" class="px-3 py-2 rounded-lg border border-gray-200 text-sm"/>
-          <span class="text-ink-500">~</span>
-          <input type="date" value="2026-04-14" class="px-3 py-2 rounded-lg border border-gray-200 text-sm"/>
+        <div class="mt-5 rounded-xl bg-gray-50 p-4">
+          <div class="text-sm font-semibold mb-2">구체적인 측정 기준</div>
+          <div class="flex gap-2 flex-wrap text-sm">
+            <select class="px-3 py-2 rounded-lg border border-gray-200">
+              <option>내신 점수</option>
+              <option>모의고사 백분위</option>
+              <option>등급</option>
+              <option>자체 테스트 점수</option>
+            </select>
+            <select class="px-3 py-2 rounded-lg border border-gray-200">
+              <option>절대값</option>
+              <option>변화량 (향상도)</option>
+            </select>
+          </div>
         </div>
       </div>
 
+      <!-- STEP 3 · 변수 (X) -->
       <div class="eq-step hidden" data-step="3">
-        <div class="text-xs tracking-widest font-bold text-brand-600 mb-2">STEP 3</div>
-        <h3 class="text-xl font-bold">원장님의 감(感)을 먼저 기록해볼게요</h3>
-        <p class="mt-2 text-sm text-ink-500">각 변수가 성적에 영향을 준다고 얼마나 체감하시나요?</p>
-        <div class="mt-5 space-y-3" id="eqIntuition"></div>
+        <div class="text-xs tracking-widest font-bold text-brand-600 mb-2">STEP 3 · 변수</div>
+        <h3 class="text-xl font-bold">어떤 변수로 분석할까요?</h3>
+        <p class="mt-2 text-sm text-ink-500">관리 중인 변수와 직접 추가 변수 중 선택하세요.</p>
+
+        <!-- 관리 중 -->
+        <div class="mt-5">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="text-xs font-bold text-ink-500">📊 현재 데이터 허브에서 관리 중인 변수</span>
+          </div>
+          <div class="grid grid-cols-2 gap-2" id="eqVarManaged"></div>
+        </div>
+
+        <!-- 직접 추가 -->
+        <div class="mt-5 pt-5 border-t border-gray-100">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="text-xs font-bold text-ink-500">✍️ 이 방정식을 위해 직접 추가</span>
+          </div>
+          <button class="w-full py-3 rounded-xl border-2 border-dashed border-brand-200 text-brand-600 font-semibold text-sm hover:bg-brand-50" id="eqAddCustomX">+ 새 변수 추가하기</button>
+          <div class="mt-2 space-y-1.5" id="eqCustomList"></div>
+        </div>
+
+        <!-- 직관 (inline) -->
+        <div class="mt-6 pt-5 border-t border-gray-100">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="text-xs font-bold text-ink-500">⭐ 원장님의 직관 (선택)</span>
+            <span class="text-[10px] text-ink-400">· STEP 4 결과와 대조됩니다</span>
+          </div>
+          <div class="space-y-2" id="eqIntuition"></div>
+        </div>
       </div>
 
+      <!-- STEP 4 · 분석 결과 -->
       <div class="eq-step hidden" data-step="4">
-        <div class="text-xs tracking-widest font-bold text-brand-600 mb-2">STEP 4</div>
-        <h3 class="text-xl font-bold">데이터를 점검하고 있어요</h3>
-        <p class="mt-2 text-sm text-ink-500">선택하신 기간 안에서 분석 가능 여부를 자동 판정합니다.</p>
-        <div class="mt-5 space-y-2.5">
-          <div class="flex items-center gap-3 p-4 rounded-xl bg-soft-mint">
-            <div class="text-xl">✅</div>
-            <div class="flex-1"><div class="font-bold text-sm">숙제이행률</div><div class="text-xs text-ink-500">학생 24/24명 · 12주 누적</div></div>
-            <div class="text-emerald-700 font-bold text-xs">🟢 분석 가능</div>
-          </div>
-          <div class="flex items-center gap-3 p-4 rounded-xl bg-soft-mint">
-            <div class="text-xl">🕐</div>
-            <div class="flex-1"><div class="font-bold text-sm">복습시간</div><div class="text-xs text-ink-500">학생 22/24명 · 10주 누적</div></div>
-            <div class="text-emerald-700 font-bold text-xs">🟢 분석 가능</div>
-          </div>
-          <div class="flex items-center gap-3 p-4 rounded-xl bg-soft-mint">
-            <div class="text-xl">✅</div>
-            <div class="flex-1"><div class="font-bold text-sm">출결률</div><div class="text-xs text-ink-500">학생 24/24명 · 12주 누적</div></div>
-            <div class="text-emerald-700 font-bold text-xs">🟢 분석 가능</div>
-          </div>
-          <div class="flex items-center gap-3 p-4 rounded-xl bg-soft-lemon">
-            <div class="text-xl">🙋</div>
-            <div class="flex-1"><div class="font-bold text-sm">질문횟수</div><div class="text-xs text-ink-500">학생 18/24명 · 결측 6명</div></div>
-            <div class="text-amber-700 font-bold text-xs">🟡 조건부</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="eq-step hidden" data-step="5">
-        <div class="text-xs tracking-widest font-bold text-brand-600 mb-2">STEP 5</div>
-        <h3 class="text-xl font-bold">하나씩 돌려보며 감을 잡을게요</h3>
-        <p class="mt-2 text-sm text-ink-500">각 변수와 성적의 관계를 그림으로 먼저 보여드려요.</p>
-        <div class="mt-5 grid grid-cols-1 gap-4">
-          <div class="rounded-2xl border border-gray-100 p-5">
-            <div class="flex items-center justify-between mb-2">
-              <div class="font-bold text-sm">복습시간 → 성적</div>
-              <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">🟢 R²=0.61</span>
-            </div>
-            <svg viewBox="0 0 300 100" class="w-full h-24">
-              <g fill="#3a74ff"><circle cx="40" cy="80" r="3"/><circle cx="80" cy="70" r="3"/><circle cx="120" cy="55" r="3"/><circle cx="170" cy="42" r="3"/><circle cx="220" cy="30" r="3"/><circle cx="270" cy="18" r="3"/></g>
-              <line x1="30" y1="85" x2="280" y2="15" stroke="#f04685" stroke-width="2"/>
-            </svg>
-            <div class="mt-1 text-xs text-ink-700">복습 1시간당 <b class="text-brand-600">+3.2점</b></div>
-          </div>
-          <div class="rounded-2xl border border-gray-100 p-5">
-            <div class="flex items-center justify-between mb-2">
-              <div class="font-bold text-sm">숙제이행률 → 성적</div>
-              <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">🟢 R²=0.54</span>
-            </div>
-            <svg viewBox="0 0 300 100" class="w-full h-24">
-              <g fill="#3a74ff"><circle cx="40" cy="78" r="3"/><circle cx="90" cy="65" r="3"/><circle cx="140" cy="50" r="3"/><circle cx="200" cy="35" r="3"/><circle cx="260" cy="22" r="3"/></g>
-              <line x1="30" y1="80" x2="280" y2="20" stroke="#f04685" stroke-width="2"/>
-            </svg>
-            <div class="mt-1 text-xs text-ink-700">숙제이행률 1%p당 <b class="text-brand-600">+0.28점</b></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="eq-step hidden" data-step="6">
-        <div class="text-xs tracking-widest font-bold text-brand-600 mb-2">STEP 6</div>
+        <div class="text-xs tracking-widest font-bold text-brand-600 mb-2">STEP 4 · 분석 완료</div>
         <h3 class="text-xl font-bold">우리 학원만의 성공방정식이 완성됐어요</h3>
-        <p class="mt-2 text-sm text-ink-500">모든 변수를 한 번에 고려한 다중회귀 결과입니다.</p>
+        <p class="mt-2 text-sm text-ink-500">지금 쌓여있는 모든 데이터로 회귀분석을 돌린 결과입니다.</p>
+
+        <!-- 방정식 카드 -->
         <div class="mt-5 rounded-3xl bg-gradient-to-br from-brand-50 to-soft-blush p-6 text-center">
-          <div class="text-xs tracking-widest font-bold text-brand-700 mb-2">우리학원 성공방정식</div>
+          <div class="text-xs tracking-widest font-bold text-brand-700 mb-2">우리 학원 성공방정식</div>
           <div class="text-xl font-extrabold leading-relaxed">
             성적 = <span class="text-brand-600">0.42</span> × 복습 + <span class="text-brand-600">0.28</span> × 숙제 + <span class="text-brand-600">0.19</span> × 출석 + <span class="text-accent-600">62</span>
           </div>
@@ -374,53 +373,31 @@
             🟢 신뢰도 <span class="text-emerald-600">78%</span>
           </div>
         </div>
-      </div>
 
-      <div class="eq-step hidden" data-step="7">
-        <div class="text-xs tracking-widest font-bold text-brand-600 mb-2">STEP 7</div>
-        <h3 class="text-xl font-bold">원장님의 감, 얼마나 맞았을까요?</h3>
-        <p class="mt-2 text-sm text-ink-500">STEP 3에서 기록하신 직관과 실제 데이터를 비교해볼게요.</p>
-        <div class="mt-5 space-y-2.5">
-          <div class="grid grid-cols-[1fr_auto_1fr_auto] items-center gap-3 p-3 rounded-xl border border-gray-100 text-sm">
-            <div><div class="font-bold">복습시간</div><div class="text-xs text-ink-500">직관 3/5</div></div>
-            <div class="text-ink-300">→</div>
-            <div><div class="font-bold text-brand-600">β 0.42 · 1위</div></div>
-            <span class="text-[10px] font-bold text-accent-700 bg-accent-50 px-2 py-0.5 rounded-full">✨ 과소평가</span>
+        <!-- 해석 -->
+        <div class="mt-4 rounded-xl bg-soft-navy p-4 text-sm text-ink-700">
+          💡 <b>핵심 해석:</b> 이 그룹에서는 <b class="text-brand-600">복습시간</b>이 가장 강력해요. 복습 1시간 늘리면 평균 <b>+3.2점</b> 오를 것으로 예측됩니다.
+        </div>
+
+        <!-- 함정 진단 + 직관 비교 (간결하게) -->
+        <div class="mt-4 grid grid-cols-2 gap-2 text-xs">
+          <div class="rounded-xl bg-emerald-50 p-3 flex items-center gap-2">
+            <span class="text-base">✅</span>
+            <div><div class="font-bold text-emerald-700">다중공선성 PASS</div><div class="text-emerald-600">변수 간 중복 없음</div></div>
           </div>
-          <div class="grid grid-cols-[1fr_auto_1fr_auto] items-center gap-3 p-3 rounded-xl border border-gray-100 text-sm">
-            <div><div class="font-bold">숙제이행률</div><div class="text-xs text-ink-500">직관 5/5</div></div>
-            <div class="text-ink-300">→</div>
-            <div><div class="font-bold text-brand-600">β 0.28 · 2위</div></div>
-            <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">👍 일치</span>
-          </div>
-          <div class="grid grid-cols-[1fr_auto_1fr_auto] items-center gap-3 p-3 rounded-xl border border-gray-100 text-sm">
-            <div><div class="font-bold">출결률</div><div class="text-xs text-ink-500">직관 5/5</div></div>
-            <div class="text-ink-300">→</div>
-            <div><div class="font-bold text-brand-600">β 0.19 · 3위</div></div>
-            <span class="text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">⚠️ 과대평가</span>
+          <div class="rounded-xl bg-amber-50 p-3 flex items-center gap-2">
+            <span class="text-base">⚠️</span>
+            <div><div class="font-bold text-amber-700">과적합 주의</div><div class="text-amber-600">데이터 더 쌓이면 개선</div></div>
           </div>
         </div>
+
+        <!-- 직관 vs 실제 비교 (있을 때만) -->
         <div class="mt-4 rounded-xl bg-soft-blush p-4 text-sm">
-          💡 원장님께서 가장 중요하다고 보신 "출석"보다, <b class="text-accent-600">복습</b>이 2배 넘게 강력했습니다.
+          <div class="font-bold mb-2">💡 원장님 직관과의 비교</div>
+          <div class="text-ink-700">가장 중요하다고 보신 "출석"보다 <b class="text-accent-600">복습</b>이 2배 강력했어요.</div>
         </div>
-      </div>
 
-      <div class="eq-step hidden" data-step="8">
-        <div class="text-xs tracking-widest font-bold text-brand-600 mb-2">STEP 8</div>
-        <h3 class="text-xl font-bold">완성! 이제 저장하고 활용해볼까요?</h3>
-        <p class="mt-2 text-sm text-ink-500">이 방정식은 다음 업데이트 전까지 계속 사용됩니다.</p>
-        <div class="mt-5 rounded-3xl bg-white border-2 border-brand-100 p-6">
-          <div class="text-xs tracking-widest font-bold text-brand-700 mb-2">우리학원 성공방정식</div>
-          <div class="text-base font-extrabold">성적 = 복습 × 0.42 + 숙제 × 0.28 + 출석 × 0.19 + 62</div>
-          <div class="mt-3 rounded-lg bg-soft-navy p-3 text-xs">
-            💡 복습 1시간 늘리면 평균 <b>+3.2점</b> 예측
-          </div>
-          <div class="mt-3 text-[11px] text-ink-500">R² 0.78 · 학생 24명 · 2026.04.14 · v3</div>
-        </div>
-        <div class="mt-5 grid grid-cols-2 gap-2">
-          <button class="py-3 rounded-xl border border-gray-200 font-semibold text-sm hover:bg-gray-50">📄 PDF 저장</button>
-          <a href="report.html" class="text-center py-3 rounded-xl bg-brand-500 text-white font-semibold text-sm hover:bg-brand-600">리포트 만들기 →</a>
-        </div>
+        <div class="mt-5 text-[11px] text-ink-500 text-center">중3 수학반 24명 · 누적 데이터 기반 · 2026.04.14 생성</div>
       </div>
 
     </div>
