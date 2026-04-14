@@ -34,6 +34,25 @@
   .tone-btn.on{background:#eef4ff;border-color:#3a74ff;color:#1e48b8;font-weight:600}
 
   .status-dot{width:10px;height:10px;border-radius:9999px;display:inline-block;margin-right:6px}
+
+  /* A4 리포트 페이지 (210×297mm @96dpi = 794×1123) */
+  .a4-stage{position:relative;display:flex;justify-content:center;align-items:flex-start}
+  .a4-page{width:794px;min-height:1123px;background:white;box-shadow:0 8px 30px rgba(17,24,39,.12),0 1px 3px rgba(17,24,39,.06);border-radius:6px;transform-origin:top center;font-size:14px;color:#1e293b;position:relative}
+  .a4-inner{padding:56px 60px 50px 60px;display:flex;flex-direction:column;height:100%;min-height:1123px}
+  .a4-page h1{font-size:26px;font-weight:800;letter-spacing:-.5px}
+  .a4-page h2{font-size:16px;font-weight:800;color:#1e293b;margin-bottom:10px;letter-spacing:-.3px;display:flex;align-items:center;gap:8px}
+  .a4-page h2::before{content:'';width:4px;height:18px;background:#3a74ff;border-radius:2px;display:inline-block}
+  .bar-row{display:flex;align-items:center;gap:10px;margin:7px 0}
+  .bar-row .bar-label{width:90px;font-weight:600;font-size:13px;color:#374151;flex-shrink:0}
+  .bar-row .bar-track{flex:1;height:14px;background:#f1f5f9;border-radius:7px;overflow:hidden;position:relative}
+  .bar-row .bar-fill{height:100%;background:linear-gradient(90deg,#3a74ff,#5a8eff);border-radius:7px}
+  .bar-row .bar-val{width:54px;text-align:right;font-weight:700;font-size:12px;color:#3a74ff;flex-shrink:0}
+  .spark{width:100%;height:46px}
+  .next-action-item{display:flex;gap:10px;padding:10px 0;border-bottom:1px dashed #e5e7eb}
+  .next-action-item:last-child{border-bottom:none}
+  .next-action-item .num{flex-shrink:0;width:24px;height:24px;border-radius:50%;background:#3a74ff;color:white;font-weight:800;font-size:12px;display:grid;place-items:center}
+
+  .send-status-icon{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px}
 </style>
 </head>
 <body class="font-sans text-ink-900 antialiased">
