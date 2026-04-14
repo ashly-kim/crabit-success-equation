@@ -601,7 +601,7 @@
            <div class="text-xs text-ink-500 mt-0.5">6주 후: ${s.predLow}~${s.predHigh}점</div>`;
 
       return `
-      <tr class="border-t border-gray-100 hover:bg-gray-50 transition cursor-pointer" onclick="startWizardForStudent(${i})">
+      <tr class="border-t border-gray-100 hover:bg-gray-50 transition cursor-pointer" onclick="openStudentDetail(${i})">
         <td class="px-5 py-4">
           <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-full bg-soft-navy text-brand-700 font-bold grid place-items-center">${s.name[0]}</div>
@@ -625,7 +625,7 @@
         <td class="px-5 py-4 max-w-[260px]">
           <div class="text-sm ${s.insightColor}">${s.insight}</div>
         </td>
-        <td class="px-5 py-4 text-center" onclick="event.stopPropagation();startWizardForStudent(${i})">
+        <td class="px-5 py-4 text-center" onclick="event.stopPropagation();openStudentDetail(${i})">
           <button class="w-10 h-10 rounded-xl hover:bg-brand-50 grid place-items-center text-ink-500 hover:text-brand-600 transition">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M7 3h10l3 4v14H4V7z"/><path d="M8 12h8M8 16h5"/></svg>
           </button>
