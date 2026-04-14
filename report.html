@@ -6,7 +6,7 @@
 <title>리포트카드 · 우리학원 성공방정식</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="shared.js?v=1776175149517"></script>
+<script src="shared.js?v=1776177022564"></script>
 <script>__applyTheme();</script>
 <style>
   html,body{background:#f6f7fb}
@@ -750,19 +750,291 @@
     return equations.filter(eq => eq.group === '전체 학생' || s.cls === eq.group);
   }
 
-  function tinySpark(arr, color){
-    color = color || '#3a74ff';
-    const max = Math.max(...arr), min = Math.min(...arr);
-    const path = arr.map((v,i)=>{
-      const x = (i/(arr.length-1))*100;
-      const y = 100 - ((v-min)/Math.max(1,max-min))*100;
-      return `${i===0?'M':'L'}${x.toFixed(1)},${y.toFixed(1)}`;
-    }).join(' ');
-    return `<svg viewBox="0 0 100 100" preserveAspectRatio="none" class="w-full h-12">
-      <path d="${path} L100,100 L0,100 Z" fill="${color}" opacity=".12"/>
-      <path d="${path}" fill="none" stroke="${color}" stroke-width="1.6" vector-effect="non-scaling-stroke" stroke-linejoin="round" stroke-linecap="round"/>
-    </svg>`;
+  // ===== 곡선 path (Catmull-Rom → Cubic Bezier) =====
+  function smoothPath(pts){
+    if(pts.length < 2) return '';
+    let d = `M${pts[0].x.toFixed(1)},${pts[0].y.toFixed(1)}`;
+    for(let i = 0; i < pts.length - 1; i++){
+      const p0 = pts[i-1] || pts[i];
+      const p1 = pts[i];
+      const p2 = pts[i+1];
+      const p3 = pts[i+2] || p2;
+      const cp1x = p1.x + (p2.x - p0.x) / 6;
+      const cp1y = p1.y + (p2.y - p0.y) / 6;
+      const cp2x = p2.x - (p3.x - p1.x) / 6;
+      const cp2y = p2.y - (p3.y - p1.y) / 6;
+      d += ` C${cp1x.toFixed(1)},${cp1y.toFixed(1)} ${cp2x.toFixed(1)},${cp2y.toFixed(1)} ${p2.x.toFixed(1)},${p2.y.toFixed(1)}`;
+    }
+    return d;
   }
+
+  let __sparkSeq = 0;
+  function sparkChart(values, labels){
+    // values: number[], labels: string[] (each tooltip)
+    const id = 'sp_' + (++__sparkSeq);
+    const max = Math.max(...values, 1);
+    const min = Math.min(...values);
+    const range = Math.max(1, max - min);
+    const n = values.length;
+    const pts = values.map((v,i) => ({
+      x: n > 1 ? (i / (n - 1)) * 100 : 50,
+      y: 100 - ((v - min) / range) * 90 - 5
+    }));
+    const line = smoothPath(pts);
+    const area = line + ` L${pts[n-1].x.toFixed(1)},100 L${pts[0].x.toFixed(1)},100 Z`;
+    return `
+      <div class="spark-wrap" id="${id}" data-vals='${JSON.stringify(values)}' data-labels='${JSON.stringify(labels)}'>
+        <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="grad-${id}" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#f04685" stop-opacity=".30"/>
+              <stop offset="100%" stop-color="#f04685" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <path d="${area}" fill="url(#grad-${id})"/>
+          <path d="${line}" fill="none" stroke="#f04685" stroke-width="1.8" vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="spark-marker"></div>
+        <div class="spark-tip"></div>
+      </div>
+    `;
+  }
+
+  function bindSparkTooltips(root){
+    (root || document).querySelectorAll('.spark-wrap').forEach(wrap => {
+      if(wrap.__bound) return;
+      wrap.__bound = true;
+      const vals = JSON.parse(wrap.dataset.vals);
+      const labels = JSON.parse(wrap.dataset.labels);
+      const marker = wrap.querySelector('.spark-marker');
+      const tip = wrap.querySelector('.spark-tip');
+      const max = Math.max(...vals, 1);
+      const min = Math.min(...vals);
+      const range = Math.max(1, max - min);
+      const n = vals.length;
+      wrap.addEventListener('mousemove', e => {
+        const rect = wrap.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const ratio = Math.max(0, Math.min(1, x / rect.width));
+        const idx = Math.min(n-1, Math.max(0, Math.round(ratio * (n - 1))));
+        const xPct = n > 1 ? (idx / (n - 1)) * 100 : 50;
+        const yPct = 100 - ((vals[idx] - min) / range) * 90 - 5;
+        marker.style.left = xPct + '%';
+        marker.style.top = yPct + '%';
+        marker.classList.add('on');
+        tip.innerHTML = labels[idx];
+        tip.style.left = xPct + '%';
+        tip.style.top = yPct + '%';
+        tip.classList.add('on');
+      });
+      wrap.addEventListener('mouseleave', () => {
+        marker.classList.remove('on');
+        tip.classList.remove('on');
+      });
+    });
+  }
+
+  // ===== 학생 일별 데이터 (84일) =====
+  const TODAY_FAKE = new Date(2026, 3, 14); // 2026.04.14
+  function ensureDailyData(s){
+    if(s.dailyData) return;
+    const days = 84;
+    const dates = [];
+    for(let i = days - 1; i >= 0; i--){
+      const d = new Date(TODAY_FAKE);
+      d.setDate(d.getDate() - i);
+      dates.push(d);
+    }
+    s.dailyDates = dates;
+    s.dailyData = {};
+    s.classAvg = {};
+    s.eq.terms.forEach(t => {
+      const center = 35 + Math.floor(Math.random() * 30);
+      s.classAvg[t.name] = center;
+      s.dailyData[t.name] = dates.map((_, i) => {
+        const olderMissing = i < days * 0.5 ? 0.45 : 0.18;
+        if(Math.random() < olderMissing) return null;
+        const wave = Math.sin(i / 10) * 12 + (s.contribution[t.name] - 50) * 0.4;
+        return Math.max(0, Math.round(center + wave + (Math.random() * 18 - 9)));
+      });
+    });
+  }
+
+  function fmtMD(d){
+    return `${d.getMonth()+1}/${d.getDate()}`;
+  }
+  function fmtYMD(d){
+    return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+  }
+  function sameDate(a, b){ return a.toDateString() === b.toDateString(); }
+
+  // ===== 미니 캘린더 (기간 선택) =====
+  let sdCalMonth = null; // {y, m}
+  let sdPeriod = null;   // {start, end}
+  let sdPickStart = null;
+
+  function pickCalDate(y, m, d){
+    const date = new Date(y, m, d);
+    if(!sdPickStart){
+      sdPickStart = date;
+      sdPeriod = null;
+    } else if(date < sdPickStart){
+      // 새 시작점
+      sdPickStart = date;
+      sdPeriod = null;
+    } else {
+      sdPeriod = {start: sdPickStart, end: date};
+      sdPickStart = null;
+    }
+    refreshDataSection();
+  }
+  function navCalMonth(dir){
+    if(!sdCalMonth) return;
+    let y = sdCalMonth.y, m = sdCalMonth.m + dir;
+    if(m < 0){ m = 11; y--; }
+    if(m > 11){ m = 0; y++; }
+    sdCalMonth = {y, m};
+    refreshDataSection();
+  }
+  function resetCalRange(){
+    sdPeriod = null; sdPickStart = null;
+    refreshDataSection();
+  }
+  window.pickCalDate = pickCalDate;
+  window.navCalMonth = navCalMonth;
+  window.resetCalRange = resetCalRange;
+
+  function renderCalendar(){
+    const s = students[currentStudentIdx];
+    const availSet = new Set(s.dailyDates.filter((_, i) =>
+      s.eq.terms.some(t => s.dailyData[t.name][i] != null)
+    ).map(d => d.toDateString()));
+
+    if(!sdCalMonth) sdCalMonth = {y: TODAY_FAKE.getFullYear(), m: TODAY_FAKE.getMonth()};
+    const {y, m} = sdCalMonth;
+    const first = new Date(y, m, 1);
+    const last = new Date(y, m+1, 0);
+    const startDow = first.getDay();
+    const days = last.getDate();
+
+    let cells = '';
+    for(let i = 0; i < startDow; i++) cells += '<div class="mini-cal-cell"></div>';
+    for(let d = 1; d <= days; d++){
+      const date = new Date(y, m, d);
+      const has = availSet.has(date.toDateString());
+      let cls = 'mini-cal-cell';
+      if(has) cls += ' has';
+      if(sdPeriod && date >= sdPeriod.start && date <= sdPeriod.end){
+        cls += ' in-range';
+        if(sameDate(date, sdPeriod.start) || sameDate(date, sdPeriod.end)) cls += ' range-end';
+      } else if(sdPickStart && sameDate(date, sdPickStart)){
+        cls += ' in-range range-end';
+      }
+      cells += `<div class="${cls}" ${has?`onclick="pickCalDate(${y},${m},${d})"`:''}>${d}</div>`;
+    }
+
+    const periodText = sdPeriod
+      ? `<span class="text-accent-700 font-bold">${fmtYMD(sdPeriod.start)} ~ ${fmtYMD(sdPeriod.end)}</span>`
+      : sdPickStart
+        ? `<span class="text-ink-500">시작: ${fmtYMD(sdPickStart)} · 끝 날짜를 클릭하세요</span>`
+        : `<span class="text-ink-500">전체 기간 (최근 12주)</span>`;
+
+    return `
+      <div class="mini-cal bg-white rounded-xl border border-gray-200 p-4">
+        <div class="flex items-center justify-between mb-3">
+          <button onclick="navCalMonth(-1)" class="w-8 h-8 rounded-lg hover:bg-gray-100 grid place-items-center text-ink-500">‹</button>
+          <div class="font-bold text-sm">${y}년 ${m+1}월</div>
+          <button onclick="navCalMonth(1)" class="w-8 h-8 rounded-lg hover:bg-gray-100 grid place-items-center text-ink-500">›</button>
+        </div>
+        <div class="mini-cal-grid">
+          ${['일','월','화','수','목','금','토'].map(d=>`<div class="mini-cal-dow">${d}</div>`).join('')}
+          ${cells}
+        </div>
+        <div class="mt-3 flex items-center justify-between text-[11px]">
+          <div>📅 ${periodText}</div>
+          ${(sdPeriod || sdPickStart) ? '<button onclick="resetCalRange()" class="text-accent-600 font-semibold underline">초기화</button>' : ''}
+        </div>
+        <div class="mt-2 text-[10px] text-ink-500">회색 칸 = 데이터가 입력된 날짜만 선택 가능</div>
+      </div>
+    `;
+  }
+
+  // 선택된 기간(또는 전체)으로 변수별 데이터 가공해서 변수 카드 렌더
+  function renderVarCards(){
+    const s = students[currentStudentIdx];
+    const start = sdPeriod ? sdPeriod.start : s.dailyDates[0];
+    const end = sdPeriod ? sdPeriod.end : s.dailyDates[s.dailyDates.length-1];
+    // 인덱스 범위
+    const idxRange = s.dailyDates.map((d,i)=>({d,i})).filter(x=>x.d>=start && x.d<=end);
+    if(idxRange.length === 0){
+      return '<div class="text-ink-500 text-sm">선택한 기간에 데이터가 없어요.</div>';
+    }
+    return s.eq.terms.map(t => {
+      const dataInRange = idxRange.map(x => ({val: s.dailyData[t.name][x.i], d: x.d}));
+      // 주 단위 버킷 (최대 12개)
+      const totalDays = dataInRange.length;
+      const bucketSize = Math.max(1, Math.ceil(totalDays / 12));
+      const buckets = [];
+      for(let i = 0; i < dataInRange.length; i += bucketSize){
+        const slice = dataInRange.slice(i, i + bucketSize);
+        const nonNull = slice.filter(x => x.val != null);
+        const avg = nonNull.length ? Math.round(nonNull.reduce((a,b)=>a+b.val,0)/nonNull.length) : 0;
+        buckets.push({avg, start: slice[0].d, end: slice[slice.length-1].d, hasData: nonNull.length > 0});
+      }
+      const values = buckets.map(b => b.avg);
+      const labels = buckets.map(b =>
+        b.hasData
+          ? `<b>${fmtMD(b.start)}${bucketSize>1?' ~ '+fmtMD(b.end):''}</b><br/>${b.avg} ${t.unit}`
+          : `<b>${fmtMD(b.start)}${bucketSize>1?' ~ '+fmtMD(b.end):''}</b><br/><span style="opacity:.7">데이터 없음 (0 처리)</span>`
+      );
+      // 학생 평균 / 반 평균 비교
+      const allVals = dataInRange.map(x=>x.val).filter(v=>v!=null);
+      const studentAvg = allVals.length ? Math.round(allVals.reduce((a,b)=>a+b,0)/allVals.length) : 0;
+      const classAvg = s.classAvg[t.name];
+      const diffPct = classAvg ? Math.round(((studentAvg - classAvg) / classAvg) * 100) : 0;
+      const compareLabel = studentAvg === 0
+        ? '<span class="text-ink-500">데이터 없음</span>'
+        : (diffPct >= 0
+          ? `<span class="text-accent-700 font-bold">반 평균 대비 +${diffPct}% 상위</span>`
+          : `<span class="text-rose-600 font-bold">반 평균 대비 ${diffPct}% 하위</span>`);
+      return `
+        <div class="bg-white rounded-2xl shadow-card ring-soft p-5">
+          <div class="flex items-baseline gap-2 mb-1">
+            <div class="text-base font-extrabold text-ink-900">${t.name}</div>
+            <div class="text-xs text-ink-500">· ${t.unit}</div>
+            <span class="text-[10px] font-bold text-brand-600 bg-brand-50 px-2 py-0.5 rounded-full ml-auto">β ${t.beta}</span>
+          </div>
+          <div class="flex items-end justify-between mt-2 mb-2">
+            <div>
+              <div class="text-2xl font-extrabold text-ink-900">${studentAvg}</div>
+              <div class="text-[11px] text-ink-500 mt-0.5">기간 평균</div>
+            </div>
+            <div class="text-right">
+              <div class="text-[11px] text-ink-500">반 평균</div>
+              <div class="text-sm font-bold text-ink-700">${classAvg}</div>
+            </div>
+          </div>
+          <div class="text-[12px] mb-2">${compareLabel}</div>
+          ${sparkChart(values, labels)}
+          <div class="flex justify-between text-[10px] text-ink-500 mt-2">
+            <span>${fmtMD(buckets[0].start)}</span>
+            <span>${fmtMD(buckets[buckets.length-1].end)}</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function refreshDataSection(){
+    const calEl = document.getElementById('sdCalendar');
+    const varEl = document.getElementById('sdVarCards');
+    if(calEl) calEl.innerHTML = renderCalendar();
+    if(varEl){
+      varEl.innerHTML = renderVarCards();
+      bindSparkTooltips(varEl);
+    }
+  }
+  window.refreshDataSection = refreshDataSection;
 
   function openStudentDetail(idx){
     currentStudentIdx = idx;
