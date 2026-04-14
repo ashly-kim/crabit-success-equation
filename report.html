@@ -982,6 +982,7 @@
   window.selectWizEq = selectWizEq;
 
   function eligibleStudents(){
+    if(wizState.lockStudent) return [wizState.lockStudent];
     const eq = equations[wizState.eqIdx];
     return students.filter(s => eq.group === '전체 학생' || s.cls === eq.group);
   }
