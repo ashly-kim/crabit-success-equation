@@ -1,4 +1,55 @@
 // 공통 Tailwind config + 스타일
+(function injectCustomFormStyles(){
+  if(document.getElementById('__customFormStyles')) return;
+  const css = `
+  /* 자체 체크박스 */
+  input[type="checkbox"]:not(.sr-only):not(.native){
+    -webkit-appearance:none; appearance:none;
+    width:22px; height:22px; min-width:22px; min-height:22px;
+    border:2px solid #d1d5db; border-radius:6px;
+    background:#fff; cursor:pointer; position:relative;
+    transition:all .12s ease; flex-shrink:0;
+    vertical-align:middle;
+  }
+  input[type="checkbox"]:not(.sr-only):not(.native):hover{ border-color:#3a74ff }
+  input[type="checkbox"]:not(.sr-only):not(.native):checked{
+    background:#3a74ff; border-color:#3a74ff;
+  }
+  input[type="checkbox"]:not(.sr-only):not(.native):checked::after{
+    content:''; position:absolute; left:6px; top:2px;
+    width:6px; height:11px; border:solid #fff;
+    border-width:0 2.5px 2.5px 0; transform:rotate(45deg);
+  }
+  input[type="checkbox"]:not(.sr-only):not(.native):focus-visible{
+    box-shadow:0 0 0 4px rgba(58,116,255,.18);
+  }
+
+  /* 자체 라디오 */
+  input[type="radio"]:not(.sr-only):not(.native){
+    -webkit-appearance:none; appearance:none;
+    width:22px; height:22px; min-width:22px; min-height:22px;
+    border:2px solid #d1d5db; border-radius:9999px;
+    background:#fff; cursor:pointer; position:relative;
+    transition:all .12s ease; flex-shrink:0;
+    vertical-align:middle;
+  }
+  input[type="radio"]:not(.sr-only):not(.native):hover{ border-color:#3a74ff }
+  input[type="radio"]:not(.sr-only):not(.native):checked{ border-color:#3a74ff }
+  input[type="radio"]:not(.sr-only):not(.native):checked::after{
+    content:''; position:absolute; left:50%; top:50%;
+    width:11px; height:11px; border-radius:9999px; background:#3a74ff;
+    transform:translate(-50%,-50%);
+  }
+  input[type="radio"]:not(.sr-only):not(.native):focus-visible{
+    box-shadow:0 0 0 4px rgba(58,116,255,.18);
+  }
+  `;
+  const style = document.createElement('style');
+  style.id = '__customFormStyles';
+  style.textContent = css;
+  (document.head || document.documentElement).appendChild(style);
+})();
+
 window.__applyTheme = function(){
   tailwind.config = {
     theme: {
