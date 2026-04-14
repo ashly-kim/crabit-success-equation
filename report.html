@@ -1088,25 +1088,72 @@
 
   function renderGdList(){
     const g = currentGen;
-    document.getElementById('gdReportList').innerHTML = g.students.map((s,i)=>{
+    document.getElementById('gdReportBody').innerHTML = g.students.map((s,i)=>{
       const checked = gdSelected.has(i);
-      const phoneWarn = s.kakao === 'noPhone'
-        ? '<span class="text-[11px] font-bold text-rose-700 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-full ml-2">📵 학부모 번호 미등록</span>'
-        : '';
+      const phoneCell = s.parentPhone
+        ? `<span class="font-mono">${s.parentPhone}</span>`
+        : `<span class="inline-flex items-center gap-1 text-rose-700 bg-rose-50 border border-rose-200 px-2 py-1 rounded-md text-xs font-bold">📵 미등록</span>`;
+      let kakaoCell;
+      if(s.kakao === 'sent'){
+        kakaoCell = `<div class="flex items-center gap-2"><span class="send-status-icon bg-yellow-100" title="발송 완료"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="#3a1d1d"><path d="M12 4C6.48 4 2 7.58 2 12c0 2.72 1.7 5.12 4.29 6.56-.18.66-.66 2.38-.76 2.75-.12.46.17.46.36.33.15-.1 2.4-1.63 3.35-2.28.91.13 1.82.19 2.76.19 5.52 0 10-3.58 10-8S17.52 4 12 4z"/></svg></span><span class="text-ink-700">${s.kakaoAt}</span></div>`;
+      } else if(s.kakao === 'fail'){
+        kakaoCell = `<span class="inline-flex items-center gap-1 text-rose-700 text-xs font-bold">⚠️ 발송 실패 · 재시도 필요</span>`;
+      } else if(s.kakao === 'noPhone'){
+        kakaoCell = `<span class="text-ink-300">—</span>`;
+      } else {
+        kakaoCell = `<span class="text-ink-500 text-xs">발송 전</span>`;
+      }
+      const disabledAttr = s.kakao === 'noPhone' ? 'disabled title="학부모 번호 미등록"' : '';
       return `
-      <div class="bg-white rounded-2xl shadow-card ring-soft p-4 flex items-center gap-4 hover:bg-gray-50 transition cursor-pointer" onclick="openReportViewer(${i})">
-        <input type="checkbox" ${checked?'checked':''} onclick="event.stopPropagation()" onchange="gdToggle(${i}, this.checked)"/>
-        <div class="w-11 h-11 rounded-full bg-soft-navy text-brand-700 font-bold grid place-items-center">${s.name[0]}</div>
-        <div class="flex-1 min-w-0">
-          <div class="flex items-center flex-wrap"><span class="font-extrabold text-[16px]">${s.name}</span>${phoneWarn}</div>
-          <div class="text-xs text-ink-500 mt-0.5">${s.cls} · 예측 ${s.status==='red'?'데이터 부족':s.cur+(g.eq.yUnit||'')}</div>
-        </div>
-        ${statusIcons(s)}
-        <button class="ml-2 px-3 py-1.5 text-xs rounded-lg border border-gray-200 hover:bg-gray-50 font-semibold" onclick="event.stopPropagation();openReportViewer(${i})">열어보기 →</button>
-      </div>`;
+      <tr class="border-t border-gray-100 hover:bg-gray-50 transition">
+        <td class="px-4 py-4 text-center">
+          <input type="checkbox" ${checked?'checked':''} ${disabledAttr} onchange="gdToggle(${i}, this.checked)"/>
+        </td>
+        <td class="px-4 py-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-soft-navy text-brand-700 font-bold grid place-items-center">${s.name[0]}</div>
+            <div>
+              <div class="font-extrabold text-[15px]">${s.name}</div>
+              <div class="text-[11px] text-ink-500 mt-0.5">${s.cls}</div>
+            </div>
+          </div>
+        </td>
+        <td class="px-4 py-4 text-[13px]">${phoneCell}</td>
+        <td class="px-4 py-4 text-[13px]">${kakaoCell}</td>
+        <td class="px-4 py-4">
+          <div class="flex items-center justify-center gap-1.5">
+            <button onclick="copyReportLink(${i})" title="공유 링크 복사" class="w-9 h-9 rounded-lg border border-gray-200 hover:bg-brand-50 hover:border-brand-300 hover:text-brand-600 grid place-items-center text-ink-500 transition">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.07 0l3-3a5 5 0 00-7.07-7.07l-1.5 1.5"/><path d="M14 11a5 5 0 00-7.07 0l-3 3a5 5 0 007.07 7.07l1.5-1.5"/></svg>
+            </button>
+            <button onclick="openReportViewer(${i})" title="리포트 크게 열어보기" class="w-9 h-9 rounded-lg border border-gray-200 hover:bg-brand-50 hover:border-brand-300 hover:text-brand-600 grid place-items-center text-ink-500 transition">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 3h6v6"/><path d="M9 21H3v-6"/><path d="M21 3l-7 7"/><path d="M3 21l7-7"/></svg>
+            </button>
+          </div>
+        </td>
+      </tr>`;
     }).join('');
     updateGdSelCount();
   }
+
+  // 공유 링크 복사
+  function copyReportLink(i){
+    const s = currentGen.students[i];
+    const link = `https://crabit.school/r/${currentGen.id}/${encodeURIComponent(s.name)}-${Math.random().toString(36).slice(2,8)}`;
+    const fallback = ()=>{
+      const ta = document.createElement('textarea');
+      ta.value = link; document.body.appendChild(ta); ta.select();
+      try{ document.execCommand('copy'); }catch(e){}
+      document.body.removeChild(ta);
+    };
+    if(navigator.clipboard?.writeText){
+      navigator.clipboard.writeText(link).catch(fallback);
+    } else { fallback(); }
+    const t = document.getElementById('copyToast');
+    t.classList.remove('hidden');
+    clearTimeout(window.__toastT);
+    window.__toastT = setTimeout(()=>t.classList.add('hidden'), 1800);
+  }
+  window.copyReportLink = copyReportLink;
 
   function gdToggle(idx, checked){
     if(checked) gdSelected.add(idx); else gdSelected.delete(idx);
