@@ -679,10 +679,10 @@
   }
 
   function wizNext(){
-    if(wizStep < WIZ_STEPS){ wizStep++; renderWizStep(); window.scrollTo({top:0}); }
+    if(wizStep < WIZ_STEPS){ wizStep++; renderWizStep(); document.getElementById('wizard').scrollTo({top:0}); }
     else { alert(`${document.querySelectorAll('#wizPreviewList > div').length}건의 리포트가 발송되었어요!`); closeWizard(); }
   }
-  function wizPrev(){ if(wizStep>1){ wizStep--; renderWizStep(); window.scrollTo({top:0}); } }
+  function wizPrev(){ if(wizStep>1){ wizStep--; renderWizStep(); document.getElementById('wizard').scrollTo({top:0}); } }
   window.wizNext = wizNext; window.wizPrev = wizPrev;
 </script>
 </body>
