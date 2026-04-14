@@ -94,23 +94,24 @@
           </div>
         </div>
 
-        <!-- 캐러셀: 양옆 다른 카드 살짝 보이게 -->
+        <!-- 캐러셀: 한 번에 카드 하나, 좌우 화살표는 카드 바깥 균형 -->
         <div class="relative" id="eqCarouselWrap">
-          <!-- 좌우 nav -->
-          <button onclick="navEq(-1)" class="absolute left-2 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-white shadow-card grid place-items-center text-ink-700 hover:bg-gray-50 hover:scale-110 transition">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
-          </button>
-          <button onclick="navEq(1)" class="absolute right-2 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-white shadow-card grid place-items-center text-ink-700 hover:bg-gray-50 hover:scale-110 transition">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-          </button>
+          <!-- 상단 중앙 도트 -->
+          <div id="eqDots" class="mb-3 flex justify-center gap-2"></div>
 
-          <!-- 트랙: 가운데 풀폭 + 좌우 카드 살짝 엿보임 -->
-          <div class="mx-12" style="overflow:hidden">
-            <div id="eqTrack" class="flex gap-4 transition-transform duration-500 ease-out py-1" style="padding:0 7%"></div>
+          <div class="flex items-stretch gap-3">
+            <button onclick="navEq(-1)" class="flex-shrink-0 self-center w-11 h-11 rounded-full bg-white shadow-card grid place-items-center text-ink-700 hover:bg-gray-50 hover:scale-110 transition">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+            </button>
+
+            <div class="flex-1 min-w-0" style="overflow:hidden">
+              <div id="eqTrack" class="flex transition-transform duration-500 ease-out py-1"></div>
+            </div>
+
+            <button onclick="navEq(1)" class="flex-shrink-0 self-center w-11 h-11 rounded-full bg-white shadow-card grid place-items-center text-ink-700 hover:bg-gray-50 hover:scale-110 transition">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+            </button>
           </div>
-
-          <!-- 도트 -->
-          <div id="eqDots" class="mt-4 flex justify-center gap-2"></div>
         </div>
 
         <!-- 방정식 없음 (전부 비었을 때) -->
