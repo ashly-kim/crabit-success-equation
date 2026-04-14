@@ -1079,9 +1079,9 @@
       </div>`;
     }).join('');
 
-    // 캐러셀 이동 (중앙 정렬)
-    const percent = -100 * eqCurrentIndex;
-    track.style.transform = `translateX(${percent}%)`;
+    // 캐러셀 이동 (카드 86% + gap 16px 고려)
+    const offset = eqCurrentIndex * (86 + (16/track.offsetWidth*100));
+    track.style.transform = `translateX(-${offset}%)`;
 
     // 도트
     document.getElementById('eqDots').innerHTML = equations.map((_,i)=>
