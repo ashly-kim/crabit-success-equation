@@ -13,22 +13,27 @@
   .nav-item.active{background:#eef4ff;color:#2559e6;font-weight:600}
   .nav-item.active svg{color:#2559e6}
   .ring-soft{box-shadow:inset 0 0 0 1px #eef0f5}
+
+  .top-tab{padding:12px 4px;font-weight:600;color:#6b7280;border-bottom:2px solid transparent;transition:.15s;cursor:pointer}
+  .top-tab.on{color:#1e48b8;border-color:#3a74ff}
+
   .modal{position:fixed;inset:0;background:rgba(17,24,39,.55);display:none;align-items:center;justify-content:center;z-index:50;padding:20px}
   .modal.on{display:flex;animation:fade .2s}
   @keyframes fade{from{opacity:0}to{opacity:1}}
   .modal-box{animation:slideUp .3s cubic-bezier(.2,.8,.2,1)}
   @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+
+  /* 사이드 드로어 */
+  .drawer{position:fixed;inset:0;z-index:50;display:none}
+  .drawer.on{display:block}
+  .drawer-bg{position:absolute;inset:0;background:rgba(17,24,39,.55);animation:fade .2s}
+  .drawer-panel{position:absolute;right:0;top:0;height:100%;width:100%;max-width:720px;background:white;box-shadow:-4px 0 24px rgba(0,0,0,.15);display:flex;flex-direction:column;transform:translateX(100%);transition:transform .35s cubic-bezier(.2,.8,.2,1)}
+  .drawer.on .drawer-panel{transform:translateX(0)}
+
   .tab-btn.active{background:white;color:#1e48b8;box-shadow:0 1px 3px rgba(0,0,0,.08)}
   .tone-btn.on{background:#eef4ff;border-color:#3a74ff;color:#1e48b8;font-weight:600}
-  .top-tab{padding:12px 4px;font-weight:600;color:#6b7280;border-bottom:2px solid transparent;transition:.15s;cursor:pointer}
-  .top-tab.on{color:#1e48b8;border-color:#3a74ff}
-  .row-btn{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;transition:.15s}
-  .row-btn:hover{background:#eef4ff;color:#2559e6}
-  .student-row{transition:.15s}
-  .student-row:hover{background:#f9fafc}
-  .expand{max-height:0;overflow:hidden;transition:max-height .35s ease}
-  .expand.open{max-height:600px}
-  .history-chip{width:28px;height:28px;border-radius:8px;display:inline-grid;place-items:center;margin-right:4px}
+
+  .status-dot{width:10px;height:10px;border-radius:9999px;display:inline-block;margin-right:6px}
 </style>
 </head>
 <body class="font-sans text-ink-900 antialiased">
@@ -38,57 +43,84 @@
     <div id="topbar"></div>
     <div class="px-8 py-8 max-w-[1280px] mx-auto space-y-8">
 
-      <!-- Hero (배경 없음) -->
+      <!-- Hero + CTA -->
       <section>
-        <div class="text-sm text-brand-600 font-semibold">STEP 3 · 리포트카드 생성기</div>
-        <h1 class="mt-2 text-[32px] leading-tight font-extrabold">
-          학생별 리포트를 만들고<br/>
-          학부모에게 <span class="text-brand-600">알림톡</span>으로 바로 보내세요.
-        </h1>
-        <p class="mt-3 text-ink-500 text-[15px] max-w-3xl">
-          지금 사용 중인 방정식 기준으로 리포트가 생성됩니다. 새 데이터가 쌓이면 자동으로 다음 버전으로 올라가요.
-        </p>
+        <div class="flex items-start justify-between gap-6 flex-wrap">
+          <div>
+            <div class="text-sm text-brand-600 font-semibold">리포트카드</div>
+            <h1 class="mt-2 text-[32px] leading-tight font-extrabold">
+              학생별 <span class="text-brand-600">예측 현황</span>과<br/>
+              리포트를 한 곳에서 관리하세요.
+            </h1>
+            <p class="mt-3 text-ink-500 text-[15px] max-w-2xl">
+              지금까지 쌓인 데이터 기준으로 학생별 예측 현황을 한눈에 확인하고, 학부모 상담에 필요한 리포트를 바로 생성·발송하세요.
+            </p>
+          </div>
+          <button onclick="openGenerateModal()" class="px-6 py-4 rounded-2xl bg-brand-500 text-white font-bold text-base hover:bg-brand-600 shadow-soft flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+            리포트카드 생성
+          </button>
+        </div>
       </section>
 
       <!-- Top Tabs -->
       <section>
         <div class="flex items-center gap-8 border-b border-gray-200">
-          <div class="top-tab on" data-tab="gen">📝 리포트 생성 · 발송</div>
+          <div class="top-tab on" data-tab="now">📊 지금의 현황</div>
           <div class="top-tab" data-tab="hist">📚 리포트 히스토리</div>
         </div>
       </section>
 
-      <!-- TAB 1: Generate / Send -->
-      <div class="top-pane" data-pane="gen">
+      <!-- ============ TAB 1: 지금의 현황 ============ -->
+      <div class="top-pane" data-pane="now">
 
-        <!-- Actions -->
-        <section class="bg-white rounded-3xl p-5 shadow-card ring-soft mb-6">
-          <div class="flex items-center justify-between flex-wrap gap-4">
-            <div class="flex items-center gap-2">
-              <input placeholder="🔍 학생 이름으로 검색" class="px-4 py-2.5 rounded-xl border border-gray-200 text-sm w-64"/>
-              <select class="px-4 py-2.5 rounded-xl border border-gray-200 text-sm">
-                <option>전체 반</option><option>중3 수학반</option><option>중2 수학반</option><option>고1 수학반</option>
-              </select>
-              <select class="px-4 py-2.5 rounded-xl border border-gray-200 text-sm">
-                <option>전체 학생</option><option>데이터 수집률 높은 순</option><option>최근 리포트순</option><option>리포트 미발행</option>
-              </select>
-            </div>
-            <div class="text-sm text-ink-500">
-              전체 <b class="text-ink-900">76명</b>
-            </div>
+        <!-- 요약 지표 -->
+        <section class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <div class="bg-white rounded-2xl p-5 shadow-card ring-soft">
+            <div class="text-xs text-ink-500 mb-1">전체 학생</div>
+            <div class="text-2xl font-extrabold">76<span class="text-base font-bold text-ink-500 ml-1">명</span></div>
+          </div>
+          <div class="bg-white rounded-2xl p-5 shadow-card ring-soft">
+            <div class="text-xs text-ink-500 mb-1">예측 가능</div>
+            <div class="text-2xl font-extrabold text-emerald-600">52<span class="text-base font-bold text-ink-500 ml-1">명</span></div>
+          </div>
+          <div class="bg-white rounded-2xl p-5 shadow-card ring-soft">
+            <div class="text-xs text-ink-500 mb-1">주의 필요</div>
+            <div class="text-2xl font-extrabold text-amber-600">16<span class="text-base font-bold text-ink-500 ml-1">명</span></div>
+          </div>
+          <div class="bg-white rounded-2xl p-5 shadow-card ring-soft">
+            <div class="text-xs text-ink-500 mb-1">데이터 부족</div>
+            <div class="text-2xl font-extrabold text-rose-600">8<span class="text-base font-bold text-ink-500 ml-1">명</span></div>
           </div>
         </section>
 
-        <!-- Student Table -->
+        <!-- 필터 -->
+        <section class="bg-white rounded-2xl p-4 shadow-card ring-soft mb-6">
+          <div class="flex items-center gap-2 flex-wrap">
+            <input placeholder="🔍 학생 이름으로 검색" class="px-4 py-2.5 rounded-xl border border-gray-200 text-sm flex-1 min-w-[220px]"/>
+            <select class="px-4 py-2.5 rounded-xl border border-gray-200 text-sm">
+              <option>전체 반</option><option>중3 수학반</option><option>중2 수학반</option><option>고1 수학반</option>
+            </select>
+            <select class="px-4 py-2.5 rounded-xl border border-gray-200 text-sm">
+              <option>전체 방정식</option><option>중3 수학반 · 성적 향상 v2</option><option>고1 영어반 · 모의고사 등급</option>
+            </select>
+            <select class="px-4 py-2.5 rounded-xl border border-gray-200 text-sm">
+              <option>전체 상태</option><option>🟢 예측 가능</option><option>🟡 주의 필요</option><option>🔴 데이터 부족</option>
+            </select>
+          </div>
+        </section>
+
+        <!-- 학생 리스트 -->
         <section class="bg-white rounded-3xl shadow-card ring-soft overflow-hidden">
           <table class="w-full text-sm">
             <thead>
               <tr class="bg-gray-50 text-ink-500 text-[13px]">
                 <th class="px-5 py-3 text-left">학생</th>
-                <th class="px-5 py-3 text-left">반</th>
-                <th class="px-5 py-3 text-left">마지막 리포트 생성일</th>
-                <th class="px-5 py-3 text-left">데이터 수집 진행률</th>
-                <th class="px-5 py-3 text-center w-24">액션</th>
+                <th class="px-5 py-3 text-left">적용 방정식</th>
+                <th class="px-5 py-3 text-left">데이터 수집 기간</th>
+                <th class="px-5 py-3 text-left">현재 예측</th>
+                <th class="px-5 py-3 text-left">추천 액션 (인사이트)</th>
+                <th class="px-5 py-3 text-center w-24">리포트</th>
               </tr>
             </thead>
             <tbody id="studentTable"></tbody>
@@ -111,18 +143,21 @@
 
       </div>
 
-      <!-- TAB 2: History -->
+      <!-- ============ TAB 2: 리포트 히스토리 ============ -->
       <div class="top-pane hidden" data-pane="hist">
 
         <section class="bg-white rounded-3xl p-5 shadow-card ring-soft mb-6">
           <div class="flex items-center justify-between flex-wrap gap-4">
-            <div class="flex items-center gap-2">
-              <input placeholder="🔍 학생 이름으로 검색" class="px-4 py-2.5 rounded-xl border border-gray-200 text-sm w-64" />
+            <div class="flex items-center gap-2 flex-wrap">
+              <input placeholder="🔍 학생 이름으로 검색" class="px-4 py-2.5 rounded-xl border border-gray-200 text-sm w-64"/>
               <select class="px-4 py-2.5 rounded-xl border border-gray-200 text-sm">
-                <option>전체 기간</option><option>최근 30일</option><option>최근 3개월</option><option>2026년</option>
+                <option>전체 기간</option><option>최근 30일</option><option>최근 3개월</option>
               </select>
               <select class="px-4 py-2.5 rounded-xl border border-gray-200 text-sm">
-                <option>전체 전달 방식</option><option>카카오 알림톡</option><option>PDF 다운로드</option><option>둘 다</option>
+                <option>전체 방정식</option><option>중3 수학반 · 성적 향상 v2</option>
+              </select>
+              <select class="px-4 py-2.5 rounded-xl border border-gray-200 text-sm">
+                <option>전체 전달 방식</option><option>카카오 알림톡</option><option>PDF 다운로드</option>
               </select>
             </div>
             <button class="px-4 py-2 text-sm rounded-lg border border-gray-200 hover:bg-gray-50 font-semibold">📥 CSV 내보내기</button>
@@ -133,27 +168,24 @@
           <table class="w-full text-sm">
             <thead>
               <tr class="bg-gray-50 text-ink-500 text-[13px]">
-                <th class="px-5 py-3 text-left">리포트</th>
                 <th class="px-5 py-3 text-left">학생</th>
+                <th class="px-5 py-3 text-left">방정식</th>
                 <th class="px-5 py-3 text-center">버전</th>
                 <th class="px-5 py-3 text-left">생성일</th>
-                <th class="px-5 py-3 text-center">방정식</th>
-                <th class="px-5 py-3 text-center">성적</th>
+                <th class="px-5 py-3 text-left">분석 기간</th>
                 <th class="px-5 py-3 text-center">전달</th>
-                <th class="px-5 py-3 text-center w-24">액션</th>
+                <th class="px-5 py-3 text-center w-20">액션</th>
               </tr>
             </thead>
             <tbody id="historyTable"></tbody>
           </table>
           <div class="px-5 py-4 flex items-center justify-between text-sm text-ink-500 border-t border-gray-100">
-            <div>총 <b class="text-ink-900">46</b>건 중 1~10번째</div>
+            <div>총 <b class="text-ink-900">46</b>건</div>
             <div class="flex gap-1">
               <button class="w-8 h-8 rounded-lg border border-gray-200 hover:bg-gray-50">‹</button>
               <button class="w-8 h-8 rounded-lg bg-brand-500 text-white">1</button>
               <button class="w-8 h-8 rounded-lg hover:bg-gray-50">2</button>
               <button class="w-8 h-8 rounded-lg hover:bg-gray-50">3</button>
-              <button class="w-8 h-8 rounded-lg hover:bg-gray-50">4</button>
-              <button class="w-8 h-8 rounded-lg hover:bg-gray-50">5</button>
               <button class="w-8 h-8 rounded-lg border border-gray-200 hover:bg-gray-50">›</button>
             </div>
           </div>
@@ -165,94 +197,232 @@
   </main>
 </div>
 
-<!-- Modal: Report preview -->
-<div class="modal" id="modal">
-  <div class="modal-box bg-white rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-    <div class="p-7">
+<!-- ============ 리포트 생성 분기 모달 ============ -->
+<div class="modal" id="generateModal">
+  <div class="modal-box bg-white rounded-3xl w-full max-w-3xl overflow-hidden">
+    <div class="p-8">
       <div class="flex items-center justify-between mb-5">
         <div>
-          <div class="text-xs tracking-widest font-bold text-brand-600">RC · <span id="mVer">v3</span></div>
-          <h2 class="text-2xl font-bold" id="mTitle">김민재 학생 리포트카드</h2>
-          <div class="text-sm text-ink-500 mt-1">2026.04.14 기준 · 누적 3개월 데이터</div>
+          <div class="text-xs tracking-widest font-bold text-brand-600">리포트카드 생성</div>
+          <h2 class="text-2xl font-extrabold mt-1">어떤 방식으로 만드시겠어요?</h2>
+          <p class="text-sm text-ink-500 mt-1">상황에 맞는 방식을 선택해주세요.</p>
         </div>
-        <button onclick="closeModal()" class="w-10 h-10 rounded-full hover:bg-gray-100 grid place-items-center text-2xl">×</button>
+        <button onclick="closeModal('generateModal')" class="w-10 h-10 rounded-full hover:bg-gray-100 grid place-items-center text-2xl">×</button>
       </div>
 
-      <div class="inline-flex bg-gray-100 rounded-full p-1 mb-5">
-        <button class="tab-btn active px-4 py-2 rounded-full text-sm font-semibold" data-tab="report">리포트</button>
-        <button class="tab-btn px-4 py-2 rounded-full text-sm font-semibold" data-tab="script">상담 스크립트</button>
-        <button class="tab-btn px-4 py-2 rounded-full text-sm font-semibold" data-tab="send">학부모 발송</button>
+      <div class="grid md:grid-cols-2 gap-4">
+        <!-- 방정식별 일괄 -->
+        <button onclick="selectGenerateMode('eq')" class="text-left rounded-2xl border-2 border-gray-200 p-6 hover:border-brand-500 hover:bg-brand-50 transition group">
+          <div class="text-3xl mb-3">📊</div>
+          <div class="font-extrabold text-lg">방정식별로</div>
+          <div class="font-extrabold text-lg mb-2">일괄 생성</div>
+          <p class="text-sm text-ink-500 leading-relaxed">
+            특정 방정식에 속한 학생 <b>전원의 리포트</b>를 한 번에 발행합니다.
+          </p>
+          <div class="mt-4 text-xs text-brand-600 font-semibold opacity-0 group-hover:opacity-100 transition">→ 시험 직후, 월말 정기 발송에 추천</div>
+        </button>
+        <!-- 학생별 맞춤 -->
+        <button onclick="selectGenerateMode('student')" class="text-left rounded-2xl border-2 border-gray-200 p-6 hover:border-brand-500 hover:bg-brand-50 transition group">
+          <div class="text-3xl mb-3">👤</div>
+          <div class="font-extrabold text-lg">학생별로</div>
+          <div class="font-extrabold text-lg mb-2">맞춤 생성</div>
+          <p class="text-sm text-ink-500 leading-relaxed">
+            특정 학생의 데이터를 기반으로 <b>한 명만 자세히</b> 분석하고 커스텀합니다.
+          </p>
+          <div class="mt-4 text-xs text-brand-600 font-semibold opacity-0 group-hover:opacity-100 transition">→ 개별 상담 직전, 이탈 위험 관리에 추천</div>
+        </button>
       </div>
 
-      <div class="tab-pane" data-pane="report">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-5">
-          <div class="rounded-2xl bg-soft-navy p-4"><div class="text-xs text-ink-500">현재</div><div class="text-xl font-bold">72점</div></div>
-          <div class="rounded-2xl bg-soft-mint p-4"><div class="text-xs text-ink-500">전월 대비</div><div class="text-xl font-bold text-emerald-600">+4점</div></div>
-          <div class="rounded-2xl bg-soft-blush p-4"><div class="text-xs text-ink-500">반 평균 대비</div><div class="text-xl font-bold">상위 45%</div></div>
-          <div class="rounded-2xl bg-soft-lemon p-4"><div class="text-xs text-ink-500">6주 후 예상</div><div class="text-xl font-bold">78~82</div></div>
-        </div>
-        <div class="space-y-4">
-          <div class="rounded-2xl border border-gray-100 p-5"><div class="text-xs font-bold text-brand-600">📍 WHERE</div><div class="mt-1 text-sm text-ink-700">현재 72점, 반 평균 75점 대비 3점 낮습니다. 지난 달 68점 대비 +4점으로 성장 중입니다.</div></div>
-          <div class="rounded-2xl border border-gray-100 p-5"><div class="text-xs font-bold text-brand-600">🔍 FOUND</div><div class="mt-1 text-sm text-ink-700">우리 학원 성공방정식 분석 결과, <b>복습시간 부족</b>이 주 성장 동인으로 확인됩니다. (β=0.42, 1위)</div></div>
-          <div class="rounded-2xl border border-gray-100 p-5"><div class="text-xs font-bold text-brand-600">✅ TODO</div><ul class="mt-2 space-y-1.5 text-sm text-ink-700 list-disc list-inside"><li>Quick Win 1: 주 복습시간 4h → 6h (현실적)</li><li>Quick Win 2: 단원별 오답노트 작성</li><li>Quick Win 3: 수업 중 질문 1회 이상</li><li>Strategic: 방학 중 개념 재정비 2주 집중</li></ul></div>
-          <div class="rounded-2xl border border-gray-100 p-5"><div class="text-xs font-bold text-brand-600">🎯 EXPECT</div><div class="mt-1 text-sm text-ink-700">위 To-Do를 유지할 경우 6주 뒤 <b>78~82점</b> 범위 예상.</div></div>
+      <div class="mt-5 rounded-xl bg-gray-50 p-4 text-xs text-ink-500">
+        💡 두 방식 모두 생성 전 <b>미리보기 단계</b>에서 발송 여부를 최종 결정하실 수 있어요.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 방정식별 일괄 생성 드로어 ============ -->
+<div class="drawer" id="eqDrawer">
+  <div class="drawer-bg" onclick="closeDrawer('eqDrawer')"></div>
+  <div class="drawer-panel">
+    <div class="px-7 py-5 border-b border-gray-100 flex items-start justify-between">
+      <div>
+        <div class="text-xs tracking-widest font-bold text-brand-600">방정식별 일괄 생성</div>
+        <h2 class="text-xl font-extrabold mt-1">방정식을 선택해주세요</h2>
+      </div>
+      <button onclick="closeDrawer('eqDrawer')" class="w-10 h-10 rounded-full hover:bg-gray-100 grid place-items-center text-2xl">×</button>
+    </div>
+
+    <div class="flex-1 overflow-y-auto px-7 py-6 space-y-5">
+
+      <!-- 방정식 리스트 -->
+      <div>
+        <label class="block text-sm font-bold mb-3">1. 어떤 방정식으로 리포트를 만드시겠어요?</label>
+        <div class="space-y-3" id="eqBulkList"></div>
+      </div>
+
+      <!-- 학생 범위 -->
+      <div>
+        <label class="block text-sm font-bold mb-3">2. 대상 학생</label>
+        <div class="space-y-2">
+          <label class="flex items-center gap-3 rounded-xl border border-gray-200 p-3 cursor-pointer hover:bg-gray-50">
+            <input type="radio" name="scope" checked class="w-4 h-4"/>
+            <div class="flex-1"><div class="font-semibold text-sm">이 방정식에 적용되는 학생 전체</div><div class="text-xs text-ink-500">24명 전원</div></div>
+          </label>
+          <label class="flex items-center gap-3 rounded-xl border border-gray-200 p-3 cursor-pointer hover:bg-gray-50">
+            <input type="radio" name="scope" class="w-4 h-4"/>
+            <div class="flex-1"><div class="font-semibold text-sm">이번 달 데이터가 갱신된 학생만</div><div class="text-xs text-ink-500">18명</div></div>
+          </label>
+          <label class="flex items-center gap-3 rounded-xl border border-gray-200 p-3 cursor-pointer hover:bg-gray-50">
+            <input type="radio" name="scope" class="w-4 h-4"/>
+            <div class="flex-1"><div class="font-semibold text-sm">개별 선택</div><div class="text-xs text-ink-500">다음 단계에서 선택</div></div>
+          </label>
         </div>
       </div>
 
-      <div class="tab-pane hidden" data-pane="script">
-        <div class="mb-4 rounded-xl bg-amber-50 border border-amber-100 p-4 text-sm text-amber-900">⚠️ 이 탭은 <b>원장님 내부용</b>입니다. 학부모에게는 발송되지 않아요.</div>
-        <div class="space-y-4">
-          <div class="rounded-2xl border border-gray-100 p-5"><div class="text-sm font-semibold text-ink-500">Q1. 그래서 우리 아이 잘할 수 있나요?</div><div class="mt-2 text-[15px] leading-relaxed">"네, 어머님. 김민재 학생은 지난 3개월 동안 꾸준히 성장하고 있어요. 우리 학원 데이터 기반으로 현재 패턴을 유지하시면 6주 뒤 78~82점까지 올라갈 수 있을 것으로 보입니다."</div></div>
-          <div class="rounded-2xl border border-gray-100 p-5"><div class="text-sm font-semibold text-ink-500">Q2. 다른 학원은 이렇게 한다던데요?</div><div class="mt-2 text-[15px] leading-relaxed">"저희는 감으로 말씀드리지 않고, 학생별 실제 데이터를 3개월 이상 쌓아 분석한 결과를 바탕으로 처방을 드립니다."</div></div>
-          <div class="rounded-2xl border border-gray-100 p-5"><div class="text-sm font-semibold text-ink-500">Q3. 학원비 대비 효과가 있나요?</div><div class="mt-2 text-[15px] leading-relaxed">"복습시간 주 2시간 확보만으로도 다음 시험 +6점 수준이 예상됩니다."</div></div>
-        </div>
-      </div>
-
-      <div class="tab-pane hidden" data-pane="send">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <div class="space-y-4">
-            <div>
-              <div class="text-sm font-semibold mb-2">학부모 말투 톤</div>
-              <div class="flex gap-2 flex-wrap">
-                <button class="tone-btn on px-4 py-2 rounded-full border-2 border-gray-200 text-sm">따뜻형</button>
-                <button class="tone-btn px-4 py-2 rounded-full border-2 border-gray-200 text-sm">친근형</button>
-                <button class="tone-btn px-4 py-2 rounded-full border-2 border-gray-200 text-sm">전문형</button>
-              </div>
+      <!-- 분석 기간 -->
+      <div>
+        <label class="block text-sm font-bold mb-3">3. 분석 기간</label>
+        <div class="space-y-2">
+          <label class="flex items-start gap-3 rounded-xl border-2 border-brand-500 bg-brand-50 p-3 cursor-pointer">
+            <input type="radio" name="period" checked class="w-4 h-4 mt-0.5"/>
+            <div class="flex-1">
+              <div class="font-semibold text-sm">자동 (학생별 최대 가능 기간)</div>
+              <div class="text-xs text-ink-500">학생마다 데이터 보유 기간이 달라도 각자 최대로 활용</div>
             </div>
+          </label>
+          <label class="flex items-start gap-3 rounded-xl border border-gray-200 p-3 cursor-pointer hover:bg-gray-50">
+            <input type="radio" name="period" class="w-4 h-4 mt-0.5"/>
+            <div class="flex-1">
+              <div class="font-semibold text-sm">최근 3개월로 통일</div>
+              <div class="text-xs text-ink-500">학생 간 비교가 쉬움</div>
+            </div>
+          </label>
+          <label class="flex items-start gap-3 rounded-xl border border-gray-200 p-3 cursor-pointer hover:bg-gray-50">
+            <input type="radio" name="period" class="w-4 h-4 mt-0.5"/>
+            <div class="flex-1">
+              <div class="font-semibold text-sm">직접 설정</div>
+              <div class="text-xs text-ink-500">시작일 ~ 종료일 지정</div>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <!-- 공통 코멘트 -->
+      <div>
+        <label class="block text-sm font-bold mb-2">4. 학부모 메시지 톤</label>
+        <div class="flex gap-2 flex-wrap">
+          <button class="tone-btn on px-4 py-2 rounded-full border-2 border-gray-200 text-sm">따뜻형</button>
+          <button class="tone-btn px-4 py-2 rounded-full border-2 border-gray-200 text-sm">친근형</button>
+          <button class="tone-btn px-4 py-2 rounded-full border-2 border-gray-200 text-sm">전문형</button>
+        </div>
+      </div>
+
+      <div class="rounded-xl bg-soft-navy p-4 text-sm">
+        💡 <b>예상 결과:</b> 총 <span class="font-bold text-brand-600" id="eqBulkCount">24</span>건의 리포트카드가 생성됩니다.
+      </div>
+
+    </div>
+
+    <div class="px-7 py-4 border-t border-gray-100 flex items-center justify-between">
+      <button onclick="closeDrawer('eqDrawer')" class="px-4 py-2.5 rounded-xl border border-gray-200 font-semibold text-sm hover:bg-gray-50">취소</button>
+      <button class="px-5 py-2.5 rounded-xl bg-brand-500 text-white font-semibold text-sm hover:bg-brand-600">미리보기 및 발송 →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 학생별 맞춤 생성 드로어 ============ -->
+<div class="drawer" id="studentDrawer">
+  <div class="drawer-bg" onclick="closeDrawer('studentDrawer')"></div>
+  <div class="drawer-panel">
+    <div class="px-7 py-5 border-b border-gray-100 flex items-start justify-between">
+      <div>
+        <div class="text-xs tracking-widest font-bold text-brand-600">학생별 맞춤 생성</div>
+        <h2 class="text-xl font-extrabold mt-1" id="studentDrawerTitle">학생을 선택해주세요</h2>
+      </div>
+      <button onclick="closeDrawer('studentDrawer')" class="w-10 h-10 rounded-full hover:bg-gray-100 grid place-items-center text-2xl">×</button>
+    </div>
+
+    <div class="flex-1 overflow-y-auto px-7 py-6 space-y-5" id="studentDrawerBody">
+
+      <!-- 학생 검색/선택 (초기 상태) -->
+      <div id="studentSelectPhase">
+        <label class="block text-sm font-bold mb-3">어떤 학생의 리포트를 만드시겠어요?</label>
+        <input placeholder="🔍 학생 이름으로 검색" class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm mb-3" oninput="filterStudentPick(this.value)"/>
+        <div class="space-y-2 max-h-[460px] overflow-y-auto" id="studentPickList"></div>
+      </div>
+
+      <!-- 학생 상세 설정 (선택 후) -->
+      <div id="studentConfigPhase" class="hidden space-y-5">
+
+        <!-- 선택된 학생 요약 -->
+        <div class="rounded-2xl bg-soft-navy p-5">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-12 h-12 rounded-full bg-white text-brand-700 font-bold grid place-items-center text-lg" id="scSelName">김</div>
             <div>
-              <div class="text-sm font-semibold mb-2">전달 경로</div>
-              <div class="space-y-2">
-                <label class="flex items-center gap-2 rounded-xl border border-gray-200 p-3 text-sm"><input type="radio" name="ch" checked/> 💬 카카오 알림톡 (크레딧 1건 차감)</label>
-                <label class="flex items-center gap-2 rounded-xl border border-gray-200 p-3 text-sm"><input type="radio" name="ch"/> 🔗 비공개 링크만 생성</label>
-                <label class="flex items-center gap-2 rounded-xl border border-gray-200 p-3 text-sm"><input type="radio" name="ch"/> 📄 PDF만 다운로드</label>
-              </div>
+              <div class="font-bold text-lg" id="scSelFull">김민재 학생</div>
+              <div class="text-xs text-ink-500" id="scSelClass">중3 수학반</div>
             </div>
           </div>
-          <div class="rounded-3xl bg-yellow-300 p-4">
-            <div class="rounded-2xl bg-white p-5 shadow-card">
-              <div class="flex items-center gap-2 mb-3">
-                <div class="w-8 h-8 rounded-full bg-brand-500 text-white grid place-items-center text-xs font-bold">우</div>
-                <div class="text-sm font-semibold">우리학원 · 알림톡</div>
-              </div>
-              <div class="text-[13px] leading-relaxed whitespace-pre-line">[행복수학학원] 자녀 학습 리포트 v3 도착
-
-어머님, 김민재 학생의 4월 데이터 분석 리포트가 준비되었습니다.
-
-· 이번 달: 72점 (전월 대비 +4점 ↑)
-· 성장 동인: 복습시간 증가가 주효
-· 앞으로: 질문횟수 +2회 시 +3점 예상</div>
-              <div class="mt-3 pt-3 border-t border-gray-100 grid grid-cols-2 gap-2">
-                <button class="py-2 rounded-lg bg-gray-50 text-xs font-semibold">리포트 보기</button>
-                <button class="py-2 rounded-lg bg-gray-50 text-xs font-semibold">지난 리포트</button>
-              </div>
-            </div>
+          <div class="grid grid-cols-2 gap-3 text-sm">
+            <div><div class="text-xs text-ink-500">데이터 보유 기간</div><div class="font-bold">2024.04.01 ~ 현재<br/><span class="text-xs font-normal text-ink-500">24개월 누적</span></div></div>
+            <div><div class="text-xs text-ink-500">마지막 리포트</div><div class="font-bold">v3 · 2026.04.14</div></div>
           </div>
         </div>
-        <div class="mt-6 flex items-center justify-between">
-          <div class="text-sm text-ink-500">알림톡 크레딧 잔여 <b class="text-brand-600">287 / 300</b></div>
-          <button class="px-6 py-3 rounded-xl bg-brand-500 text-white font-semibold hover:bg-brand-600">지금 발송하기 →</button>
+
+        <!-- 1. 방정식 선택 -->
+        <div>
+          <label class="block text-sm font-bold mb-3">1. 어떤 방정식을 적용할까요?</label>
+          <div class="space-y-2" id="scEqList"></div>
         </div>
+
+        <!-- 2. 분석 기간 -->
+        <div>
+          <label class="block text-sm font-bold mb-3">2. 분석 기간 <span class="text-xs font-normal text-ink-500">· 이 학생은 최대 24개월 선택 가능</span></label>
+          <div class="grid grid-cols-4 gap-2 mb-3">
+            <button class="sc-period rounded-xl border-2 border-gray-200 p-3 text-sm font-semibold hover:border-brand-300">1개월</button>
+            <button class="sc-period rounded-xl border-2 border-brand-500 bg-brand-50 text-brand-700 p-3 text-sm font-semibold">3개월</button>
+            <button class="sc-period rounded-xl border-2 border-gray-200 p-3 text-sm font-semibold hover:border-brand-300">6개월</button>
+            <button class="sc-period rounded-xl border-2 border-gray-200 p-3 text-sm font-semibold hover:border-brand-300">전체</button>
+          </div>
+          <div class="rounded-xl bg-gray-50 p-3 text-xs text-ink-700">
+            🟢 선택 기간에 분석 가능한 변수 <b>3개</b> · 🟡 조건부 <b>1개</b> · 🔴 미달 <b>0개</b>
+          </div>
+        </div>
+
+        <!-- 3. 커스텀 코멘트 -->
+        <div>
+          <label class="block text-sm font-bold mb-2">3. 한 줄 코멘트 <span class="text-xs font-normal text-ink-500">· 선택 · 학부모에게 전달</span></label>
+          <textarea placeholder="예: 이번 달 숙제 성실도가 유독 좋았어요. 한 마디 전해드리고 싶어 메시지 보냅니다." class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm resize-none" rows="2"></textarea>
+        </div>
+
+        <!-- 4. 강조 변수 -->
+        <div>
+          <label class="block text-sm font-bold mb-2">4. 강조하고 싶은 변수 <span class="text-xs font-normal text-ink-500">· 선택</span></label>
+          <div class="flex gap-2 flex-wrap">
+            <button class="px-3 py-1.5 rounded-full border-2 border-gray-200 text-xs font-semibold hover:border-brand-300">복습시간</button>
+            <button class="px-3 py-1.5 rounded-full border-2 border-brand-500 bg-brand-50 text-brand-700 text-xs font-semibold">숙제이행률</button>
+            <button class="px-3 py-1.5 rounded-full border-2 border-gray-200 text-xs font-semibold hover:border-brand-300">출결률</button>
+          </div>
+        </div>
+
+        <!-- 5. 톤 -->
+        <div>
+          <label class="block text-sm font-bold mb-2">5. 학부모 메시지 톤</label>
+          <div class="flex gap-2 flex-wrap">
+            <button class="tone-btn on px-4 py-2 rounded-full border-2 border-gray-200 text-sm">따뜻형</button>
+            <button class="tone-btn px-4 py-2 rounded-full border-2 border-gray-200 text-sm">친근형</button>
+            <button class="tone-btn px-4 py-2 rounded-full border-2 border-gray-200 text-sm">전문형</button>
+          </div>
+        </div>
+
       </div>
+
+    </div>
+
+    <div class="px-7 py-4 border-t border-gray-100 flex items-center justify-between">
+      <button id="scBackBtn" onclick="backToStudentPick()" class="px-4 py-2.5 rounded-xl border border-gray-200 font-semibold text-sm hover:bg-gray-50 hidden">← 다른 학생</button>
+      <button onclick="closeDrawer('studentDrawer')" class="px-4 py-2.5 rounded-xl border border-gray-200 font-semibold text-sm hover:bg-gray-50">취소</button>
+      <button id="scSubmitBtn" class="px-5 py-2.5 rounded-xl bg-brand-500 text-white font-semibold text-sm hover:bg-brand-600 hidden">리포트 미리보기 →</button>
     </div>
   </div>
 </div>
@@ -261,152 +431,280 @@
   document.getElementById('sidebar').outerHTML = __renderLayout('report');
   document.getElementById('topbar').outerHTML = __renderTopbar(['홈','리포트카드']);
 
-  // Students - 76명 생성
-  const firstNames = ['민재','서연','하윤','지우','도윤','소율','지호','예진','준서','서윤','시우','지민','현우','유진','서준','하은','연우','지안','채원','태윤','수빈','지훈','예은','성민','유나','우진','다은','준호','가은','민준','윤서','승현','주원','나연','은지','재민','수현','혜원','동욱','예지','정우','하진','지원','영훈','시은','재현','유준','소희','태민','보람','현진','혜린','광호','주아','한결','승우','예린','건우','수아','정민','가영','지석','윤아','민수','채은','도현','연재','기태','세빈','현수','유빈','진우','혜수','재우','소은','병훈'];
-  const classes = ['중3 수학반','중2 수학반','고1 수학반','중3 영어반','고2 수학반'];
-  const surnames = ['김','이','박','최','정','강','조','윤','장','임','한','오','서','신','권','황','송','안','홍','유','전','고'];
+  // 공통 모달/드로어 헬퍼
+  function openModal(id){ document.getElementById(id).classList.add('on'); }
+  function closeModal(id){ document.getElementById(id).classList.remove('on'); }
+  window.openModal = openModal; window.closeModal = closeModal;
+  function openDrawer(id){ document.getElementById(id).classList.add('on'); document.body.style.overflow='hidden'; }
+  function closeDrawer(id){ document.getElementById(id).classList.remove('on'); document.body.style.overflow=''; }
+  window.openDrawer = openDrawer; window.closeDrawer = closeDrawer;
+  document.getElementById('generateModal').onclick = e=>{ if(e.target.id==='generateModal') closeModal('generateModal'); };
 
-  const sampleHist = [
-    {ver:'v3', date:'2026.04.14', eq:'v2', score:85, sent:['kakao','pdf']},
-    {ver:'v2', date:'2026.03.10', eq:'v2', score:83, sent:['kakao']},
-    {ver:'v1', date:'2026.02.08', eq:'v1', score:80, sent:['pdf']}
-  ];
-  const sampleHist2 = [
-    {ver:'v2', date:'2026.03.10', eq:'v2', score:75, sent:['kakao']},
-    {ver:'v1', date:'2026.02.08', eq:'v1', score:72, sent:['pdf']}
-  ];
-  const sampleHist3 = [
-    {ver:'v1', date:'2026.02.08', eq:'v1', score:68, sent:[]}
+  // ===== 방정식 목록 (허브와 공유할 예정이지만 여기선 하드코딩) =====
+  const equations = [
+    {id:'eq1', name:'중3 수학반 · 성적 향상', group:'중3 수학반', count:24, trust:78, version:2, color:'brand'},
+    {id:'eq2', name:'고1 영어반 · 모의고사 등급', group:'고1 영어반', count:22, trust:65, version:1, color:'accent'},
+    {id:'eq3', name:'전체 · 재등록 예측', group:'전체 학생', count:76, trust:71, version:1, color:'ink'}
   ];
 
-  // 76명 생성
-  const students = [];
-  for(let i=0;i<76;i++){
+  // ===== 학생 데이터 =====
+  const surnames = ['김','이','박','최','정','강','조','윤','한','오','서','신'];
+  const firstNames = ['민재','서연','하윤','지우','도윤','소율','지호','예진','준서','서윤','시우','지민','현우','유진','서준','하은','시은','재민','수현','혜원','광호','주아','한결','승우','예린','건우','수아','정민'];
+  const classes = ['중3 수학반','중2 수학반','고1 수학반','중3 영어반'];
+
+  function genStudent(i){
     const sn = surnames[i%surnames.length];
     const fn = firstNames[i%firstNames.length];
     const cls = classes[i%classes.length];
-    // 데이터 수집률: 분포 만들기
-    const progress = [92,88,85,82,78,75,72,68,65,62,58,55,48,42,38,32,25,18,12,8][i%20];
-    // 마지막 리포트 생성일
-    const daysAgo = [2,5,8,12,15,18,22,25,30,35,42,50,60,75,null][i%15];
-    const lastDate = daysAgo==null ? null : new Date(2026,3,14-daysAgo);
-    const lastDateStr = lastDate ? `${lastDate.getFullYear()}.${String(lastDate.getMonth()+1).padStart(2,'0')}.${String(lastDate.getDate()).padStart(2,'0')}` : null;
 
-    students.push({
-      n: sn+fn,
-      cls,
-      progress,
-      lastReport: lastDateStr,
-      hist: progress>70 ? sampleHist : (progress>40 ? sampleHist2 : sampleHist3),
-      status: progress>40 ? 'ready' : 'draft',
-      ver: progress>70 ? 'v3' : (progress>40 ? 'v2' : '초안'),
-      cur: 60+Math.round(progress*0.3),
-      diff: progress>50 ? '+'+(Math.floor(Math.random()*5)+1) : (Math.random()>0.5?'+1':'-1'),
-      pred: progress>50 ? (70+Math.floor(Math.random()*10))+'~'+(75+Math.floor(Math.random()*10)) : '-'
-    });
+    // 상태 분포
+    const statusPool = ['green','green','green','green','green','yellow','yellow','red'];
+    const status = statusPool[i%statusPool.length];
+
+    const eq = cls.includes('수학') ? equations[0] : (cls.includes('영어') ? equations[1] : equations[2]);
+
+    // 데이터 기간
+    const months = status==='green' ? (12+Math.floor(Math.random()*12)) : (status==='yellow' ? (5+Math.floor(Math.random()*5)) : (1+Math.floor(Math.random()*3)));
+
+    // 예측 시뮬레이션
+    const cur = 60 + Math.floor(Math.random()*25);
+    const diff = status==='green' ? (Math.random()>0.2?'+':'-')+(Math.floor(Math.random()*5)+1) : (Math.random()>0.5?'+1':'-1');
+    const predLow = cur + (status==='green'?2:0);
+    const predHigh = cur + (status==='green'?7:3);
+
+    // 인사이트
+    let insight, insightColor;
+    if(status==='green'){
+      const suggestions = [
+        '복습 +1h → 다음 시험 +3.2점 예상',
+        '숙제이행률 현재 수준 유지 시 우상향',
+        '질문횟수 3회 이상이면 +2점 기대',
+        '이번 달 성장 페이스 우수'
+      ];
+      insight = suggestions[i%suggestions.length];
+      insightColor = 'text-emerald-700';
+    } else if(status==='yellow'){
+      const suggestions = [
+        '숙제이행률 +15%p 필요 · 상담 권장',
+        '최근 3주 출결 불안정 · 확인 필요',
+        '복습시간 하락 중 · 개입 필요',
+        '성적 정체 · 학습 패턴 재점검'
+      ];
+      insight = suggestions[i%suggestions.length];
+      insightColor = 'text-amber-700';
+    } else {
+      insight = '데이터 더 쌓여야 예측 가능';
+      insightColor = 'text-rose-600';
+    }
+
+    return {name:sn+fn, cls, status, eq, months, cur, diff, predLow, predHigh, insight, insightColor};
   }
 
+  const students = Array.from({length:12}, (_,i)=>genStudent(i));
+
+  // ===== 학생 리스트 렌더 =====
+  function renderStudentTable(){
+    const rows = students.map((s,i)=>{
+      const statusBadge = {
+        green:'<span class="flex items-center text-xs font-bold text-emerald-700"><span class="status-dot bg-emerald-500"></span>예측 가능</span>',
+        yellow:'<span class="flex items-center text-xs font-bold text-amber-700"><span class="status-dot bg-amber-500"></span>주의 필요</span>',
+        red:'<span class="flex items-center text-xs font-bold text-rose-600"><span class="status-dot bg-rose-500"></span>데이터 부족</span>'
+      }[s.status];
+
+      const predContent = s.status==='red'
+        ? '<div class="text-sm text-ink-300">-</div>'
+        : `<div class="text-sm"><span class="font-bold">${s.cur}점</span> <span class="${s.diff.includes('+')?'text-emerald-600':'text-rose-500'} text-xs font-bold">${s.diff}</span></div>
+           <div class="text-xs text-ink-500 mt-0.5">6주 후: ${s.predLow}~${s.predHigh}점</div>`;
+
+      return `
+      <tr class="border-t border-gray-100 hover:bg-gray-50 transition cursor-pointer" onclick="pickStudentDirect(${i})">
+        <td class="px-5 py-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-soft-navy text-brand-700 font-bold grid place-items-center">${s.name[0]}</div>
+            <div>
+              <div class="font-semibold text-[15px]">${s.name}</div>
+              <div class="text-xs text-ink-500 mt-0.5">${s.cls}</div>
+            </div>
+          </div>
+        </td>
+        <td class="px-5 py-4">
+          <div class="flex flex-col gap-1">
+            ${statusBadge}
+            <div class="text-xs text-ink-700 font-semibold">${s.eq.name}</div>
+          </div>
+        </td>
+        <td class="px-5 py-4">
+          <div class="text-sm font-semibold">${s.months}개월</div>
+          <div class="text-xs text-ink-500">누적 데이터</div>
+        </td>
+        <td class="px-5 py-4">${predContent}</td>
+        <td class="px-5 py-4 max-w-[260px]">
+          <div class="text-sm ${s.insightColor}">${s.insight}</div>
+        </td>
+        <td class="px-5 py-4 text-center" onclick="event.stopPropagation();pickStudentDirect(${i})">
+          <button class="w-10 h-10 rounded-xl hover:bg-brand-50 grid place-items-center text-ink-500 hover:text-brand-600 transition">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M7 3h10l3 4v14H4V7z"/><path d="M8 12h8M8 16h5"/></svg>
+          </button>
+        </td>
+      </tr>`;
+    }).join('');
+    document.getElementById('studentTable').innerHTML = rows;
+  }
+  renderStudentTable();
+
+  // ===== History Table =====
+  const history = [
+    {name:'박서연', cls:'중3 수학반', eq:'중3 수학반 · 성적 향상', version:'v3', date:'2026.04.14', period:'2026.01.14 ~ 04.14', sent:['kakao','pdf']},
+    {name:'김민재', cls:'중3 수학반', eq:'중3 수학반 · 성적 향상', version:'v3', date:'2026.04.14', period:'2026.01.14 ~ 04.14', sent:['kakao']},
+    {name:'정하윤', cls:'중3 수학반', eq:'중3 수학반 · 성적 향상', version:'v3', date:'2026.04.14', period:'2026.01.14 ~ 04.14', sent:['kakao','pdf']},
+    {name:'최지우', cls:'중3 수학반', eq:'중3 수학반 · 성적 향상', version:'v2', date:'2026.03.10', period:'2025.12.10 ~ 03.10', sent:['pdf']},
+    {name:'박서연', cls:'중3 수학반', eq:'중3 수학반 · 성적 향상', version:'v2', date:'2026.03.10', period:'2025.12.10 ~ 03.10', sent:['kakao']},
+    {name:'한소율', cls:'중3 영어반', eq:'고1 영어반 · 모의고사', version:'v1', date:'2026.02.28', period:'2025.11.28 ~ 02.28', sent:['kakao','pdf']}
+  ];
   function sentIcons(arr){
-    let out = '';
-    if(arr.includes('kakao')) out += `<span class="history-chip bg-yellow-100" title="알림톡 발송"><svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="#3a1d1d"><path d="M12 4C6.48 4 2 7.58 2 12c0 2.72 1.7 5.12 4.29 6.56-.18.66-.66 2.38-.76 2.75-.12.46.17.46.36.33.15-.1 2.4-1.63 3.35-2.28.91.13 1.82.19 2.76.19 5.52 0 10-3.58 10-8S17.52 4 12 4z"/></svg></span>`;
-    if(arr.includes('pdf')) out += `<span class="history-chip bg-brand-50 text-brand-600" title="PDF 다운로드"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg></span>`;
-    if(!arr.length) out = '<span class="text-ink-300 text-xs">—</span>';
+    let out = '<div class="flex gap-1 justify-center">';
+    if(arr.includes('kakao')) out += `<span class="w-7 h-7 rounded-md bg-yellow-100 grid place-items-center" title="알림톡"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="#3a1d1d"><path d="M12 4C6.48 4 2 7.58 2 12c0 2.72 1.7 5.12 4.29 6.56-.18.66-.66 2.38-.76 2.75-.12.46.17.46.36.33.15-.1 2.4-1.63 3.35-2.28.91.13 1.82.19 2.76.19 5.52 0 10-3.58 10-8S17.52 4 12 4z"/></svg></span>`;
+    if(arr.includes('pdf')) out += `<span class="w-7 h-7 rounded-md bg-brand-50 text-brand-600 grid place-items-center" title="PDF"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg></span>`;
+    if(!arr.length) out += '<span class="text-ink-300 text-xs">—</span>';
+    out += '</div>';
     return out;
   }
-
-  // Student table rows - 첫 12명만 첫 페이지 표시
-  const st = document.getElementById('studentTable');
-  st.innerHTML = students.slice(0,12).map((s,i)=>{
-    const barColor = s.progress>=70?'bg-emerald-500':(s.progress>=40?'bg-amber-400':'bg-rose-400');
-    const barText = s.progress>=70?'text-emerald-700':(s.progress>=40?'text-amber-700':'text-rose-600');
-    return `
-    <tr class="student-row border-t border-gray-100 cursor-pointer" onclick="openModal(${i})">
-      <td class="px-5 py-4">
-        <div class="flex items-center gap-3">
-          <div class="w-9 h-9 rounded-full bg-soft-navy text-brand-700 font-bold grid place-items-center">${s.n[0]}</div>
-          <div>
-            <div class="font-semibold">${s.n}</div>
-            <div class="text-xs text-ink-500">이전 리포트 ${s.hist.length}건</div>
-          </div>
-        </div>
-      </td>
-      <td class="px-5 py-4 text-ink-700">${s.cls}</td>
-      <td class="px-5 py-4 text-ink-700">${s.lastReport || '<span class="text-ink-300">— 미생성</span>'}</td>
-      <td class="px-5 py-4">
-        <div class="flex items-center gap-3 min-w-[200px]">
-          <div class="flex-1 h-2 rounded-full bg-gray-100 overflow-hidden">
-            <div class="h-2 ${barColor}" style="width:${s.progress}%"></div>
-          </div>
-          <span class="text-sm font-bold ${barText} w-12 text-right">${s.progress}%</span>
-        </div>
-      </td>
-      <td class="px-5 py-4 text-center" onclick="event.stopPropagation()">
-        <button class="row-btn text-ink-500 hover:text-brand-600 inline-grid" title="리포트 열기" onclick="openModal(${i})">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-            <path d="M7 3h10l3 4v14H4V7z"/><path d="M8 12h8M8 16h5"/>
-          </svg>
-        </button>
-      </td>
-    </tr>`;
-  }).join('');
-
-  // History table (flat list, sorted by date desc)
-  const historyRows = [];
-  students.forEach(s=>s.hist.forEach(h=>historyRows.push({...h, name:s.n, cls:s.cls})));
-  historyRows.sort((a,b)=>b.date.localeCompare(a.date));
-  document.getElementById('historyTable').innerHTML = historyRows.slice(0,10).map(h=>`
+  document.getElementById('historyTable').innerHTML = history.map(h=>`
     <tr class="border-t border-gray-100 hover:bg-gray-50">
-      <td class="px-5 py-4">
-        <div class="flex items-center gap-2">
-          <div class="w-9 h-9 rounded-lg bg-brand-50 text-brand-600 grid place-items-center">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M7 3h10l3 4v14H4V7z"/><path d="M8 12h8M8 16h5"/></svg>
-          </div>
-          <div class="font-semibold">리포트카드</div>
-        </div>
-      </td>
       <td class="px-5 py-4"><div class="font-semibold">${h.name}</div><div class="text-xs text-ink-500">${h.cls}</div></td>
-      <td class="px-5 py-4 text-center"><span class="text-[11px] font-bold bg-brand-50 text-brand-700 px-2 py-1 rounded-full">${h.ver}</span></td>
+      <td class="px-5 py-4 text-ink-700 text-sm">${h.eq}</td>
+      <td class="px-5 py-4 text-center"><span class="text-[11px] font-bold bg-brand-50 text-brand-700 px-2 py-1 rounded-full">${h.version}</span></td>
       <td class="px-5 py-4 text-ink-700">${h.date}</td>
-      <td class="px-5 py-4 text-center text-ink-700">${h.eq}</td>
-      <td class="px-5 py-4 text-center font-semibold">${h.score}점</td>
+      <td class="px-5 py-4 text-ink-500 text-xs">${h.period}</td>
       <td class="px-5 py-4 text-center">${sentIcons(h.sent)}</td>
       <td class="px-5 py-4 text-center">
-        <button class="row-btn text-ink-500 hover:text-brand-600 inline-grid" title="열람">
+        <button class="w-9 h-9 rounded-lg hover:bg-brand-50 grid place-items-center text-ink-500 hover:text-brand-600" title="열람">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
         </button>
       </td>
     </tr>
   `).join('');
 
-  // Top tab switching
+  // Top tabs
   document.querySelectorAll('.top-tab').forEach(t=>{
     t.onclick = ()=>{
       document.querySelectorAll('.top-tab').forEach(x=>x.classList.remove('on'));
       t.classList.add('on');
-      document.querySelectorAll('.top-pane').forEach(p=>p.classList.toggle('hidden', p.dataset.pane!==t.dataset.tab));
+      document.querySelectorAll('.top-pane').forEach(p=>p.classList.toggle('hidden', p.dataset.pane !== t.dataset.tab));
     };
   });
 
-  // Modal
-  function openModal(i, tabIdx){
-    const s = students[i];
-    document.getElementById('mTitle').textContent = `${s.n} 학생 리포트카드`;
-    document.getElementById('mVer').textContent = s.ver;
-    document.getElementById('modal').classList.add('on');
-    setTab(tabIdx||0);
+  // ===== 리포트 생성 분기 =====
+  function openGenerateModal(){ openModal('generateModal'); }
+  window.openGenerateModal = openGenerateModal;
+
+  function selectGenerateMode(mode){
+    closeModal('generateModal');
+    if(mode === 'eq'){
+      renderEqBulkList();
+      openDrawer('eqDrawer');
+    } else {
+      renderStudentPickList();
+      document.getElementById('studentSelectPhase').classList.remove('hidden');
+      document.getElementById('studentConfigPhase').classList.add('hidden');
+      document.getElementById('scSubmitBtn').classList.add('hidden');
+      document.getElementById('scBackBtn').classList.add('hidden');
+      document.getElementById('studentDrawerTitle').textContent = '학생을 선택해주세요';
+      openDrawer('studentDrawer');
+    }
   }
-  window.openModal = openModal;
-  function closeModal(){ document.getElementById('modal').classList.remove('on'); }
-  window.closeModal = closeModal;
-  document.getElementById('modal').onclick = e=>{ if(e.target.id==='modal') closeModal(); };
-  function setTab(idx){
-    document.querySelectorAll('.modal .tab-btn').forEach((t,i)=>t.classList.toggle('active', i===idx));
-    document.querySelectorAll('.modal .tab-pane').forEach((p,i)=>p.classList.toggle('hidden', i!==idx));
+  window.selectGenerateMode = selectGenerateMode;
+
+  // 방정식 리스트 (일괄 생성 드로어용)
+  function renderEqBulkList(){
+    document.getElementById('eqBulkList').innerHTML = equations.map((eq,i)=>`
+      <label class="flex items-start gap-3 rounded-xl border-2 ${i===0?'border-brand-500 bg-brand-50':'border-gray-200'} p-4 cursor-pointer hover:bg-gray-50">
+        <input type="radio" name="eqPick" ${i===0?'checked':''} class="w-4 h-4 mt-1"/>
+        <div class="flex-1">
+          <div class="font-bold text-sm">${eq.name}</div>
+          <div class="text-xs text-ink-500 mt-1">적용 학생: ${eq.count}명 · 신뢰도 ${eq.trust}% · v${eq.version}</div>
+        </div>
+      </label>
+    `).join('');
   }
-  document.querySelectorAll('.modal .tab-btn').forEach((b,i)=>b.onclick = ()=>setTab(i));
-  document.querySelectorAll('.tone-btn').forEach(b=>b.onclick = ()=>{
-    document.querySelectorAll('.tone-btn').forEach(x=>x.classList.remove('on'));
-    b.classList.add('on');
+
+  // 학생 선택 리스트 (맞춤 생성 드로어용)
+  function renderStudentPickList(keyword=''){
+    const filtered = students.filter(s=>s.name.includes(keyword));
+    document.getElementById('studentPickList').innerHTML = filtered.map((s,i)=>`
+      <button onclick="pickStudentFromDrawer(${students.indexOf(s)})" class="w-full flex items-center gap-3 rounded-xl border border-gray-100 p-3 hover:border-brand-300 hover:bg-brand-50 transition text-left">
+        <div class="w-10 h-10 rounded-full bg-soft-navy text-brand-700 font-bold grid place-items-center">${s.name[0]}</div>
+        <div class="flex-1 min-w-0">
+          <div class="font-semibold text-sm">${s.name}</div>
+          <div class="text-xs text-ink-500 mt-0.5">${s.cls} · ${s.months}개월 데이터</div>
+        </div>
+        <div class="text-xs ${s.status==='green'?'text-emerald-600':s.status==='yellow'?'text-amber-600':'text-rose-500'} font-semibold">
+          ${s.status==='green'?'🟢':s.status==='yellow'?'🟡':'🔴'}
+        </div>
+      </button>
+    `).join('');
+  }
+  window.filterStudentPick = (kw)=>renderStudentPickList(kw);
+
+  // 학생 선택 완료 → Config phase
+  function pickStudentFromDrawer(idx){
+    const s = students[idx];
+    document.getElementById('scSelName').textContent = s.name[0];
+    document.getElementById('scSelFull').textContent = `${s.name} 학생`;
+    document.getElementById('scSelClass').textContent = s.cls;
+    document.getElementById('studentDrawerTitle').textContent = `${s.name} · 리포트 설정`;
+    // 적용 가능 방정식 리스트
+    document.getElementById('scEqList').innerHTML = equations.map((eq,i)=>{
+      const applies = (s.cls.includes('수학') && eq.group.includes('수학')) || (s.cls.includes('영어') && eq.group.includes('영어')) || eq.group==='전체 학생';
+      const isCurrent = s.eq.id === eq.id;
+      return `
+      <label class="flex items-start gap-3 rounded-xl border-2 ${isCurrent?'border-brand-500 bg-brand-50':'border-gray-200'} p-4 cursor-pointer hover:bg-gray-50">
+        <input type="radio" name="scEq" ${isCurrent?'checked':''} ${!applies?'disabled':''} class="w-4 h-4 mt-1"/>
+        <div class="flex-1">
+          <div class="flex items-center gap-2">
+            <div class="font-bold text-sm">${eq.name}</div>
+            ${isCurrent?'<span class="text-[10px] font-bold bg-brand-500 text-white px-2 py-0.5 rounded-full">현재 그룹</span>':''}
+            ${!applies?'<span class="text-[10px] text-rose-500 font-semibold">적용 불가</span>':''}
+          </div>
+          <div class="text-xs text-ink-500 mt-1">적용 학생 ${eq.count}명 · 신뢰도 ${eq.trust}%</div>
+        </div>
+      </label>`;
+    }).join('');
+    document.getElementById('studentSelectPhase').classList.add('hidden');
+    document.getElementById('studentConfigPhase').classList.remove('hidden');
+    document.getElementById('scSubmitBtn').classList.remove('hidden');
+    document.getElementById('scBackBtn').classList.remove('hidden');
+  }
+  window.pickStudentFromDrawer = pickStudentFromDrawer;
+
+  // 학생 리스트에서 행 클릭 → 맞춤 드로어 직통
+  function pickStudentDirect(idx){
+    closeModal('generateModal');
+    renderStudentPickList();
+    pickStudentFromDrawer(idx);
+    openDrawer('studentDrawer');
+  }
+  window.pickStudentDirect = pickStudentDirect;
+
+  function backToStudentPick(){
+    document.getElementById('studentSelectPhase').classList.remove('hidden');
+    document.getElementById('studentConfigPhase').classList.add('hidden');
+    document.getElementById('scSubmitBtn').classList.add('hidden');
+    document.getElementById('scBackBtn').classList.add('hidden');
+    document.getElementById('studentDrawerTitle').textContent = '학생을 선택해주세요';
+  }
+  window.backToStudentPick = backToStudentPick;
+
+  // Tone / period 토글 공통
+  document.addEventListener('click', e=>{
+    if(e.target.classList.contains('tone-btn')){
+      e.target.parentElement.querySelectorAll('.tone-btn').forEach(x=>x.classList.remove('on'));
+      e.target.classList.add('on');
+    }
+    if(e.target.classList.contains('sc-period')){
+      e.target.parentElement.querySelectorAll('.sc-period').forEach(x=>{x.classList.remove('border-brand-500','bg-brand-50','text-brand-700'); x.classList.add('border-gray-200')});
+      e.target.classList.remove('border-gray-200'); e.target.classList.add('border-brand-500','bg-brand-50','text-brand-700');
+    }
   });
 </script>
 </body>
