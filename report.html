@@ -696,7 +696,7 @@
     document.getElementById('wizPrevBtn').disabled = wizStep === 1;
     const titles = ['방정식 선택','대상 학생 확인','분석 기간 · 톤 설정','리포트 미리보기'];
     document.getElementById('wizStepTitle').textContent = `${wizStep}. ${titles[wizStep-1]}`;
-    document.getElementById('wizNextBtn').textContent = wizStep === WIZ_STEPS ? '리포트 발송하기 ✓' : (wizStep === 3 ? '미리보기 →' : '다음 →');
+    document.getElementById('wizNextBtn').textContent = wizStep === WIZ_STEPS ? '리포트 생성하기 ✓' : (wizStep === 3 ? '미리보기 →' : '다음 →');
     document.getElementById('wizStepDots').innerHTML = [1,2,3,4].map(n=>`
       <span class="w-8 h-8 rounded-full grid place-items-center text-xs font-bold ${n<wizStep?'bg-brand-500 text-white':n===wizStep?'bg-brand-500 text-white ring-4 ring-brand-100':'bg-gray-200 text-ink-500'}">${n}</span>
     `).join('');
