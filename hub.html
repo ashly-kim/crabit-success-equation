@@ -1078,13 +1078,12 @@
       </div>`;
     }).join('');
 
-    // 캐러셀 이동 (카드 86% + gap 16px 고려)
-    const offset = eqCurrentIndex * (86 + (16/track.offsetWidth*100));
-    track.style.transform = `translateX(-${offset}%)`;
+    // 한 장당 100% 이동
+    track.style.transform = `translateX(-${eqCurrentIndex * 100}%)`;
 
-    // 도트
+    // 상단 도트 (현재 인덱스만 브랜드 컬러 + 확장)
     document.getElementById('eqDots').innerHTML = equations.map((_,i)=>
-      `<button onclick="setEqIndex(${i})" class="w-2 h-2 rounded-full transition ${i===eqCurrentIndex?'bg-brand-500 w-6':'bg-gray-300'}"></button>`
+      `<button onclick="setEqIndex(${i})" aria-label="방정식 ${i+1}" class="h-2 rounded-full transition-all ${i===eqCurrentIndex?'bg-brand-500 w-6':'bg-gray-300 w-2 hover:bg-gray-400'}"></button>`
     ).join('');
   }
 
