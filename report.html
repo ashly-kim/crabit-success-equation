@@ -6,7 +6,7 @@
 <title>리포트카드 · 우리학원 성공방정식</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="shared.js?v=1776177022564"></script>
+<script src="shared.js?v=1776177283569"></script>
 <script>__applyTheme();</script>
 <style>
   html,body{background:#f6f7fb}
@@ -1038,76 +1038,104 @@
 
   function openStudentDetail(idx){
     currentStudentIdx = idx;
+    sdPeriod = null; sdPickStart = null; sdCalMonth = null;
     const s = students[idx];
+    ensureDailyData(s);
     document.getElementById('sdTitle').textContent = `${s.name} 학생`;
     const apEq = applicableEquations(s);
 
-    // 변수 카드 (방정식의 변수들을 사용)
-    const varCards = s.eq.terms.map(t=>{
-      const arr = Array.from({length:8},()=>30+Math.floor(Math.random()*60));
-      const cur = arr[arr.length-1];
-      const prev = arr[arr.length-2];
-      const delta = cur - prev;
-      const deltaSign = delta >= 0 ? '+' : '';
-      const deltaColor = delta >= 0 ? 'text-emerald-600' : 'text-rose-500';
-      return `
-      <div class="bg-white rounded-2xl shadow-card ring-soft p-5">
-        <div class="flex items-start justify-between mb-2">
-          <div>
-            <div class="text-xs text-ink-500">${t.unit}</div>
-            <div class="text-base font-extrabold mt-0.5">${t.name}</div>
-          </div>
-          <span class="text-[10px] font-bold text-brand-600 bg-brand-50 px-2 py-0.5 rounded-full">β ${t.beta}</span>
-        </div>
-        <div class="flex items-end justify-between mb-2">
-          <div>
-            <div class="text-2xl font-extrabold text-ink-900">${cur}</div>
-            <div class="text-[11px] ${deltaColor} font-bold mt-0.5">${deltaSign}${delta} (직전 주 대비)</div>
-          </div>
-          <div class="text-right">
-            <div class="text-[11px] text-ink-500">평균</div>
-            <div class="text-sm font-bold text-ink-700">${Math.round(arr.reduce((a,b)=>a+b,0)/arr.length)}</div>
-          </div>
-        </div>
-        ${tinySpark(arr)}
-        <div class="flex justify-between text-[10px] text-ink-500 mt-1"><span>8주 전</span><span>이번 주</span></div>
-      </div>`;
-    }).join('');
-
-    // 인사이트 자동 생성
+    // ===== 인사이트 (구체적 수치 + 액션) =====
     const insights = [];
+    const yUnit = s.eq.yUnit || '';
     s.eq.terms.forEach(t => {
-      const c = s.contribution[t.name] ?? 50;
-      if(c > 70) insights.push({txt:`<b>${t.name}</b>이 학원 평균 대비 우수 (활동 지수 ${c}). β ${t.beta} 효과를 잘 살리고 있어요.`, tone:'good'});
-      else if(c < 40) insights.push({txt:`<b>${t.name}</b> 활동 지수 ${c}로 낮음. β ${t.beta} 변수라 개선 시 ${s.eq.y} 향상에 직결됩니다.`, tone:'bad'});
+      const allVals = s.dailyData[t.name].filter(v => v != null);
+      const studentAvg = allVals.length ? Math.round(allVals.reduce((a,b)=>a+b,0)/allVals.length) : 0;
+      const cAvg = s.classAvg[t.name];
+      const diffPct = cAvg ? Math.round(((studentAvg - cAvg) / cAvg) * 100) : 0;
+      const betaImpact = (studentAvg * t.beta).toFixed(1);
+      const betaGap = ((cAvg - studentAvg) * t.beta).toFixed(1);
+      if(diffPct >= 15){
+        insights.push({
+          txt: `<b>${t.name}</b>이 ${studentAvg}${t.unit}로 반 평균 ${cAvg} 대비 <b class="text-accent-700">+${diffPct}%</b>. β ${t.beta} 효과로 ${s.eq.y}에 약 <b>+${Math.abs(betaImpact)}${yUnit}</b> 기여 중이에요.`,
+          tone: 'good',
+          actions: [{label:'학부모에게 칭찬 한마디 보내기', kind:'kakao'}]
+        });
+      } else if(diffPct <= -15){
+        insights.push({
+          txt: `<b>${t.name}</b>이 ${studentAvg}${t.unit}로 반 평균 ${cAvg} 대비 <b class="text-rose-600">${diffPct}%</b>. 반 평균까지 회복하면 ${s.eq.y} <b>+${Math.abs(betaGap)}${yUnit}</b> 기대돼요.`,
+          tone: 'bad',
+          actions: [{label:'1:1 상담 일정 잡기', kind:'meet'}, {label:'데이터 입력 확인', kind:'data'}]
+        });
+      }
     });
-    if(s.status==='green') insights.push({txt:`최근 추세가 우상향 — 다음 시험 ${s.predLow}~${s.predHigh}${s.eq.yUnit||'점'} 예측.`, tone:'good'});
-    if(s.status==='yellow') insights.push({txt:`주의 구간. 1~2개 변수의 회복으로 추세 반전 가능.`, tone:'warn'});
-    if(s.status==='red') insights.push({txt:`데이터 보유 ${s.months}개월로 부족. 4주 이상 추가 누적 후 재분석 권장.`, tone:'bad'});
-    while(insights.length < 3) insights.push({txt:`전체 변수 균형 양호 — 현 패턴 유지 권장.`, tone:'neutral'});
+    const recentMissing = s.eq.terms.filter(t => {
+      const recent14 = s.dailyData[t.name].slice(-14);
+      const nullCount = recent14.filter(v => v == null).length;
+      return nullCount >= 7;
+    });
+    if(recentMissing.length){
+      insights.push({
+        txt: `최근 2주간 <b>${recentMissing.map(t=>t.name).join(', ')}</b> 입력 누락이 50% 이상이에요. 정확한 예측을 위해 입력을 채워주세요.`,
+        tone: 'warn',
+        actions: [{label:'데이터 허브에서 입력하기', kind:'data'}]
+      });
+    }
+    if(s.status === 'green' && insights.length < 3){
+      insights.push({
+        txt: `현재 패턴 유지 시 다음 시험 <b>${s.predLow}~${s.predHigh}${yUnit}</b>로 우상향 예측이에요. 지금이 학부모 공유하기 좋은 타이밍.`,
+        tone: 'good', actions: [{label:'지금 리포트 생성하기', kind:'report'}]
+      });
+    }
+    if(s.status === 'yellow' && insights.length < 3){
+      insights.push({
+        txt: `주의 구간. <b>${s.eq.terms[0].name}</b> 1~2단계만 회복하면 추세 반전이 충분히 가능합니다.`,
+        tone: 'warn', actions: [{label:'1:1 상담 일정 잡기', kind:'meet'}]
+      });
+    }
+    if(s.status === 'red' && insights.length < 3){
+      insights.push({
+        txt: `데이터 보유 ${s.months}개월로 부족해요. 4주 이상 추가 누적 후 재분석을 권장합니다.`,
+        tone: 'bad', actions: [{label:'데이터 허브로 이동', kind:'data'}]
+      });
+    }
+    while(insights.length < 2){
+      insights.push({txt:'전체 변수 균형 양호. 현 패턴 유지 시 안정적입니다.', tone:'neutral', actions:[]});
+    }
 
-    const insightHtml = insights.slice(0,3).map(i=>{
-      const dotCls = i.tone==='good'?'bg-accent-500':
-                     i.tone==='warn'?'bg-amber-500':
-                     i.tone==='bad'?'bg-rose-500':'bg-brand-500';
+    const insightHtml = insights.slice(0,4).map(i=>{
+      const dotCls = i.tone==='good'?'bg-accent-300':
+                     i.tone==='warn'?'bg-amber-400':
+                     i.tone==='bad'?'bg-rose-400':'bg-gray-300';
       const ico = i.tone==='good'?'💡':i.tone==='warn'?'⚠️':i.tone==='bad'?'🚨':'💡';
+      const actionHtml = i.actions && i.actions.length ? `
+        <div class="flex gap-2 mt-3 flex-wrap">
+          ${i.actions.map(a => `<button onclick="insightAction('${a.kind}')" class="px-3 py-1.5 rounded-lg bg-soft-pink hover:bg-accent-100 text-accent-700 text-[12px] font-bold border border-accent-100 transition">${a.label} →</button>`).join('')}
+        </div>` : '';
       return `
         <div class="flex gap-3 p-4 border-b border-gray-100 last:border-b-0">
           <div class="w-7 h-7 rounded-full ${dotCls} text-white grid place-items-center text-[13px] flex-shrink-0">${ico}</div>
-          <div class="text-[14px] text-ink-700 leading-relaxed pt-1">${i.txt}</div>
+          <div class="flex-1">
+            <div class="text-[14px] text-ink-700 leading-relaxed pt-0.5">${i.txt}</div>
+            ${actionHtml}
+          </div>
         </div>`;
     }).join('');
 
-    // 적용 가능 방정식 칩
+    // ===== 적용 가능 방정식 (간단 + 산식 토글) =====
     const eqHtml = apEq.map(eq=>`
       <div class="rounded-xl border-2 ${eq.id===s.eq.id?'border-brand-500 bg-brand-50':'border-gray-200 bg-white'} p-4">
-        <div class="flex items-center gap-2 mb-1">
+        <div class="flex items-center gap-2 mb-2">
           <span class="text-[10px] font-bold text-brand-600 bg-white px-2 py-0.5 rounded-full">v${eq.version}</span>
           <span class="text-[11px] text-ink-500">신뢰도 ${eq.trust}%</span>
           ${eq.id===s.eq.id?'<span class="text-[10px] font-bold bg-brand-500 text-white px-2 py-0.5 rounded-full ml-auto">현재 적용</span>':''}
         </div>
-        <div class="font-extrabold text-[15px]">${eq.name}</div>
-        <div class="text-[12px] text-ink-700 mt-1">${eq.formula}</div>
+        <div class="font-extrabold text-[15px] text-ink-900">${eq.name}</div>
+        <div class="text-[11px] text-ink-500 mt-1">예측 대상: <b class="text-ink-700">${eq.y}</b> · 변수 ${eq.terms.length}개</div>
+        <button onclick="toggleEqFormula(this)" class="mt-3 text-[11px] text-brand-600 font-semibold hover:underline flex items-center gap-1">
+          <span>산식 보기</span>
+          <svg class="w-3 h-3 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="hidden eq-formula mt-2 rounded-lg bg-white/70 border border-gray-200 p-3 text-[12px] font-bold text-ink-700 leading-relaxed">${eq.formula}</div>
       </div>`).join('');
 
     // Next Action
@@ -1124,14 +1152,14 @@
     }[s.status];
 
     document.getElementById('sdBody').innerHTML = `
-      <!-- 프로필 카드 (정보 + 수정) -->
+      <!-- 프로필 카드 (통일된 회색 배경 + 검정 텍스트) -->
       <section class="bg-white rounded-3xl shadow-card ring-soft p-7" id="sdProfileCard">
         <div class="flex items-start justify-between gap-4 flex-wrap mb-5">
           <div class="flex items-center gap-5">
             <div class="w-16 h-16 rounded-full bg-soft-pink text-accent-600 font-extrabold grid place-items-center text-2xl flex-shrink-0">${s.name[0]}</div>
             <div>
               <div class="flex items-center gap-3 flex-wrap">
-                <div class="text-[24px] font-extrabold">${s.name}</div>
+                <div class="text-[24px] font-extrabold text-ink-900">${s.name}</div>
                 ${statusBadge}
               </div>
               <div class="text-sm text-ink-500 mt-1">데이터 보유 ${s.months}개월 · 마지막 입력 2주 전</div>
@@ -1143,60 +1171,50 @@
           </button>
         </div>
 
-        <!-- 편집 가능 정보 -->
+        <!-- 편집 가능 정보 (회색 배경 + 검정 텍스트, Pretendard 통일) -->
         <div class="grid md:grid-cols-3 gap-3">
-          <div class="rounded-xl bg-soft-blush border border-accent-100 p-4">
-            <div class="text-[11px] font-bold text-accent-700 tracking-wider">반</div>
-            <div class="font-extrabold text-[17px] mt-1 sd-view">${s.cls}</div>
-            <select id="sdEditCls" class="hidden sd-edit w-full mt-1 px-3 py-2 rounded-lg border border-gray-200 text-sm font-semibold bg-white">
+          <div class="rounded-xl bg-gray-50 border border-gray-100 p-4">
+            <div class="text-[11px] font-semibold text-ink-500 tracking-wider">반</div>
+            <div class="text-[15px] font-bold text-ink-900 mt-1.5 sd-view">${s.cls}</div>
+            <select id="sdEditCls" class="hidden sd-edit w-full mt-1 px-3 py-2 rounded-lg border border-gray-200 text-[15px] font-bold text-ink-900 bg-white">
               ${classes.map(c=>`<option ${c===s.cls?'selected':''}>${c}</option>`).join('')}
             </select>
           </div>
-          <div class="rounded-xl bg-soft-blush border border-accent-100 p-4 md:col-span-2">
-            <div class="text-[11px] font-bold text-accent-700 tracking-wider">학부모 연락처</div>
-            <div class="font-extrabold text-[17px] mt-1 sd-view">
+          <div class="rounded-xl bg-gray-50 border border-gray-100 p-4">
+            <div class="text-[11px] font-semibold text-ink-500 tracking-wider">학부모 연락처</div>
+            <div class="text-[15px] font-bold mt-1.5 sd-view">
               ${s.parentPhone
-                ? `<span class="font-mono">${s.parentPhone}</span>`
-                : `<span class="text-rose-600 text-[14px]">📵 미등록 — 알림톡 발송 불가. 우측 "정보 수정"으로 등록해주세요.</span>`}
+                ? `<span class="text-ink-900">${s.parentPhone}</span>`
+                : `<span class="text-rose-600">📵 미등록</span>`}
             </div>
-            <input type="tel" id="sdEditPhone" placeholder="010-1234-5678" value="${s.parentPhone||''}" class="hidden sd-edit w-full mt-1 px-3 py-2 rounded-lg border border-gray-200 text-sm font-semibold font-mono"/>
+            <input type="tel" id="sdEditPhone" placeholder="010-1234-5678" value="${s.parentPhone||''}" class="hidden sd-edit w-full mt-1 px-3 py-2 rounded-lg border border-gray-200 text-[15px] font-bold text-ink-900"/>
+          </div>
+          <div class="rounded-xl bg-gray-50 border border-gray-100 p-4">
+            <div class="text-[11px] font-semibold text-ink-500 tracking-wider">데이터 보유</div>
+            <div class="text-[15px] font-bold text-ink-900 mt-1.5">${s.months}개월 · 마지막 2주 전</div>
           </div>
         </div>
 
         <div id="sdEditActions" class="hidden mt-4 flex justify-end gap-2">
           <button onclick="cancelSdEdit()" class="px-4 py-2 rounded-lg border border-gray-200 text-sm font-semibold hover:bg-gray-50">취소</button>
-          <button onclick="saveSdEdit()" class="px-5 py-2 rounded-lg bg-accent-500 text-white text-sm font-bold hover:bg-accent-600">저장</button>
+          <button onclick="saveSdEdit()" class="px-5 py-2 rounded-lg bg-brand-500 text-white text-sm font-bold hover:bg-brand-600">저장</button>
         </div>
 
         <!-- 핵심 수치 -->
-        <div class="grid grid-cols-3 gap-3 mt-6 text-sm">
-          <div class="rounded-lg bg-gray-50 p-3">
-            <div class="text-[11px] text-ink-500">현재 ${s.eq.y||'예측'}</div>
-            <div class="font-extrabold text-[18px] mt-0.5">${s.status==='red'?'—':s.cur+(s.eq.yUnit||'')}</div>
+        <div class="grid grid-cols-3 gap-3 mt-4 text-sm">
+          <div class="rounded-lg bg-gray-50 border border-gray-100 p-3">
+            <div class="text-[11px] font-semibold text-ink-500">현재 ${s.eq.y||'예측'}</div>
+            <div class="font-extrabold text-[18px] mt-0.5 text-ink-900">${s.status==='red'?'—':s.cur+(s.eq.yUnit||'')}</div>
           </div>
           <div class="rounded-lg bg-soft-pink border border-accent-100 p-3">
-            <div class="text-[11px] text-accent-700 font-bold">다음 시험 예측</div>
-            <div class="font-extrabold text-[18px] mt-0.5 text-accent-700">${s.status==='red'?'—':s.predLow+'~'+s.predHigh+(s.eq.yUnit||'')}</div>
+            <div class="text-[11px] font-semibold text-accent-700">다음 시험 예측</div>
+            <div class="font-extrabold text-[18px] mt-0.5 text-ink-900">${s.status==='red'?'—':s.predLow+'~'+s.predHigh+(s.eq.yUnit||'')}</div>
           </div>
-          <div class="rounded-lg bg-gray-50 p-3">
-            <div class="text-[11px] text-ink-500">변화 추이 (직전 대비)</div>
+          <div class="rounded-lg bg-gray-50 border border-gray-100 p-3">
+            <div class="text-[11px] font-semibold text-ink-500">변화 추이 (직전 대비)</div>
             <div class="font-extrabold text-[18px] mt-0.5 ${s.diff?.includes?.('+')?'text-emerald-600':'text-rose-500'}">${s.status==='red'?'—':s.diff}</div>
           </div>
         </div>
-      </section>
-
-      <!-- 학생 정보 카드 바로 밑 CTA -->
-      <section class="rounded-2xl bg-gradient-to-r from-accent-500 to-accent-600 p-5 text-white flex items-center justify-between gap-4 flex-wrap shadow-soft">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-full bg-white/20 grid place-items-center text-xl">📝</div>
-          <div>
-            <div class="font-extrabold text-[16px]">${s.name} 학생만의 리포트카드</div>
-            <div class="text-xs opacity-90 mt-0.5">학부모 상담·피드백 자료로 바로 사용 가능</div>
-          </div>
-        </div>
-        <button onclick="startStudentReport()" class="px-5 py-3 rounded-xl bg-white text-accent-600 font-extrabold hover:bg-soft-blush shadow flex items-center gap-2">
-          리포트 생성하기 →
-        </button>
       </section>
 
       <!-- 적용 가능 방정식 -->
@@ -1205,13 +1223,23 @@
         <div class="grid md:grid-cols-${Math.min(apEq.length,2)} gap-3">${eqHtml}</div>
       </section>
 
-      <!-- 수집된 데이터 -->
+      <!-- 수집된 데이터 (캘린더 + 변수 카드) -->
       <section>
-        <h3 class="text-lg font-extrabold mb-3">수집된 데이터 <span class="text-sm font-semibold text-ink-500 ml-1">최근 8주</span></h3>
-        <div class="grid md:grid-cols-3 gap-4">${varCards}</div>
+        <div class="flex items-end justify-between mb-3 flex-wrap gap-2">
+          <h3 class="text-lg font-extrabold">수집된 데이터</h3>
+          <span class="text-sm text-ink-500">달력에서 기간을 선택하면 그 기간 데이터로 다시 계산됩니다</span>
+        </div>
+        <div class="grid md:grid-cols-3 gap-4">
+          <div class="md:col-span-1">
+            <div id="sdCalendar"></div>
+          </div>
+          <div class="md:col-span-2">
+            <div id="sdVarCards" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+          </div>
+        </div>
       </section>
 
-      <!-- 인사이트 (한 카드 안에) -->
+      <!-- 인사이트 -->
       <section class="bg-white rounded-3xl shadow-card ring-soft p-2">
         <h3 class="text-lg font-extrabold px-5 pt-5 pb-3">원장님이 주목할 인사이트</h3>
         ${insightHtml}
@@ -1224,9 +1252,36 @@
       </section>
     `;
 
+    refreshDataSection();
     document.getElementById('studentDetail').classList.remove('hidden');
     document.body.style.overflow = 'hidden';
   }
+
+  function toggleEqFormula(btn){
+    const formula = btn.parentElement.querySelector('.eq-formula');
+    const arrow = btn.querySelector('svg');
+    const label = btn.querySelector('span');
+    if(formula.classList.contains('hidden')){
+      formula.classList.remove('hidden');
+      label.textContent = '산식 접기';
+      arrow.style.transform = 'rotate(180deg)';
+    } else {
+      formula.classList.add('hidden');
+      label.textContent = '산식 보기';
+      arrow.style.transform = '';
+    }
+  }
+  function insightAction(kind){
+    if(kind === 'report'){ startStudentReport(); return; }
+    const map = {
+      kakao: '학부모 알림톡 발송 (시연용)',
+      meet: '1:1 상담 일정 잡기 (시연용)',
+      data: '데이터 허브로 이동 (시연용)'
+    };
+    alert(map[kind] || '액션');
+  }
+  window.toggleEqFormula = toggleEqFormula;
+  window.insightAction = insightAction;
 
   // ===== 학생 정보 인라인 편집 =====
   function toggleSdEdit(){
