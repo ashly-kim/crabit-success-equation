@@ -1190,7 +1190,7 @@
     document.getElementById('rvIdx').textContent = rvIdx + 1;
     const stage = document.getElementById('rvStage');
     stage.innerHTML = renderReportPage(p.s, p.eq, p.periodLabel, p.tone);
-    fitA4(stage);
+    requestAnimationFrame(()=>fitA4(stage));
   }
   function rvNav(dir){
     rvIdx = (rvIdx + dir + rvList.length) % rvList.length;
