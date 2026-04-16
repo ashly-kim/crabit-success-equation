@@ -9,7 +9,7 @@
 <title>리포트카드 · 우리학원 성공방정식</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="shared.js?v=1776381995471"></script>
+<script src="shared.js?v=1776382032779"></script>
 <script>__applyTheme();</script>
 <!-- PDF 내보내기 (html2pdf = jsPDF + html2canvas 번들) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -110,9 +110,9 @@
 
   /* 성장선 애니메이션 */
   .gline-path{stroke-dasharray:800;stroke-dashoffset:800;animation:drawLine 1.6s cubic-bezier(.2,.8,.2,1) forwards}
-  .gline-dot{opacity:0;animation:popIn .35s cubic-bezier(.2,.8,.2,1) forwards}
+  .gline-dot{opacity:0;animation:popIn .35s ease-out forwards}
   @keyframes drawLine{to{stroke-dashoffset:0}}
-  @keyframes popIn{to{opacity:1;transform:scale(1)}}
+  @keyframes popIn{to{opacity:1}}
   .ring-grad{stroke-dasharray:283;stroke-dashoffset:283;animation:drawRing 1.6s ease forwards}
   @keyframes drawRing{to{stroke-dashoffset:var(--ring-off, 140)}}
 
