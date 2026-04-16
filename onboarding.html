@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta http-equiv="Cache-Control" content="no-cache, max-age=0, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+<title>시작하기 · 우리학원 성공방정식</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="shared.js?v=1776359007954"></script>
+<script>__applyTheme();</script>
+<style>
+  html,body{background:#ffffff;min-height:100vh}
+  body{font-family:'Pretendard Variable',Pretendard,system-ui,sans-serif;color:#191f28}
+
+  .ob-field{width:100%;padding:16px;border:1px solid #e5e8eb;border-radius:12px;font-size:15px;font-weight:500;color:#191f28;background:#ffffff;outline:none;transition:border-color .15s}
+  .ob-field::placeholder{color:#8b95a1;font-weight:400}
+  .ob-field:focus{border-color:#3a74ff}
+
+  .ob-btn{padding:14px 24px;border-radius:12px;font-size:15px;font-weight:600;transition:all .15s;border:none;cursor:pointer}
+  .ob-btn.primary{background:#3a74ff;color:white}
+  .ob-btn.primary:hover{background:#2559e6}
+  .ob-btn.primary:disabled{background:#b9d0ff;cursor:not-allowed}
+  .ob-btn.ghost{background:white;color:#4e5968;border:1px solid #e5e8eb}
+  .ob-btn.ghost:hover{background:#f9fafb}
+
+  /* 선택 카드 */
+  .choice-card{border:2px solid #e5e8eb;border-radius:16px;padding:24px;cursor:pointer;transition:all .15s;background:white;text-align:left;width:100%}
+  .choice-card:hover{border-color:#8ab0ff;background:#f9fbff}
+  .choice-card.on{border-color:#3a74ff;background:#eef4ff}
+  .choice-card .ico{font-size:32px;margin-bottom:8px;display:block}
+  .choice-card .title{font-size:17px;font-weight:700;color:#191f28;margin-bottom:4px}
+  .choice-card .sub{font-size:13px;color:#4e5968;line-height:1.5}
+
+  /* X 후보 체크박스 (태그형) */
+  .tag-check{display:inline-flex;align-items:center;gap:6px;padding:10px 14px;border:1.5px solid #e5e8eb;border-radius:9999px;font-size:14px;font-weight:600;color:#4e5968;background:white;cursor:pointer;transition:all .12s;user-select:none}
+  .tag-check:hover{border-color:#8ab0ff;color:#3a74ff}
+  .tag-check.on{background:#eef4ff;border-color:#3a74ff;color:#1e48b8}
+  .tag-check .dot{width:14px;height:14px;border-radius:4px;border:1.5px solid #d1d5db;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+  .tag-check.on .dot{background:#3a74ff;border-color:#3a74ff;color:white;font-size:9px;font-weight:800}
+
+  /* 진행 바 */
+  .prog{height:3px;background:#e5e8eb;overflow:hidden}
+  .prog-fill{height:100%;background:#3a74ff;transition:width .3s cubic-bezier(.2,.8,.2,1)}
+
+  /* 페이드 인 */
+  @keyframes fade-up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  .step-pane{animation:fade-up .3s ease}
+</style>
+</head>
+<body>
+
+<!-- 상단 -->
+<header class="border-b border-gray-100 bg-white sticky top-0 z-10">
+  <div class="max-w-[720px] mx-auto px-6 py-4 flex items-center justify-between">
+    <div class="text-[15px] font-extrabold tracking-tight text-[#191f28]">우리학원 성공방정식</div>
+    <button onclick="__auth.logout()" class="text-xs text-[#8b95a1] hover:text-[#4e5968]">로그아웃</button>
+  </div>
+  <div class="prog"><div id="obProg" class="prog-fill" style="width:25%"></div></div>
+</header>
+
+<main class="max-w-[720px] mx-auto px-6 py-12 pb-32">
+
+  <!-- STEP 1: 환영 + 학원 정보 -->
+  <div class="ob-step" data-step="1">
+    <div class="text-[13px] font-bold text-[#3a74ff] mb-2">STEP 1 / 4</div>
+    <h1 class="text-[28px] font-extrabold leading-tight mb-3">
+      원장님, 반가워요 👋
+    </h1>
+    <p class="text-[15px] text-[#4e5968] leading-relaxed mb-8">
+      우리 학원만의 <b class="text-[#191f28]">성공방정식</b>을 찾아드릴 수 있도록<br/>
+      간단한 질문 몇 가지만 답해주세요. <b class="text-[#3a74ff]">3분</b>이면 끝나요.
+    </p>
+
+    <div class="bg-[#f9fafb] rounded-2xl p-6 mb-8">
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-[#4e5968] mb-1.5">학원 이름</label>
+          <input id="obAcademy" class="ob-field" placeholder="예: 행복수학학원" oninput="checkStep1()"/>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-[#4e5968] mb-1.5">원장님 성함</label>
+          <input id="obDirector" class="ob-field" placeholder="예: 김원장" oninput="checkStep1()"/>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 2: Y 선택 -->
+  <div class="ob-step hidden" data-step="2">
+    <div class="text-[13px] font-bold text-[#3a74ff] mb-2">STEP 2 / 4</div>
+    <h1 class="text-[28px] font-extrabold leading-tight mb-3">
+      가장 해결하고 싶은 문제가 뭐예요?
+    </h1>
+    <p class="text-[15px] text-[#4e5968] leading-relaxed mb-8">
+      원장님이 <b class="text-[#191f28]">"숫자로 증명하고 싶은 결과"</b>를 하나 골라주세요.<br/>
+      이게 성공방정식의 <b class="text-[#3a74ff]">Y(목표값)</b>가 돼요.
+    </p>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="obYGrid"></div>
+  </div>
+
+  <!-- STEP 3: X 후보 -->
+  <div class="ob-step hidden" data-step="3">
+    <div class="text-[13px] font-bold text-[#3a74ff] mb-2">STEP 3 / 4</div>
+    <h1 class="text-[28px] font-extrabold leading-tight mb-3">
+      우리 학원에서<br/>이미 기록 중인 데이터가 있나요?
+    </h1>
+    <p class="text-[15px] text-[#4e5968] leading-relaxed mb-4">
+      <b class="text-[#191f28]">지금 엑셀이나 노트에 관리 중이신 데이터</b>, 또는 <b class="text-[#191f28]">앞으로 기록해보고 싶은 데이터</b>를 모두 골라주세요.<br/>
+      이것들이 우리 학원 방정식의 <b class="text-[#3a74ff]">X(변수)</b> 후보예요.
+    </p>
+    <p class="text-[13px] text-[#8b95a1] mb-6">💡 3개 이상 선택을 권장해요 · 나중에 데이터 허브에서 언제든 수정 가능</p>
+
+    <div class="flex flex-wrap gap-2.5 mb-6" id="obXList"></div>
+
+    <div class="mt-6 bg-[#f9fafb] rounded-xl p-4 text-[13px] text-[#4e5968]">
+      <span class="font-bold text-[#191f28]">선택된 변수 <span id="obXCount">0</span>개</span>
+      <span class="ml-2">· 여러 개를 골라야 "어떤 X가 가장 영향이 큰지" 비교할 수 있어요.</span>
+    </div>
+  </div>
+
+  <!-- STEP 4: 데이터 보유 상태 -->
+  <div class="ob-step hidden" data-step="4">
+    <div class="text-[13px] font-bold text-[#3a74ff] mb-2">STEP 4 / 4</div>
+    <h1 class="text-[28px] font-extrabold leading-tight mb-3">
+      이 데이터, 이미 가지고 계세요?
+    </h1>
+    <p class="text-[15px] text-[#4e5968] leading-relaxed mb-8">
+      방정식을 찾으려면 최소 <b class="text-[#3a74ff]">3개월 · 학생 20명 이상</b>의 데이터가 필요해요.<br/>
+      기존 엑셀 파일이 있다면 업로드해서 <b class="text-[#191f28]">오늘 바로 방정식</b>을 확인할 수 있어요.
+    </p>
+
+    <div class="space-y-3">
+      <button type="button" class="choice-card" onclick="selectDataChoice('have')" id="obCardHave">
+        <span class="ico">📂</span>
+        <div class="title">이미 기록해둔 엑셀이 있어요</div>
+        <div class="sub">엑셀·구글시트 파일을 업로드하면 AI가 자동으로 컬럼을 매핑하고, 바로 회귀분석 결과를 보여드려요.</div>
+      </button>
+      <button type="button" class="choice-card" onclick="selectDataChoice('new')" id="obCardNew">
+        <span class="ico">📝</span>
+        <div class="title">지금부터 수집할게요</div>
+        <div class="sub">데이터 허브에서 학생별로 입력을 시작하세요. 데이터가 쌓일수록 방정식 신뢰도가 올라가요.</div>
+      </button>
+    </div>
+  </div>
+
+</main>
+
+<!-- 하단 네비 -->
+<div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 z-20">
+  <div class="max-w-[720px] mx-auto px-6 py-4 flex items-center justify-between gap-3">
+    <button id="obPrev" class="ob-btn ghost" onclick="obPrev()" style="visibility:hidden">← 이전</button>
+    <div class="text-[12px] text-[#8b95a1]" id="obStepLabel">1 / 4</div>
+    <button id="obNext" class="ob-btn primary" onclick="obNext()" disabled>다음 →</button>
+  </div>
+</div>
+
+<script>
+  // 세션 없으면 로그인으로
+  if(!__auth.getSession()){ location.href = 'login.html'; }
+
+  // 신규 가입이 아닌 사용자는 메인으로 (이미 온보딩 완료)
+  const __sess = __auth.getSession();
+  if(__sess && !__sess.isFreshSignup){ location.href = 'index.html'; }
+
+  // ===== 데이터 후보 =====
+  const Y_OPTIONS = [
+    {id:'score',    ico:'📊', title:'성적 향상',    sub:'내신·모의고사 점수가 얼마나 오르는지'},
+    {id:'reenroll', ico:'🔄', title:'재등록률',     sub:'수강 연장 · 다음 학기 등록 여부 예측'},
+    {id:'dropout',  ico:'🚨', title:'이탈 예방',    sub:'퇴원 징후를 조기에 감지해 선제 상담'},
+    {id:'satisfy',  ico:'💌', title:'학부모 만족도', sub:'상담·리포트로 만족도 지표 개선'},
+    {id:'custom',   ico:'✏️', title:'직접 입력',     sub:'위에 없는 우리 학원만의 목표'}
+  ];
+
+  const X_OPTIONS = [
+    {id:'attend',   label:'출결률',       hint:'출석 앱/출석부'},
+    {id:'hw',       label:'숙제이행률',   hint:'체크리스트'},
+    {id:'review',   label:'복습시간',     hint:'학생 자가보고'},
+    {id:'q',        label:'질문횟수',     hint:'수업 관찰'},
+    {id:'focus',    label:'수업집중도',   hint:'강사 평가'},
+    {id:'score',    label:'시험 성적',    hint:'내신·모의고사'},
+    {id:'selfstudy',label:'자습시간',     hint:'학원 자습실'},
+    {id:'counsel',  label:'학생 상담',    hint:'상담 일지'},
+    {id:'parent',   label:'학부모 상담',  hint:'상담 일지'},
+    {id:'mock',     label:'모의고사 등급',hint:'월간 시험'},
+    {id:'vocab',    label:'단어 암기',    hint:'단어 테스트'},
+    {id:'late',     label:'지각 횟수',    hint:'출석 기록'}
+  ];
+
+  // ===== 상태 =====
+  const STEPS = 4;
+  let curStep = 1;
+  const state = {
+    academy: '',
+    director: '',
+    y: null,
+    xs: new Set(),
+    dataChoice: null  // 'have' | 'new'
+  };
+
+  function setStep(n){
+    curStep = n;
+    document.querySelectorAll('.ob-step').forEach(el => el.classList.toggle('hidden', +el.dataset.step !== n));
+    document.getElementById('obProg').style.width = (n/STEPS*100) + '%';
+    document.getElementById('obStepLabel').textContent = `${n} / ${STEPS}`;
+    document.getElementById('obPrev').style.visibility = n === 1 ? 'hidden' : 'visible';
+    document.getElementById('obNext').textContent = n === STEPS ? '시작하기 →' : '다음 →';
+    updateNext();
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+
+  function updateNext(){
+    const btn = document.getElementById('obNext');
+    let ok = false;
+    if(curStep === 1) ok = state.academy.trim() && state.director.trim();
+    if(curStep === 2) ok = !!state.y;
+    if(curStep === 3) ok = state.xs.size >= 1;
+    if(curStep === 4) ok = !!state.dataChoice;
+    btn.disabled = !ok;
+  }
+
+  // Step 1
+  function checkStep1(){
+    state.academy = document.getElementById('obAcademy').value;
+    state.director = document.getElementById('obDirector').value;
+    updateNext();
+  }
+
+  // Step 2
+  function renderY(){
+    document.getElementById('obYGrid').innerHTML = Y_OPTIONS.map(y => `
+      <button type="button" class="choice-card ${state.y===y.id?'on':''}" onclick="selectY('${y.id}')">
+        <span class="ico">${y.ico}</span>
+        <div class="title">${y.title}</div>
+        <div class="sub">${y.sub}</div>
+      </button>
+    `).join('');
+  }
+  function selectY(id){ state.y = id; renderY(); updateNext(); }
+  window.selectY = selectY;
+
+  // Step 3
+  function renderX(){
+    document.getElementById('obXList').innerHTML = X_OPTIONS.map(x => {
+      const on = state.xs.has(x.id);
+      return `<button type="button" class="tag-check ${on?'on':''}" onclick="toggleX('${x.id}')">
+        <span class="dot">${on?'✓':''}</span>
+        ${x.label}
+        <span class="text-[11px] text-[#8b95a1] font-normal">· ${x.hint}</span>
+      </button>`;
+    }).join('');
+    document.getElementById('obXCount').textContent = state.xs.size;
+  }
+  function toggleX(id){
+    if(state.xs.has(id)) state.xs.delete(id); else state.xs.add(id);
+    renderX();
+    updateNext();
+  }
+  window.toggleX = toggleX;
+
+  // Step 4
+  function selectDataChoice(v){
+    state.dataChoice = v;
+    ['have','new'].forEach(k => document.getElementById('obCard' + (k==='have'?'Have':'New')).classList.toggle('on', state.dataChoice === k));
+    updateNext();
+  }
+  window.selectDataChoice = selectDataChoice;
+
+  // Navigation
+  function obNext(){
+    if(curStep < STEPS){ setStep(curStep + 1); return; }
+    // 완료: 세션 업데이트 + 이동
+    const s = __auth.getSession() || {};
+    __auth.setSession({
+      ...s,
+      academy: state.academy.trim(),
+      director: state.director.trim(),
+      isFreshSignup: false,
+      onboarded: true,
+      onboardingData: {
+        y: state.y,
+        xs: [...state.xs],
+        dataChoice: state.dataChoice
+      }
+    });
+    // 분기
+    if(state.dataChoice === 'have'){
+      // 지금은 바로 허브로. 주말 Supabase 붙일 때 CSV 업로드 화면 추가
+      alert('엑셀 업로드는 곧 지원될 예정이에요. 우선 데이터 허브로 이동합니다.');
+      location.href = 'hub.html';
+    } else {
+      location.href = 'hub.html';
+    }
+  }
+  function obPrev(){ if(curStep > 1) setStep(curStep - 1); }
+  window.obNext = obNext; window.obPrev = obPrev;
+
+  // 초기 렌더
+  renderY();
+  renderX();
+  setStep(1);
+</script>
+</body>
+</html>
