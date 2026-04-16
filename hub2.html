@@ -9,7 +9,7 @@
 <title>데이터 허브 2 · 우리학원 성공방정식</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="shared.js?v=1776360601983"></script>
+<script src="shared.js?v=1776360668261"></script>
 <script>__applyTheme();</script>
 <!-- 엑셀 파싱 (SheetJS, MIT 라이선스, 무료) -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -206,33 +206,83 @@
   document.getElementById('topbar').outerHTML = __renderTopbar(['홈','데이터 허브 2']);
   document.getElementById('pageFooter').outerHTML = __renderFooter();
 
-  // ===== AI 자동 매핑 사전 =====
-  const COL_DICT = {
-    // Y 후보
-    '성적':{r:'y', v:'시험 성적'}, '점수':{r:'y', v:'시험 성적'},
-    '기말':{r:'y', v:'기말고사 점수'}, '중간':{r:'y', v:'중간고사 점수'},
-    '모의':{r:'y', v:'모의고사 등급'}, '등급':{r:'y', v:'모의고사 등급'},
-    '재등록':{r:'y', v:'재등록 여부'},
+  // ===== AI 자동 매핑 사전 (우선순위 순서) =====
+  const COL_DICT = [
+    // Y 후보 — '향상/등급/재등록' 같은 결과성 키워드 우선
+    {k:'성적 향상', r:'y', v:'성적 향상'},
+    {k:'재등록', r:'y', v:'재등록 여부'},
+    {k:'모의고사', r:'y', v:'모의고사 등급'},
+    {k:'기말고사', r:'y', v:'기말고사 점수'},
+    {k:'기말', r:'y', v:'기말고사 점수'},
+    {k:'중간고사', r:'y', v:'중간고사 점수'},
+    {k:'중간', r:'y', v:'중간고사 점수'},
+    {k:'최종점수', r:'y', v:'최종 점수'},
     // X 후보
-    '복습':{r:'x', v:'복습시간'}, '예습':{r:'x', v:'예습시간'},
-    '숙제':{r:'x', v:'숙제이행률'}, '과제':{r:'x', v:'숙제이행률'},
-    '출결':{r:'x', v:'출결률'}, '출석':{r:'x', v:'출결률'},
-    '결석':{r:'x', v:'결석횟수'}, '지각':{r:'x', v:'지각횟수'},
-    '질문':{r:'x', v:'질문횟수'}, '집중':{r:'x', v:'수업집중도'},
-    '자습':{r:'x', v:'자습시간'}, '단어':{r:'x', v:'단어암기'},
-    '상담':{r:'x', v:'상담횟수'}, '만족':{r:'x', v:'만족도'},
+    {k:'만족도', r:'x', v:'만족도'},
+    {k:'복습 시간', r:'x', v:'복습시간'}, {k:'복습시간', r:'x', v:'복습시간'}, {k:'복습', r:'x', v:'복습'},
+    {k:'예습 시간', r:'x', v:'예습시간'}, {k:'예습시간', r:'x', v:'예습시간'}, {k:'예습', r:'x', v:'예습'},
+    {k:'숙제', r:'x', v:'숙제이행률'}, {k:'과제', r:'x', v:'숙제이행률'},
+    {k:'출결', r:'x', v:'출결률'}, {k:'출석', r:'x', v:'출결률'},
+    {k:'결석', r:'x', v:'결석횟수'}, {k:'지각', r:'x', v:'지각횟수'},
+    {k:'질문', r:'x', v:'질문횟수'}, {k:'발표', r:'x', v:'발표횟수'},
+    {k:'집중', r:'x', v:'수업집중도'}, {k:'자습', r:'x', v:'자습시간'},
+    {k:'단어', r:'x', v:'단어암기'}, {k:'상담', r:'x', v:'상담횟수'},
     // Meta
-    '이름':{r:'meta', v:'이름'}, '학생':{r:'meta', v:'이름'},
-    '반':{r:'meta', v:'반'}, '학년':{r:'meta', v:'학년'},
-    '날짜':{r:'meta', v:'측정일'}, '일자':{r:'meta', v:'측정일'}
-  };
+    {k:'학생ID', r:'meta', v:'학생 ID'},
+    {k:'학생', r:'meta', v:'학생'},
+    {k:'이름', r:'meta', v:'이름'}, {k:'성명', r:'meta', v:'이름'},
+    {k:'학년', r:'meta', v:'학년'},
+    {k:'날짜', r:'meta', v:'측정일'}, {k:'일자', r:'meta', v:'측정일'},
+    // 무시
+    {k:'순서', r:'ignore', v:'순서'}, {k:'번호', r:'ignore', v:'번호'}
+  ];
 
-  function autoMap(colName){
+  function autoMapOne(colName){
     const key = String(colName || '').trim();
-    for(const k in COL_DICT){
-      if(key.includes(k)) return COL_DICT[k];
+    if(!key) return {r:'ignore', v:'(빈 컬럼)'};
+    for(const e of COL_DICT){
+      if(key.includes(e.k)) return {r:e.r, v:e.v};
     }
     return {r:'ignore', v:key};
+  }
+
+  // 컬럼이 숫자 데이터인지 판정
+  function isNumericColumn(col, rows){
+    if(!rows || rows.length === 0) return false;
+    const sample = rows.slice(0, Math.min(30, rows.length));
+    let numCount = 0, nonNull = 0;
+    for(const r of sample){
+      const v = r[col];
+      if(v == null || v === '') continue;
+      nonNull++;
+      if(!isNaN(Number(v))) numCount++;
+    }
+    return nonNull > 0 && numCount / nonNull >= 0.7;
+  }
+
+  // 전체 컬럼 매핑: Y 중복 제거, 숫자 ignore → X 승격
+  function autoMapAll(columns, rows){
+    const out = {};
+    columns.forEach(c => { out[c] = autoMapOne(c); });
+    // Y가 여러 개면 '성적 향상 > 재등록 > 모의 > 기말 > 중간' 우선순위로 하나만 유지
+    const yPriority = ['성적 향상','재등록','모의','기말','중간'];
+    const yCols = columns.filter(c => out[c].r === 'y');
+    if(yCols.length > 1){
+      let chosen = null;
+      for(const p of yPriority){
+        chosen = yCols.find(c => c.includes(p));
+        if(chosen) break;
+      }
+      if(!chosen) chosen = yCols[yCols.length - 1];
+      yCols.forEach(c => { if(c !== chosen) out[c] = {r:'x', v:out[c].v}; });
+    }
+    // ignore인데 숫자 컬럼이면 X로 승격
+    columns.forEach(c => {
+      if(out[c].r === 'ignore' && isNumericColumn(c, rows)){
+        out[c] = {r:'x', v:out[c].v};
+      }
+    });
+    return out;
   }
 
   // ===== 상태 =====
