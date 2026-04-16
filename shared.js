@@ -187,12 +187,13 @@ window.__renderLayout = function(active){
         환경설정
       </a>
     </nav>
-    <div class="mt-auto p-4">
+    <div class="mt-auto p-4 space-y-2">
       <div class="rounded-2xl bg-soft-blush p-4">
         <div class="text-sm font-semibold">Alumni 플랜</div>
         <div class="text-xs text-ink-500 mt-1">첫 달 무료 · 수강생 전용</div>
         <button class="mt-3 w-full bg-white text-brand-600 text-sm font-semibold py-2 rounded-lg border border-brand-100 hover:bg-brand-50">구독 관리</button>
       </div>
+      <button onclick="__auth.logout()" class="w-full text-xs text-ink-500 hover:text-ink-900 py-2">로그아웃 →</button>
     </div>
   </aside>
   `;
