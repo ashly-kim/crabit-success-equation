@@ -204,6 +204,10 @@ window.__renderTopbar = function(crumbs){
     <span class="${i===crumbs.length-1?'text-ink-700 font-medium':''}">${c}</span>
     ${i<crumbs.length-1?'<span>›</span>':''}
   `).join('');
+  const sess = window.__auth && window.__auth.getSession();
+  const director = sess?.director || '원장';
+  const academy = sess?.academy || '';
+  const initial = director ? director[0] : '?';
   return `
   <header class="bg-white border-b border-gray-100 sticky top-0 z-20">
     <div class="px-8 py-4 flex items-center justify-between">
@@ -214,14 +218,38 @@ window.__renderTopbar = function(crumbs){
           <span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-accent-500"></span>
         </button>
         <div class="flex items-center gap-3 pl-3 border-l border-gray-100">
-          <div class="w-9 h-9 rounded-full bg-brand-100 text-brand-700 grid place-items-center font-bold">김</div>
+          <div class="w-9 h-9 rounded-full bg-brand-100 text-brand-700 grid place-items-center font-bold">${initial}</div>
           <div class="leading-tight">
-            <div class="text-sm font-semibold">김원장 원장님</div>
-            <div class="text-xs text-ink-500">행복수학학원</div>
+            <div class="text-sm font-semibold">${director} 원장님</div>
+            <div class="text-xs text-ink-500">${academy}</div>
           </div>
         </div>
       </div>
     </div>
   </header>
+  `;
+};
+
+// ===== 공통 푸터 (저작권·무단 이용 경고) =====
+window.__renderFooter = function(){
+  return `
+  <footer class="mt-16 border-t border-gray-200 bg-white">
+    <div class="max-w-[1280px] mx-auto px-8 py-8 space-y-3 text-xs text-ink-500 leading-relaxed">
+      <div class="flex items-center gap-3 flex-wrap">
+        <div class="flex items-center gap-2">
+          <div class="w-6 h-6 rounded-md bg-brand-500 grid place-items-center text-white font-bold text-[11px]">우</div>
+          <span class="font-bold text-ink-700">우리학원 성공방정식</span>
+          <span class="text-ink-300">by CRABIT</span>
+        </div>
+      </div>
+      <p class="max-w-3xl">
+        본 사이트의 모든 콘텐츠 · 분석 방법론 · 리포트 템플릿 · UI 디자인의 저작권은 <b class="text-ink-700">㈜크래빗(CRABIT)</b>에 있습니다.
+        사전 서면 동의 없이 <b>무단 복제·배포·판매·2차 가공·AI 학습 용도 이용</b>을 금지하며, 위반 시 저작권법 등 관련 법령에 따라 민·형사상 책임을 질 수 있습니다.
+      </p>
+      <p class="text-[11px] text-ink-400">
+        © 2026 CRABIT. All rights reserved. Unauthorized reproduction, distribution, modification, or AI-training use of any content on this site is strictly prohibited. Violators may be subject to civil and criminal liability under applicable law.
+      </p>
+    </div>
+  </footer>
   `;
 };
