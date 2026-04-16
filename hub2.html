@@ -9,7 +9,7 @@
 <title>데이터 허브 2 · 우리학원 성공방정식</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="shared.js?v=1776360668261"></script>
+<script src="shared.js?v=1776360713463"></script>
 <script>__applyTheme();</script>
 <!-- 엑셀 파싱 (SheetJS, MIT 라이선스, 무료) -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -308,13 +308,30 @@
       const buf = await file.arrayBuffer();
       const wb = XLSX.read(buf);
       const ws = wb.Sheets[wb.SheetNames[0]];
-      const rows = XLSX.utils.sheet_to_json(ws, {defval: null});
-      if(rows.length === 0){ alert('빈 파일이에요.'); return; }
-      const columns = Object.keys(rows[0]);
+      // 2D 배열로 받아서 빈 선행행을 스킵하고 실제 헤더 찾기
+      const aoa = XLSX.utils.sheet_to_json(ws, {header: 1, defval: null, blankrows: false});
+      if(aoa.length === 0){ alert('빈 파일이에요.'); return; }
+      let headerIdx = 0;
+      for(let i = 0; i < aoa.length; i++){
+        const strCount = aoa[i].filter(v => typeof v === 'string' && v.trim()).length;
+        if(strCount >= 2){ headerIdx = i; break; }
+      }
+      const headerRow = aoa[headerIdx].map((c, i) => (c == null || c === '') ? `컬럼${i+1}` : String(c).trim());
+      const seen = {};
+      const columns = headerRow.map(c => {
+        if(seen[c]){ seen[c]++; return `${c} (${seen[c]})`; }
+        seen[c] = 1; return c;
+      });
+      const rows = aoa.slice(headerIdx + 1)
+        .filter(r => r.some(v => v != null && v !== ''))
+        .map(r => {
+          const obj = {};
+          columns.forEach((c, i) => { obj[c] = r[i] ?? null; });
+          return obj;
+        });
+      if(rows.length === 0){ alert('데이터 행이 없어요.'); return; }
       parsedData = {columns, rows};
-      mapping = {};
-      columns.forEach(c => { mapping[c] = autoMap(c); });
-      // 첫 x로 잡힌 게 없는 경우 Y도 없으면 에러 가능 — 기본 제공
+      mapping = autoMapAll(columns, rows);
       renderMapping();
       renderPreview();
       showStep('stepMapping');
