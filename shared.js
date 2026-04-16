@@ -135,8 +135,8 @@ window.__applyTheme = function(){
         fontFamily: { sans: ['Pretendard Variable','Pretendard','system-ui','sans-serif'] },
         colors: {
           brand: {
-            50:'#eef4ff', 100:'#dbe7ff', 200:'#b9d0ff', 300:'#8ab0ff',
-            400:'#5a8eff', 500:'#3a74ff', 600:'#2559e6', 700:'#1e48b8', 900:'#132a66'
+            50:'#f5f3ff', 100:'#ede9fe', 200:'#ddd6fe', 300:'#c4b5fd',
+            400:'#a78bfa', 500:'#8b5cf6', 600:'#7c3aed', 700:'#6d28d9', 900:'#4c1d95'
           },
           accent: {
             50:'#fff1f5', 100:'#ffdde7', 200:'#ffbccd', 300:'#fb93ad',
@@ -144,8 +144,8 @@ window.__applyTheme = function(){
           },
           ink: { 900:'#111827', 700:'#374151', 500:'#6b7280', 300:'#d1d5db' },
           soft: {
-            navy:'#eef4ff', pink:'#ffe9ef', blush:'#fff1f4', mint:'#e3f7ee',
-            lemon:'#fff5d6', lilac:'#efe7ff', peach:'#ffe8d9'
+            navy:'#f5f3ff', pink:'#ffe9ef', blush:'#fff1f4', mint:'#e3f7ee',
+            lemon:'#fff5d6', lilac:'#efe7ff', peach:'#ffe8d9', gray:'#f5f5f5'
           }
         },
         boxShadow: {
