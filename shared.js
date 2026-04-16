@@ -153,6 +153,7 @@ window.__renderLayout = function(active){
   const navItems = [
     {id:'home', label:'홈', href:'index.html', svg:'<path d="M3 12l9-8 9 8"/><path d="M5 10v10h14V10"/>'},
     {id:'hub', label:'데이터 허브', href:'hub.html', svg:'<path d="M4 7h16M4 12h16M4 17h10"/>'},
+    {id:'hub2', label:'데이터 허브 2', href:'hub2.html', svg:'<path d="M12 2l3 7h7l-5.5 4 2 7-6.5-4-6.5 4 2-7L2 9h7z"/>'},
     {id:'report', label:'리포트카드', href:'report.html', svg:'<path d="M7 3h10l3 4v14H4V7z"/><path d="M8 12h8M8 16h5"/>'},
     {id:'lecture', label:'사용 가이드', href:'lecture.html', svg:'<path d="M3 5h12a3 3 0 013 3v12H6a3 3 0 01-3-3V5z"/><path d="M3 5a3 3 0 013-3h12"/><path d="M8 9h8M8 13h6"/>'}
   ];
