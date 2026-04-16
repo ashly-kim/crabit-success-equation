@@ -84,9 +84,8 @@ window.__auth = {
     return { ok:true };
   },
   kakaoLogin(){
-    // 데모: 첫 번째 계정으로 즉시 로그인 (실 연동 전까지)
-    const acc = this.getAccounts()[0];
-    if(acc) this.setSession({ phone:acc.phone, academy:acc.academy, director:acc.director });
+    // 카카오 신규 가입 플로우: 빈 상태로 로그인
+    this.setSession({ phone:'', academy:'신규 학원', director:'원장님', isFreshSignup:true });
     return { ok:true };
   },
   getSession(){ try { return JSON.parse(localStorage.getItem(__SESS_KEY) || 'null'); } catch(e){ return null; } },
