@@ -232,21 +232,16 @@ window.__renderTopbar = function(crumbs){
 window.__renderFooter = function(){
   return `
   <footer class="mt-16 border-t border-gray-200 bg-white">
-    <div class="max-w-[1280px] mx-auto px-8 py-8 space-y-3 text-xs text-ink-500 leading-relaxed">
-      <div class="flex items-center gap-3 flex-wrap">
-        <div class="flex items-center gap-2">
-          <div class="w-6 h-6 rounded-md bg-brand-500 grid place-items-center text-white font-bold text-[11px]">우</div>
-          <span class="font-bold text-ink-700">우리학원 성공방정식</span>
-          <span class="text-ink-300">by CRABIT</span>
-        </div>
+    <div class="max-w-[1280px] mx-auto px-8 py-8 space-y-2 text-[11px] text-ink-500 leading-relaxed">
+      <div class="flex items-center gap-2 mb-2">
+        <div class="w-6 h-6 rounded-md bg-brand-500 grid place-items-center text-white font-bold text-[11px]">우</div>
+        <span class="text-ink-700">우리학원 성공방정식</span>
+        <span class="text-ink-300">by CRABIT</span>
       </div>
       <p class="max-w-3xl">
-        본 사이트의 모든 콘텐츠 · 분석 방법론 · 리포트 템플릿 · UI 디자인의 저작권은 <b class="text-ink-700">㈜크래빗(CRABIT)</b>에 있습니다.
-        사전 서면 동의 없이 <b>무단 복제·배포·판매·2차 가공·AI 학습 용도 이용</b>을 금지하며, 위반 시 저작권법 등 관련 법령에 따라 민·형사상 책임을 질 수 있습니다.
+        본 사이트의 모든 콘텐츠·분석 방법론·리포트 템플릿·UI 디자인의 저작권은 ㈜크래빗(CRABIT)에 있습니다. 동의 없이 무단 복제·배포·판매 등을 금지하며, 위반 시 저작권법 등 관련 법령에 따라 민·형사상 책임을 질 수 있습니다.
       </p>
-      <p class="text-[11px] text-ink-400">
-        © 2026 CRABIT. All rights reserved. Unauthorized reproduction, distribution, modification, or AI-training use of any content on this site is strictly prohibited. Violators may be subject to civil and criminal liability under applicable law.
-      </p>
+      <p class="text-[11px] text-ink-400">© 2026 Crabit. Co., Ltd. All Rights Reserved</p>
     </div>
   </footer>
   `;
