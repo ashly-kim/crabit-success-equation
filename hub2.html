@@ -9,7 +9,7 @@
 <title>데이터 허브 2 · 우리학원 성공방정식</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="shared.js?v=1776360494131"></script>
+<script src="shared.js?v=1776360588074"></script>
 <script>__applyTheme();</script>
 <!-- 엑셀 파싱 (SheetJS, MIT 라이선스, 무료) -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -23,8 +23,8 @@
   .drop-zone:hover{border-color:#3a74ff;background:#f9fbff}
   .drop-zone.drag{border-color:#3a74ff;background:#eef4ff;transform:scale(1.01)}
 
-  .preview-table{border-collapse:collapse;width:100%;font-size:13px}
-  .preview-table th{background:#f3f4f6;padding:10px 12px;text-align:left;font-weight:700;color:#374151;border-bottom:1px solid #e5e7eb;white-space:nowrap}
+  .preview-table{border-collapse:separate;border-spacing:0;width:100%;font-size:13px}
+  .preview-table th{background:#f3f4f6;padding:10px 12px;text-align:left;font-weight:700;color:#374151;border-bottom:1px solid #e5e7eb;white-space:nowrap;position:sticky;top:0;z-index:2;box-shadow:0 1px 0 #e5e7eb}
   .preview-table td{padding:8px 12px;border-bottom:1px solid #f1f3f8;color:#1e293b;white-space:nowrap}
   .preview-table td.role-y{background:#fff7ed}
   .preview-table td.role-x{background:#eff6ff}
