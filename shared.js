@@ -58,7 +58,7 @@ const __SESS_KEY = 'crabit_session_v1';
 (function seedAccounts(){
   // 샘플 계정 업데이트를 위해 덮어쓰기
   const seed = [
-    { phone:'01087912483', password:'crafthabit1@', academy:'크래빗 영어학원', director:'김크래빗', createdAt: Date.now(), isDemo:true }
+    { phone:'01087912483', password:'crafthabit1@', academy:'크래빗 영어학원', director:'김현지', createdAt: Date.now(), isDemo:true }
   ];
   localStorage.setItem(__ACC_KEY, JSON.stringify(seed));
 })();
