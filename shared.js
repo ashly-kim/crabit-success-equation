@@ -80,7 +80,7 @@ window.__auth = {
     const acc = this.findByPhone(phone);
     if(!acc) return { ok:false, error:'등록되지 않은 휴대폰 번호예요.' };
     if(acc.password !== password) return { ok:false, error:'비밀번호가 일치하지 않아요.' };
-    this.setSession({ phone:acc.phone, academy:acc.academy, director:acc.director });
+    this.setSession({ phone:acc.phone, academy:acc.academy, director:acc.director, isDemo: !!acc.isDemo });
     return { ok:true };
   },
   kakaoLogin(){
