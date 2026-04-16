@@ -9,7 +9,7 @@
 <title>데이터 허브 · 우리학원 성공방정식</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="shared.js?v=1776381205135"></script>
+<script src="shared.js?v=1776381373539"></script>
 <script>__applyTheme();</script>
 <!-- 엑셀 파싱 (SheetJS, MIT 라이선스, 무료) -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -898,25 +898,202 @@
         </div>
       `).join('');
 
-    // 계수 테이블
+    // 계수 테이블 (연보라 테마)
     document.getElementById('coefTable').innerHTML = xCols.map((c, i) => {
       const b = beta[i+1];
       const bs = betaStd[i];
+      const rowBg = i % 2 === 0 ? '#ffffff' : '#faf5ff';
       return `
-      <tr class="border-t border-gray-100">
-        <td class="px-4 py-3 font-semibold">${xLabels[i]}</td>
-        <td class="px-4 py-3 text-right font-mono">${b.toFixed(3)}</td>
-        <td class="px-4 py-3 text-right font-mono text-brand-600 font-bold">${bs.toFixed(3)}</td>
+      <tr style="background:${rowBg};border-top:1px solid #ede9fe">
+        <td class="px-4 py-3 font-bold text-ink-900">${xLabels[i]}</td>
+        <td class="px-4 py-3 text-right font-mono text-ink-700">${b.toFixed(3)}</td>
+        <td class="px-4 py-3 text-right font-mono text-brand-700 font-bold">${bs.toFixed(3)}</td>
         <td class="px-4 py-3 text-[12px] text-ink-500">${xLabels[i]} 1단위 ↑ → ${yLabel} ${b >= 0 ? '+' : ''}${b.toFixed(2)} 변화</td>
       </tr>`;
     }).join('') + `
-      <tr class="border-t border-gray-100 bg-gray-50">
-        <td class="px-4 py-3 font-semibold text-ink-500">절편 (기본값)</td>
-        <td class="px-4 py-3 text-right font-mono">${beta[0].toFixed(3)}</td>
+      <tr style="background:#f5f3ff;border-top:1.5px solid #ddd6fe">
+        <td class="px-4 py-3 font-bold text-ink-500">절편 (기본값)</td>
+        <td class="px-4 py-3 text-right font-mono text-ink-700">${beta[0].toFixed(3)}</td>
         <td class="px-4 py-3 text-right text-ink-400">—</td>
         <td class="px-4 py-3 text-[12px] text-ink-500">모든 X가 0일 때 Y의 기본값</td>
       </tr>`;
+
+    // 스캐터 X축 셀렉트 populate
+    const scatterSel = document.getElementById('scatterX');
+    scatterSel.innerHTML = xLabels.map((lab, i) => `<option value="${i}">${lab}</option>`).join('');
+    const topIdx = betaStd.map((b,i)=>({a:Math.abs(b),i})).sort((a,b)=>b.a-a.a)[0].i;
+    scatterSel.value = topIdx;
+
+    // 쉬운 설명 + 스캐터 그래프
+    renderSimpleExplain();
+    renderScatter();
   }
+
+  // ===== 쉬운 설명 (초등학생 레벨) =====
+  function renderSimpleExplain(){
+    const { beta, r2, betaStd, n, yLabel, xLabels, xCols, cleaned } = analysisResult;
+    const r2Pct = Math.round(r2 * 100);
+    const sorted = betaStd.map((b,i)=>({b, abs:Math.abs(b), label:xLabels[i], i})).sort((a,b)=>b.abs-a.abs);
+    const top = sorted[0];
+    const topBeta = beta[top.i + 1];
+    const xArr = cleaned.map(r => r.xs[top.i]);
+    const xMin = Math.min(...xArr), xMax = Math.max(...xArr);
+    const yArr = cleaned.map(r => r.y);
+    const yAvg = yArr.reduce((a,b)=>a+b,0)/yArr.length;
+    const impact = (xMax - xMin) * topBeta;
+
+    const html = `
+      <div class="rounded-2xl p-5" style="background:linear-gradient(135deg,#faf5ff,#fdf2f8);border:1px solid #ede9fe">
+        <div class="font-extrabold text-ink-900 mb-2 text-[15px]">① 방정식이 뭘 말해주는 거예요?</div>
+        <p>컴퓨터가 원장님께서 올리신 <b class="text-brand-700">${n}명 학생의 실제 데이터</b>를 보고,
+          <span class="term">${yLabel}<span class="tpop"><span class="tp-title">📊 종속변수 Y</span>예측하고 싶은 <b>목표 수치</b>.<span class="tp-eg">이 페이지에서는 <b>${yLabel}</b>이 Y예요.</span></span></span>이 어떤
+          <span class="term">변수<span class="tpop"><span class="tp-title">📐 변수</span><b>측정 가능한 숫자 항목</b>이에요.<span class="tp-eg">X = 원인 (복습시간 등)<br/>Y = 결과 (${yLabel} 등)</span></span></span>에 따라 얼마씩 움직이는지를 공식으로 정리한 거예요.</p>
+        <p class="mt-2">"우리 학원 학생들은 평균적으로 <b class="text-brand-700">${yLabel} ≈ ${yAvg.toFixed(1)}</b>인데,
+          ${xLabels.map((l,i) => {
+            const b = beta[i+1];
+            return `<b>${l}</b>이 1 바뀌면 ${b >= 0 ? '+' : '−'}${Math.abs(b).toFixed(2)}만큼`;
+          }).join(', ')} 움직인다"는 뜻이에요.</p>
+      </div>
+
+      <div class="rounded-2xl p-5" style="background:linear-gradient(135deg,#fdf2f8,#faf5ff);border:1px solid #fce7f3">
+        <div class="font-extrabold text-ink-900 mb-2 text-[15px]">② 가장 <span class="term">영향도<span class="tpop"><span class="tp-title">⭐ 영향도</span>해당 X 변수가 Y를 끌어올리는 <b>힘의 크기</b>예요.<span class="tp-eg">표준화 β* 기준 · 0.3 이상이면 꽤 큰 영향.</span></span></span>가 큰 변수는 '${top.label}'이에요</div>
+        <p><b class="text-brand-700">${top.label}</b>의 표준화
+          <span class="term">계수<span class="tpop"><span class="tp-title">🔑 계수 (β)</span>"X가 <b>1만큼</b> 늘면 Y가 <b>β만큼</b> 변한다"는 뜻.<span class="tp-eg">β=0.42 복습 → 복습 +1시간 → ${yLabel} +0.42.</span></span></span> β* = <b class="text-brand-700">${top.b.toFixed(2)}</b>. 우리 학원의 다른 X 변수들 중 가장 큰 값이에요.</p>
+        <p class="mt-2">쉽게 말해, ${top.label}를 <b>평소의 최저(${xMin.toFixed(1)}) → 최고(${xMax.toFixed(1)})</b>로 끌어올리면 <b class="text-brand-700">${yLabel}이 약 ${impact >= 0 ? '+' : ''}${impact.toFixed(1)}만큼</b> 움직일 거예요.</p>
+      </div>
+
+      <div class="rounded-2xl p-5" style="background:#f5f5f5;border:1px solid #e5e7eb">
+        <div class="font-extrabold text-ink-900 mb-2 text-[15px]">③ 이 방정식, 얼마나 믿어도 돼요?</div>
+        <p><span class="term">신뢰도<span class="tpop"><span class="tp-title">📐 신뢰도 (R²)</span>방정식이 실제 데이터를 <b>얼마나 설명</b>하는지 0~100%로 보여주는 값.<span class="tp-eg">학생들 ${yLabel} 차이의 ${r2Pct}%를 이 X들이 설명.</span></span></span> (R²)가 <b class="text-brand-700">${r2Pct}%</b>예요. "우리 학원 학생들의 ${yLabel} 차이 중 <b>${r2Pct}%</b>를 선택하신 X 변수들(${xLabels.join(', ')})이 설명해준다"는 뜻이에요.</p>
+        <p class="mt-2">${r2Pct >= 70
+            ? `🟢 <b>70% 이상</b>이니까 학부모 상담·리포트카드에 자신있게 활용하세요.`
+            : r2Pct >= 50
+            ? `🟡 <b>50~70%</b>면 참고용으로 OK. 데이터가 쌓이면 신뢰도 ↑`
+            : `🔴 <b>50% 미만</b>이에요. 변수를 바꾸거나 학생 데이터를 더 모아보세요.`}</p>
+      </div>
+
+      <div class="rounded-2xl p-5 bg-white" style="border:1px dashed #ddd6fe">
+        <div class="font-extrabold text-ink-900 mb-2 text-[15px]">④ 이 숫자들, 어떻게 계산한 거예요?</div>
+        <p class="text-[13.5px]">회귀분석은 <b>"점들 사이로 가장 가까운 직선 하나"</b>를 찾는 방법이에요. 학생 ${n}명 각자의 (X, Y)를 좌표로 찍고, 모든 점과의 거리 제곱합이 가장 작게 되는 선을 컴퓨터가 계산해요. 그 선의 <b class="text-brand-700">기울기 = 계수 β</b>이고, Y축과 만나는 점이 <b>절편(${beta[0].toFixed(1)})</b>이에요.</p>
+        <p class="text-[13.5px] mt-2">변수마다 단위(점·시간·% 등)가 다르면 공평 비교가 안 되니까 <span class="term">표준화<span class="tpop"><span class="tp-title">🔢 표준화</span>변수를 <b>평균=0, 표준편차=1</b>로 바꿔 같은 잣대에 놓는 작업.<span class="tp-eg">이렇게 변환된 계수가 <b>β*</b> (표준화 β).</span></span></span>를 해서 줄 세운 게 바로 ② 블록의 <b>β*</b>예요.</p>
+      </div>
+    `;
+    document.getElementById('simpleExplain').innerHTML = html;
+  }
+
+  // ===== 회귀분석 스캐터 플롯 (애니메이션) =====
+  let _scatterAnimT = null;
+
+  function renderScatter(){
+    if(!analysisResult) return;
+    const svg = document.getElementById('scatterSvg');
+    if(!svg) return;
+    const sel = document.getElementById('scatterX');
+    const xIdx = Number(sel?.value ?? 0);
+    const { cleaned, xLabels, yLabel } = analysisResult;
+    const points = cleaned.map(r => ({x: r.xs[xIdx], y: r.y}));
+
+    // 단순 회귀 (시각화용)
+    const n = points.length;
+    const mx = points.reduce((a,p)=>a+p.x,0)/n;
+    const my = points.reduce((a,p)=>a+p.y,0)/n;
+    let sxx=0, sxy=0, syy=0;
+    points.forEach(p => {
+      sxx += (p.x-mx)**2;
+      sxy += (p.x-mx)*(p.y-my);
+      syy += (p.y-my)**2;
+    });
+    const slope = sxy / (sxx || 1);
+    const intercept = my - slope * mx;
+    const r2Simple = (sxy*sxy) / ((sxx*syy) || 1);
+
+    // 잔차 표준편차 (신뢰구간용)
+    let ssRes = 0;
+    points.forEach(p => { const pred = slope*p.x + intercept; ssRes += (p.y-pred)**2; });
+    const se = Math.sqrt(ssRes / Math.max(1, n-2));
+
+    // 축 범위
+    const xs = points.map(p=>p.x), ys = points.map(p=>p.y);
+    const xMin = Math.min(...xs), xMax = Math.max(...xs);
+    const yMin = Math.min(...ys), yMax = Math.max(...ys);
+    const xPad = (xMax-xMin)*0.08 || 1;
+    const yPad = (yMax-yMin)*0.12 || 1;
+    const x0 = xMin - xPad, x1 = xMax + xPad;
+    const y0 = yMin - yPad, y1 = yMax + yPad;
+
+    // 플롯 영역
+    const PL=64, PR=620, PT=24, PB=300;
+    const sx = v => PL + (v - x0) / (x1 - x0) * (PR - PL);
+    const sy = v => PB - (v - y0) / (y1 - y0) * (PB - PT);
+
+    const yTicks = [], xTicks = [];
+    for(let i=0;i<=4;i++) yTicks.push(y0 + (y1-y0) * i/4);
+    for(let i=0;i<=5;i++) xTicks.push(x0 + (x1-x0) * i/5);
+
+    const lineStart = {x:sx(x0), yU:sy(slope*x0+intercept + 1.96*se), yL:sy(slope*x0+intercept - 1.96*se), yM:sy(slope*x0+intercept)};
+    const lineEnd   = {x:sx(x1), yU:sy(slope*x1+intercept + 1.96*se), yL:sy(slope*x1+intercept - 1.96*se), yM:sy(slope*x1+intercept)};
+    const bandPath = `M ${lineStart.x} ${lineStart.yU} L ${lineEnd.x} ${lineEnd.yU} L ${lineEnd.x} ${lineEnd.yL} L ${lineStart.x} ${lineStart.yL} Z`;
+
+    const xLabel = xLabels[xIdx];
+
+    const fmtTick = v => {
+      if(Math.abs(v) >= 100) return Math.round(v);
+      if(Math.abs(v) >= 10) return v.toFixed(0);
+      return v.toFixed(1);
+    };
+
+    svg.innerHTML = `
+      ${yTicks.map(yv => `<line class="grid-line" x1="${PL}" y1="${sy(yv)}" x2="${PR}" y2="${sy(yv)}"/>`).join('')}
+      <line class="axis" x1="${PL}" y1="${PB}" x2="${PR}" y2="${PB}"/>
+      <line class="axis" x1="${PL}" y1="${PT}" x2="${PL}" y2="${PB}"/>
+      ${yTicks.map(yv => `<text class="tick" x="${PL-8}" y="${sy(yv)+3}" text-anchor="end">${fmtTick(yv)}</text>`).join('')}
+      ${xTicks.map(xv => `<text class="tick" x="${sx(xv)}" y="${PB+16}" text-anchor="middle">${fmtTick(xv)}</text>`).join('')}
+      <text class="axis-label" x="${(PL+PR)/2}" y="${PB+36}" text-anchor="middle">${xLabel}</text>
+      <text class="axis-label" x="20" y="${(PT+PB)/2}" text-anchor="middle" transform="rotate(-90, 20, ${(PT+PB)/2})">${yLabel}</text>
+      <path class="ci-band" d="${bandPath}" fill="#c4b5fd"/>
+      <line class="reg-line" x1="${lineStart.x}" y1="${lineStart.yM}" x2="${lineEnd.x}" y2="${lineEnd.yM}"
+            stroke="#7c3aed" stroke-width="2.5" stroke-linecap="round"/>
+      ${points.map((p, i) => `<circle class="dot" data-idx="${i}" cx="${sx(p.x)}" cy="${sy(p.y)}" r="5" fill="#7c3aed" stroke="white" stroke-width="1.5"/>`).join('')}
+      <g>
+        <rect x="${PR-108}" y="${PT+4}" width="104" height="26" rx="13" fill="white" stroke="#ede9fe"/>
+        <text x="${PR-56}" y="${PT+21}" text-anchor="middle" font-size="12" font-weight="800" fill="#6d28d9">R² ${Math.round(r2Simple*100)}%</text>
+      </g>
+    `;
+
+    animateScatter();
+  }
+
+  function animateScatter(){
+    if(_scatterAnimT){ _scatterAnimT.forEach(clearTimeout); }
+    _scatterAnimT = [];
+    const svg = document.getElementById('scatterSvg');
+    if(!svg) return;
+    const dots = svg.querySelectorAll('.dot');
+    const line = svg.querySelector('.reg-line');
+    const band = svg.querySelector('.ci-band');
+
+    const total = dots.length;
+    const perDelay = Math.max(25, Math.min(80, 1500 / Math.max(1, total)));
+    dots.forEach((d, i) => {
+      _scatterAnimT.push(setTimeout(() => d.classList.add('on'), i * perDelay));
+    });
+    _scatterAnimT.push(setTimeout(() => { if(line) line.classList.add('on'); }, total * perDelay + 150));
+    _scatterAnimT.push(setTimeout(() => { if(band) band.classList.add('on'); }, total * perDelay + 1200));
+  }
+
+  function replayScatterAnim(){
+    const svg = document.getElementById('scatterSvg');
+    if(!svg) return;
+    svg.querySelectorAll('.dot').forEach(d => d.classList.remove('on'));
+    const line = svg.querySelector('.reg-line');
+    const band = svg.querySelector('.ci-band');
+    if(line) line.classList.remove('on');
+    if(band) band.classList.remove('on');
+    void svg.offsetWidth;
+    animateScatter();
+  }
+  window.renderScatter = renderScatter;
+  window.replayScatterAnim = replayScatterAnim;
 
   // ===== LocalStorage 이력 관리 =====
   const UP_KEY = 'crabit_uploads_v1';
