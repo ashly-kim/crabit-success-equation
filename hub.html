@@ -9,7 +9,7 @@
 <title>데이터 허브 · 우리학원 성공방정식</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="shared.js?v=1776361691044"></script>
+<script src="shared.js?v=1776361741281"></script>
 <script>__applyTheme();</script>
 <!-- 엑셀 파싱 (SheetJS, MIT 라이선스, 무료) -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -473,39 +473,40 @@
     XLSX.writeFile(wb, '우리학원_데이터_템플릿.xlsx');
   }
 
-  function renderMapping(){
-    document.getElementById('rowCount').textContent = parsedData.rows.length;
-    document.getElementById('colCount').textContent = parsedData.columns.length;
-    const roleName = {y:'결과 (Y)', x:'변수 (X)', meta:'메타', ignore:'분석 제외'};
-    document.getElementById('mappingList').innerHTML = parsedData.columns.map(col => {
-      const m = mapping[col];
-      return `
-      <div class="border border-gray-100 rounded-xl p-4 flex items-center gap-3">
-        <div class="flex-1 min-w-0">
-          <div class="font-bold text-[14px] text-ink-900 truncate">${col}</div>
-          <div class="text-[11px] text-ink-500 mt-0.5">표시 이름: <b class="text-ink-700">${m.v}</b></div>
-        </div>
-        <select class="role-select" onchange="changeMapping('${escapeAttr(col)}', this.value)">
-          <option value="y" ${m.r==='y'?'selected':''}>📊 결과 (Y)</option>
-          <option value="x" ${m.r==='x'?'selected':''}>🎯 변수 (X)</option>
-          <option value="meta" ${m.r==='meta'?'selected':''}>📝 메타 (이름/반)</option>
-          <option value="ignore" ${m.r==='ignore'?'selected':''}>🚫 분석 제외</option>
-        </select>
-      </div>`;
-    }).join('');
-    updateMappingStatus();
-  }
-
   function escapeAttr(s){ return String(s).replace(/'/g, "\\'"); }
 
+  function renderMappingTable(){
+    document.getElementById('rowCount').textContent = parsedData.rows.length;
+    document.getElementById('colCount').textContent = parsedData.columns.length;
+    document.getElementById('mappingTable').innerHTML = parsedData.columns.map((col, idx) => {
+      const m = mapping[col];
+      const samples = parsedData.rows.slice(0, 3).map(r => r[col]).filter(v => v != null && v !== '');
+      const sampleText = samples.length ? samples.join(', ') : '—';
+      return `
+      <tr class="border-t border-gray-100 hover:bg-gray-50">
+        <td class="px-4 py-3 text-ink-500 text-[12px]">${idx + 1}</td>
+        <td class="px-4 py-3 font-semibold text-ink-900">${col}</td>
+        <td class="px-4 py-3 text-[12px] text-ink-500 max-w-xs truncate">${sampleText}</td>
+        <td class="px-4 py-3">
+          <select class="role-select w-full" onchange="changeMapping('${escapeAttr(col)}', this.value)">
+            <option value="none" ${(m.r==='none'||!m.r)?'selected':''}>-- 선택 --</option>
+            <option value="x" ${m.r==='x'?'selected':''}>🎯 변수 (X)</option>
+            <option value="y" ${m.r==='y'?'selected':''}>📊 결과 (Y)</option>
+            <option value="ignore" ${m.r==='ignore'?'selected':''}>🚫 분석 제외</option>
+          </select>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
   function changeMapping(col, role){
-    mapping[col].r = role;
-    // Y는 하나만
+    if(!mapping[col]) mapping[col] = {r: role, v: col};
+    else mapping[col].r = role;
     if(role === 'y'){
       Object.keys(mapping).forEach(k => {
-        if(k !== col && mapping[k].r === 'y') mapping[k].r = 'x';
+        if(k !== col && mapping[k].r === 'y') mapping[k].r = 'none';
       });
-      renderMapping();
+      renderMappingTable();
     }
     renderPreview();
     updateMappingStatus();
