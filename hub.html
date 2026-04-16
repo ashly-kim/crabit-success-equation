@@ -9,7 +9,7 @@
 <title>데이터 허브 · 우리학원 성공방정식</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="shared.js?v=1776361618392"></script>
+<script src="shared.js?v=1776361645376"></script>
 <script>__applyTheme();</script>
 <!-- 엑셀 파싱 (SheetJS, MIT 라이선스, 무료) -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -306,11 +306,17 @@
     return nonNull > 0 && numCount / nonNull >= 0.7;
   }
 
-  // 전체 컬럼 매핑: Y 중복 제거, 숫자 ignore → X 승격
-  function autoMapAll(columns, rows){
+  // 기본 매핑: 모두 'none' (사용자가 명시적으로 선택)
+  function defaultMapAll(columns){
+    const out = {};
+    columns.forEach(c => { out[c] = {r:'none', v:c}; });
+    return out;
+  }
+
+  // AI 자동 매핑 제안 (버튼으로 호출)
+  function suggestAutoMapping(columns, rows){
     const out = {};
     columns.forEach(c => { out[c] = autoMapOne(c); });
-    // Y가 여러 개면 '성적 향상 > 재등록 > 모의 > 기말 > 중간' 우선순위로 하나만 유지
     const yPriority = ['성적 향상','재등록','모의','기말','중간'];
     const yCols = columns.filter(c => out[c].r === 'y');
     if(yCols.length > 1){
@@ -322,7 +328,7 @@
       if(!chosen) chosen = yCols[yCols.length - 1];
       yCols.forEach(c => { if(c !== chosen) out[c] = {r:'x', v:out[c].v}; });
     }
-    // ignore인데 숫자 컬럼이면 X로 승격
+    // 숫자 컬럼 중 ignore는 X로
     columns.forEach(c => {
       if(out[c].r === 'ignore' && isNumericColumn(c, rows)){
         out[c] = {r:'x', v:out[c].v};
@@ -330,6 +336,15 @@
     });
     return out;
   }
+
+  function applyAutoMapping(){
+    if(!parsedData) return;
+    mapping = suggestAutoMapping(parsedData.columns, parsedData.rows);
+    renderMappingTable();
+    renderPreview();
+    updateMappingStatus();
+  }
+  window.applyAutoMapping = applyAutoMapping;
 
   // ===== 상태 =====
   let parsedData = null; // {columns, rows}
