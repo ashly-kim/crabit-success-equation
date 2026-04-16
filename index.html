@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="shared.js?v=1776383020185"></script>
+<script src="shared.js?v=1776383042436"></script>
 <script>__applyTheme();</script>
 <style>
   html,body{background:#f6f7fb}
@@ -411,6 +411,23 @@
     setCard('sc-analyses', analyses || '—', '회');
     setCard('sc-reports', totalReports || '—', '건');
     setCard('sc-sent', totalSent || '—', '건');
+
+    // 최근 성공방정식 카드
+    const latest = uploads.filter(u => u.analysis).sort((a,b) => (b.uploadedAt||0) - (a.uploadedAt||0))[0];
+    if(latest && latest.analysis){
+      const a = latest.analysis;
+      const d = new Date(latest.uploadedAt);
+      document.getElementById('latestEqDate').textContent =
+        `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')} 분석`;
+      document.getElementById('latestEqR2').textContent = `R² ${Math.round((a.r2||0)*100)}%`;
+      const b0 = (a.beta||[])[0];
+      const terms = (a.xLabels||[]).map((lbl,i) => {
+        const c = (a.beta||[])[i+1];
+        return c != null ? `  ${c >= 0 ? '+' : ''}${Number(c).toFixed(2)} × ${lbl}` : '';
+      }).filter(Boolean).join('\n');
+      document.getElementById('latestEqFormulaText').textContent =
+        `${a.yLabel} =\n  ${b0 != null ? Number(b0).toFixed(2) : '?'}\n${terms}`;
+    }
   })();
 </script>
 
