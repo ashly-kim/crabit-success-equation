@@ -9,7 +9,7 @@
 <title>데이터 허브 2 · 우리학원 성공방정식</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="shared.js?v=1776360739438"></script>
+<script src="shared.js?v=1776360754196"></script>
 <script>__applyTheme();</script>
 <!-- 엑셀 파싱 (SheetJS, MIT 라이선스, 무료) -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -427,7 +427,8 @@
       const chipLabel = m.r === 'y' ? 'Y' : m.r === 'x' ? 'X' : m.r === 'meta' ? 'META' : '—';
       return `<th><div class="flex items-center gap-2"><span class="role-chip ${chipCls}">${chipLabel}</span>${c}</div></th>`;
     }).join('')}</tr>`;
-    const previewRows = parsedData.rows.slice(0, 8);
+    // 성능을 위해 최대 500행까지만 렌더링 (충분히 큰 수치지만 브라우저 과부하 방지)
+    const previewRows = parsedData.rows.slice(0, 500);
     document.getElementById('previewBody').innerHTML = previewRows.map(r =>
       `<tr>${cols.map(c=>{
         const m = mapping[c];
