@@ -6,198 +6,212 @@
 <meta http-equiv="Cache-Control" content="no-cache, max-age=0, must-revalidate" />
 <meta http-equiv="Pragma" content="no-cache" />
 <meta http-equiv="Expires" content="0" />
-<title>데이터 허브 · 우리학원 성공방정식</title>
+<title>데이터 허브 2 · 우리학원 성공방정식</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="shared.js?v=1776361268711"></script>
+<script src="shared.js?v=1776361518164"></script>
 <script>__applyTheme();</script>
+<!-- 엑셀 파싱 (SheetJS, MIT 라이선스, 무료) -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
   html,body{background:#f6f7fb}
   .nav-item.active{background:#eef4ff;color:#2559e6;font-weight:600}
   .nav-item.active svg{color:#2559e6}
   .ring-soft{box-shadow:inset 0 0 0 1px #eef0f5}
-  .modal{position:fixed;inset:0;background:rgba(17,24,39,.55);display:none;align-items:center;justify-content:center;z-index:50;padding:20px}
-  .modal.on{display:flex;animation:fade .2s}
-  @keyframes fade{from{opacity:0}to{opacity:1}}
-  .modal-box{animation:slideUp .3s cubic-bezier(.2,.8,.2,1)}
-  @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
 
-  /* 입력 테이블 */
-  .grid-table{border-collapse:separate;border-spacing:0;table-layout:auto;width:auto}
-  .grid-table.mode-week{min-width:100%}
-  .grid-table th, .grid-table td{border-bottom:1px solid #f1f3f8;border-right:1px solid #f1f3f8;padding:0;position:relative;white-space:nowrap}
+  .drop-zone{border:2px dashed #cbd5e1;border-radius:20px;padding:48px 32px;text-align:center;transition:all .15s;background:#ffffff;cursor:pointer}
+  .drop-zone:hover{border-color:#3a74ff;background:#f9fbff}
+  .drop-zone.drag{border-color:#3a74ff;background:#eef4ff;transform:scale(1.01)}
 
-  /* 일간 모드: 요일 그룹 구분선 (학생 이름 오른쪽 굵은선과 동일 강도) */
-  .grid-table.mode-day th.var-sub.day-end,
-  .grid-table.mode-day td.cell.day-end{border-right:2px solid #e5e7eb !important}
-  .grid-table.mode-day th.day-group{border-right:2px solid #e5e7eb !important}
-  .grid-table thead th{background:#f9fafc;font-size:14px;font-weight:600;color:#6b7280;padding:12px 14px;position:sticky;top:0;z-index:2}
-  .grid-table thead th.var-group{background:#f3f4f6;color:#374151;border-bottom:1px solid #e5e7eb;font-size:14px;text-align:center;padding:12px}
-  .grid-table thead th.var-group.in-eq{background:#ffe9ef;color:#a62256}
-  .grid-table thead th.day-sub{background:#f5f8ff;color:#4d67a8;font-weight:500;font-size:13px;padding:10px 6px}
-  .grid-table thead th.day-group{background:#f9fafc;color:#374151;border-bottom:1px solid #e5e7eb;font-size:14px;text-align:center;font-weight:600;padding:12px 12px}
-  .grid-table thead th.var-sub{background:#f3f4f6;font-weight:500;font-size:13px;padding:10px 6px;color:#6b7280}
-  .grid-table thead th.var-sub.in-eq{background:#ffe9ef;color:#a62256;font-weight:600}
-  .grid-table tbody tr:hover td{background:#fafbfe}
-  .grid-table .name-col{position:sticky;left:0;background:white;z-index:1;padding:14px 18px;font-weight:600;border-right:2px solid #e5e7eb}
-  .grid-table thead th.name-col{background:#f9fafc;z-index:3;text-align:center}
-  .grid-table tbody tr:hover .name-col{background:#fafbfe}
-  .grid-table td.cell{padding:0;position:relative;transition:background .08s}
-  .grid-table td.cell input[type="text"], .grid-table td.cell input:not([type]){width:100%;height:52px;border:none;background:transparent;outline:none;text-align:center;font-weight:500;font-size:16px}
-  .grid-table td.cell.cell-active{background:#fff7d6 !important;box-shadow:inset 0 0 0 2px #f59e0b;z-index:5}
-  .grid-table td.cell.cell-active input{font-weight:700}
-  .grid-table td.cell.cell-fill-preview{background:#fff3b0 !important;box-shadow:inset 0 0 0 1px #f59e0b}
-  .cell-handle{position:absolute;right:-3px;bottom:-3px;width:9px;height:9px;background:#f59e0b;border:1.5px solid #fff;cursor:crosshair;z-index:7;display:none;border-radius:1px}
-  .grid-table td.cell.cell-active .cell-handle{display:block}
-  .cell-check{display:flex;align-items:center;justify-content:center;height:52px}
-  .grid-table td.cell.filled input{color:#1a3065}
+  .preview-table{border-collapse:separate;border-spacing:0;width:100%;font-size:13px}
+  .preview-table th{background:#f3f4f6;padding:10px 12px;text-align:left;font-weight:700;color:#374151;border-bottom:1px solid #e5e7eb;white-space:nowrap;position:sticky;top:0;z-index:2;box-shadow:0 1px 0 #e5e7eb}
+  .preview-table td{padding:8px 12px;border-bottom:1px solid #f1f3f8;color:#1e293b;white-space:nowrap}
+  .preview-table td.role-y{background:#fff7ed}
+  .preview-table td.role-x{background:#eff6ff}
+  .preview-table td.role-ignore{background:#f9fafb;color:#9ca3af}
 
-  /* 일간 모드 - 셀 패딩으로 자동 조정 */
-  .grid-table.mode-day td.cell input{height:54px;font-size:16px;padding:0 14px;text-align:center}
-  /* 주간 모드 - 셀 너비 적당히 */
-  .grid-table.mode-week td.cell{padding:0 12px}
-  .grid-table.mode-week td.cell input{padding:0 8px}
+  .role-chip{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:9999px;font-size:11px;font-weight:700;border:1.5px solid}
+  .role-chip.y{background:#fff7ed;color:#9a3412;border-color:#fed7aa}
+  .role-chip.x{background:#eff6ff;color:#1e48b8;border-color:#bfdbfe}
+  .role-chip.ignore{background:#f9fafb;color:#6b7280;border-color:#e5e7eb}
+  .role-chip.meta{background:#f5f3ff;color:#6d28d9;border-color:#ddd6fe}
 
-  .var-chip{transition:all .15s}
-  .var-chip.selected{background:#eef4ff;border-color:#5a8eff}
+  .role-select{padding:6px 10px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:12px;font-weight:600;background:white;outline:none;cursor:pointer}
+  .role-select:focus{border-color:#3a74ff}
 
-  .date-nav{display:flex;gap:4px}
-  .date-nav button{width:36px;height:36px;border-radius:10px;border:1px solid #e5e7eb;background:white;color:#374151}
-  .date-nav button:hover{background:#f9fafc}
+  .bar-row{display:flex;align-items:center;gap:10px;margin:8px 0}
+  .bar-label{width:120px;font-weight:600;font-size:13px;color:#374151;flex-shrink:0}
+  .bar-track{flex:1;height:16px;background:#f1f5f9;border-radius:8px;overflow:hidden;position:relative}
+  .bar-fill{height:100%;background:linear-gradient(90deg,#3a74ff,#5a8eff);border-radius:8px;transition:width .4s ease}
+  .bar-val{width:70px;text-align:right;font-weight:700;font-size:13px;color:#3a74ff}
 
-  .add-var-btn{background:linear-gradient(90deg,#eef4ff,#fff1f5);border:2px dashed #b9d0ff;color:#2559e6;font-weight:600;transition:.2s}
-  .add-var-btn:hover{border-color:#5a8eff;background:linear-gradient(90deg,#dbe7ff,#ffdde7)}
-
-  .period-btn{color:#6b7280;transition:.2s;padding:6px 16px;font-size:13px;font-weight:600;border-radius:9999px}
-  .period-btn.on{background:white;color:#1e48b8;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+  @keyframes fade-up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  .reveal{animation:fade-up .4s ease}
 </style>
 </head>
 <body class="font-sans text-ink-900 antialiased">
 <div class="flex min-h-screen">
   <div id="sidebar"></div>
-  <main class="flex-1 min-w-0">
+  <main class="flex-1 min-w-0 flex flex-col min-h-screen">
     <div id="topbar"></div>
-    <div class="px-8 py-8 max-w-[1400px] mx-auto space-y-8">
+    <div class="flex-1 px-8 py-8 max-w-[1280px] mx-auto w-full space-y-8">
 
-<!-- ============ 우리 학원 성공방정식 캐러셀 ============ -->
-      <section id="eqSection">
-        <div class="flex items-end justify-between mb-4 flex-wrap gap-3">
-          <div>
-            <h2 class="text-[26px] font-extrabold">우리 학원의 성공방정식</h2>
-            <p class="text-sm text-ink-500 mt-1">학생 그룹·목표별로 여러 방정식을 만들어 활용하세요.</p>
-          </div>
-          <div class="flex items-center gap-2">
-            <button onclick="openEqBuilder('new')" class="px-4 py-2 rounded-xl bg-brand-500 text-white text-sm font-semibold hover:bg-brand-600">+ 신규 방정식</button>
-          </div>
-        </div>
-
-        <!-- 캐러셀: 한 번에 카드 하나, 좌우 화살표는 카드 바깥 균형 -->
-        <div class="relative" id="eqCarouselWrap">
-          <div class="flex items-stretch gap-3">
-            <button onclick="navEq(-1)" class="flex-shrink-0 self-center w-11 h-11 rounded-full bg-white shadow-card grid place-items-center text-ink-700 hover:bg-gray-50 hover:scale-110 transition">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
-            </button>
-
-            <div class="flex-1 min-w-0" style="overflow:hidden;padding:8px 14px">
-              <div id="eqTrack" class="flex transition-transform duration-500 ease-out"></div>
-            </div>
-
-            <button onclick="navEq(1)" class="flex-shrink-0 self-center w-11 h-11 rounded-full bg-white shadow-card grid place-items-center text-ink-700 hover:bg-gray-50 hover:scale-110 transition">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-            </button>
-          </div>
-
-          <!-- 하단 중앙 도트 -->
-          <div id="eqDots" class="mt-4 flex justify-center gap-2"></div>
-        </div>
-
-        <!-- 방정식 없음 (전부 비었을 때) -->
-        <div id="eqEmpty" class="hidden bg-gradient-to-br from-soft-navy to-soft-blush rounded-3xl p-8 shadow-card ring-soft text-center">
-          <div class="text-5xl mb-3">📈</div>
-          <h2 class="text-2xl font-extrabold">아직 우리 학원만의 성공방정식이 없어요</h2>
-          <p class="mt-2 text-ink-700 max-w-xl mx-auto">학생 데이터로 회귀분석을 돌려보세요. <b>"무엇이 우리 학원 학생들의 성적을 가장 크게 올리는가"</b>를 숫자로 알려드릴게요.</p>
-          <button onclick="openEqBuilder('new')" class="mt-6 px-6 py-3 rounded-xl bg-brand-500 text-white font-bold hover:bg-brand-600 shadow-soft">
-            + 우리 학원만의 성공방정식 만들기
-          </button>
-          <div class="mt-4 text-xs text-ink-500">3분 안에 끝나요 · 미리 입력하신 데이터를 활용합니다</div>
-        </div>
-      </section>
-
-<!-- ============ 입력 섹션 ============ -->
+      <!-- 헤더 -->
       <section>
-        <!-- 제목: 카드 바깥 -->
-        <div class="flex items-end justify-between flex-wrap gap-3 mb-4">
-          <div>
-            <h2 class="text-[26px] font-extrabold">학생별 데이터 입력</h2>
-            <p class="text-sm text-ink-500 mt-1">주기에 맞춰 꾸준히 채워주시면 분석할 때 자동으로 반영됩니다.</p>
+        <div class="text-sm text-brand-600 font-semibold">데이터 허브 2 (개선 버전)</div>
+        <h1 class="mt-2 text-[28px] leading-tight font-extrabold">
+          엑셀만 올리면 <span class="text-brand-600">방정식</span>이 자동으로 만들어져요
+        </h1>
+        <p class="mt-3 text-ink-500 text-[15px] max-w-2xl">
+          학생 데이터가 담긴 엑셀 파일을 올려주세요. AI가 컬럼을 자동 매핑하고, 회귀분석까지 한 번에 돌려드려요.
+        </p>
+      </section>
+
+      <!-- STEP 1: 업로드 -->
+      <section id="stepUpload">
+        <div class="bg-white rounded-3xl shadow-card ring-soft p-8">
+          <div class="flex items-center justify-between mb-5">
+            <h2 class="text-[18px] font-extrabold">엑셀 파일 올리기</h2>
+            <div class="flex gap-2">
+              <button onclick="loadSample()" class="px-4 py-2 rounded-lg bg-soft-navy text-brand-700 text-sm font-semibold hover:bg-brand-100">📎 샘플 데이터로 체험</button>
+              <button onclick="downloadTemplate()" class="px-4 py-2 rounded-lg border border-gray-200 text-sm font-semibold text-ink-700 hover:bg-gray-50">📥 템플릿 다운로드</button>
+            </div>
           </div>
-          <div class="flex items-center gap-2">
-            <button onclick="openModal('alertModal')" class="px-4 py-2 rounded-xl bg-soft-blush border border-accent-200 text-accent-700 text-sm font-semibold hover:bg-accent-100 flex items-center gap-1.5">
-              🔔 데이터 기록 알림받기
-            </button>
-            <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full">자동 저장 중</span>
+
+          <div id="dropZone" class="drop-zone" onclick="document.getElementById('fileInput').click()">
+            <div class="text-5xl mb-3">📂</div>
+            <div class="text-[16px] font-bold text-ink-900 mb-1">엑셀 파일을 여기에 드래그하거나 클릭해서 선택하세요</div>
+            <div class="text-xs text-ink-500">.xlsx, .xls, .csv 지원 · 최대 10MB</div>
+          </div>
+          <input id="fileInput" type="file" accept=".xlsx,.xls,.csv" class="hidden" onchange="handleFile(event)"/>
+
+          <div class="mt-5 text-xs text-ink-500 flex items-start gap-2">
+            <span>🔒</span>
+            <span>파일은 원장님 브라우저에서 직접 처리돼요. 서버로 전송되기 전까지 안전하게 보관됩니다.</span>
           </div>
         </div>
+      </section>
 
-        <!-- 카드 -->
-        <div class="bg-white rounded-3xl shadow-card ring-soft overflow-hidden">
+      <!-- 홈 대시보드: 방정식 + 업로드 이력 -->
+      <section id="homeDash" class="grid md:grid-cols-2 gap-6">
+        <div class="bg-white rounded-3xl shadow-card ring-soft p-7">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-[17px] font-extrabold">🧮 만들어진 성공방정식</h2>
+            <span class="text-xs text-ink-500" id="eqCountLabel">0개</span>
+          </div>
+          <div id="savedEqList" class="space-y-3"></div>
+        </div>
 
-          <!-- Toolbar -->
-          <div class="flex items-center justify-between p-5 border-b border-gray-100 flex-wrap gap-4">
-            <!-- 왼쪽: 학생 그룹 -->
-            <div class="flex items-center gap-2">
-              <select class="px-4 h-10 rounded-xl border border-gray-200 text-sm font-semibold min-w-[180px]">
-                <option>전체 반 (76명)</option>
-                <option>중3 수학반 (24명)</option>
-                <option>중2 수학반 (18명)</option>
-                <option>고1 수학반 (22명)</option>
-                <option>중3 영어반 (12명)</option>
-              </select>
+        <div class="bg-white rounded-3xl shadow-card ring-soft p-7">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-[17px] font-extrabold">📁 업로드 이력</h2>
+            <span class="text-xs text-ink-500" id="upCountLabel">0개</span>
+          </div>
+          <div id="uploadList" class="space-y-3"></div>
+        </div>
+      </section>
+
+      <!-- STEP 2: 매핑 확인 -->
+      <section id="stepMapping" class="hidden">
+        <div class="bg-white rounded-3xl shadow-card ring-soft p-8 reveal">
+          <div class="flex items-center justify-between mb-5 flex-wrap gap-3">
+            <div>
+              <div class="text-sm text-brand-600 font-semibold">STEP 2</div>
+              <h2 class="text-[18px] font-extrabold mt-0.5">컬럼 매핑 확인</h2>
+              <p class="text-sm text-ink-500 mt-1">AI가 자동으로 매핑했어요. 확인하고 필요하면 수정해주세요.</p>
             </div>
+            <div class="flex items-center gap-4 text-xs text-ink-500">
+              <span>📊 <b class="text-ink-900" id="rowCount">0</b>행</span>
+              <span>📋 <b class="text-ink-900" id="colCount">0</b>컬럼</span>
+              <span id="fileName" class="text-brand-700 font-semibold"></span>
+            </div>
+          </div>
 
-            <!-- 오른쪽: 주기 토글 + 일정 탐색 -->
+          <!-- 컬럼별 역할 지정 -->
+          <div class="grid md:grid-cols-2 gap-3 mb-6" id="mappingList"></div>
+
+          <!-- 미리보기 -->
+          <div class="border border-gray-100 rounded-xl overflow-auto mb-5" style="max-height:560px">
+            <table class="preview-table">
+              <thead id="previewHead"></thead>
+              <tbody id="previewBody"></tbody>
+            </table>
+          </div>
+
+          <!-- 하단 액션 -->
+          <div class="flex items-center justify-between gap-3 flex-wrap">
+            <button onclick="resetFlow()" class="px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold hover:bg-gray-50">← 다른 파일 올리기</button>
             <div class="flex items-center gap-3">
-              <div class="inline-flex bg-gray-100 rounded-full p-1">
-                <button class="period-btn on" data-period="week">주간</button>
-                <button class="period-btn" data-period="day">일간</button>
-              </div>
-              <div class="date-nav">
-                <button title="이전"><svg class="w-4 h-4 mx-auto" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
-                <div id="periodLabel" class="px-4 h-9 rounded-lg bg-gray-100 font-semibold text-sm flex items-center">2026년 4월 2주차</div>
-                <button title="다음"><svg class="w-4 h-4 mx-auto" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>
-              </div>
-            </div>
-          </div>
-
-          <!-- 테이블 -->
-          <div class="overflow-x-auto">
-            <table class="grid-table mode-week" id="inputTable"></table>
-          </div>
-
-          <!-- 하단 -->
-          <div class="p-5 border-t border-gray-100 flex items-center justify-between flex-wrap gap-3">
-            <div class="text-sm text-ink-500">
-              📌 입력하지 않은 주는 건너뛰셔도 괜찮아요. 회귀분석 시 해당 주는 자동으로 제외됩니다.
-              <span class="ml-3">이번 주 입력 <b class="text-brand-600" id="progressCount">0</b> / <b id="progressTotal">0</b>건</span>
-            </div>
-            <div class="flex gap-2">
-<button class="px-5 py-2.5 text-sm rounded-xl bg-brand-500 text-white font-semibold hover:bg-brand-600">저장하고 마치기</button>
+              <div class="text-xs text-ink-500" id="mappingStatus">—</div>
+              <button onclick="runAnalysis()" id="runBtn" class="px-6 py-2.5 rounded-xl bg-brand-500 text-white text-sm font-bold hover:bg-brand-600 disabled:bg-gray-300 disabled:cursor-not-allowed">
+                회귀분석 실행 →
+              </button>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- ============ 관리 중인 변수 ============ -->
-      <section class="bg-white rounded-3xl p-7 shadow-card ring-soft">
-        <div class="flex items-center justify-between mb-5">
-          <div>
-            <h2 class="text-xl font-bold">관리 중인 변수</h2>
-            <p class="text-sm text-ink-500 mt-1">우리 학원에서 수집하고 있는 학생 데이터</p>
+      <!-- STEP 3: 결과 -->
+      <section id="stepResult" class="hidden">
+        <div class="bg-gradient-to-br from-brand-500 to-brand-600 rounded-3xl p-8 text-white shadow-card reveal">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="px-2.5 py-1 rounded-full bg-white/20 text-[11px] font-bold">✨ AI 분석 완료</span>
           </div>
-          <button class="add-var-btn px-5 py-2.5 rounded-xl text-sm" onclick="openAddVarModal()">+ 변수 추가</button>
+          <h2 class="text-[22px] font-extrabold mb-1">우리 학원의 성공방정식을 찾았어요</h2>
+          <p class="text-sm opacity-90">업로드하신 데이터 <span id="resRows">0</span>건으로 계산한 결과예요.</p>
+
+          <div class="mt-6 bg-white rounded-2xl p-6 text-ink-900">
+            <div class="text-[11px] font-bold text-brand-600 mb-2 tracking-wider">성공방정식</div>
+            <div class="text-[18px] font-extrabold leading-relaxed" id="resFormula">—</div>
+          </div>
+
+          <div class="mt-4 grid md:grid-cols-3 gap-3">
+            <div class="bg-white/15 rounded-xl p-4">
+              <div class="text-[11px] opacity-80">신뢰도 (R²)</div>
+              <div class="text-[22px] font-extrabold mt-1" id="resR2">—</div>
+              <div class="text-[11px] opacity-80 mt-1" id="resR2Level">—</div>
+            </div>
+            <div class="bg-white/15 rounded-xl p-4">
+              <div class="text-[11px] opacity-80">분석 학생 수</div>
+              <div class="text-[22px] font-extrabold mt-1"><span id="resN">0</span>명</div>
+              <div class="text-[11px] opacity-80 mt-1">유효 관측치</div>
+            </div>
+            <div class="bg-white/15 rounded-xl p-4">
+              <div class="text-[11px] opacity-80">예측 대상 (Y)</div>
+              <div class="text-[17px] font-extrabold mt-1" id="resY">—</div>
+              <div class="text-[11px] opacity-80 mt-1">종속변수</div>
+            </div>
+          </div>
         </div>
 
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3" id="activeVars"></div>
+        <div class="bg-white rounded-3xl shadow-card ring-soft p-7 mt-5 reveal">
+          <h3 class="text-[16px] font-extrabold mb-4">변수별 영향도 (표준화 계수 β*)</h3>
+          <div id="betaBars"></div>
+          <p class="text-[11px] text-ink-500 mt-4">💡 β* 값이 클수록 Y에 미치는 영향이 커요. 단위가 다른 변수 간 비교를 위해 표준화됐어요.</p>
+        </div>
+
+        <div class="bg-white rounded-3xl shadow-card ring-soft p-7 mt-5 reveal">
+          <h3 class="text-[16px] font-extrabold mb-4">계수 상세</h3>
+          <div class="overflow-auto">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="bg-gray-50 text-ink-500 text-[12px]">
+                  <th class="px-4 py-2.5 text-left">변수</th>
+                  <th class="px-4 py-2.5 text-right">계수 (β)</th>
+                  <th class="px-4 py-2.5 text-right">표준화 β*</th>
+                  <th class="px-4 py-2.5 text-left">해석</th>
+                </tr>
+              </thead>
+              <tbody id="coefTable"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="flex gap-3 mt-5 flex-wrap">
+          <button onclick="saveEquation()" class="px-5 py-3 rounded-xl bg-accent-500 text-white font-bold hover:bg-accent-600">💾 이 방정식 저장하기</button>
+          <button onclick="location.href='report.html'" class="px-5 py-3 rounded-xl bg-brand-500 text-white font-bold hover:bg-brand-600">📄 이 방정식으로 리포트 만들기 →</button>
+          <button onclick="resetFlow()" class="px-5 py-3 rounded-xl border border-gray-200 font-semibold hover:bg-gray-50">다른 파일로 다시 분석</button>
+        </div>
       </section>
 
     </div>
@@ -205,1452 +219,599 @@
   </main>
 </div>
 
-<!-- ============ 성공방정식 빌더 사이드 드로어 (4단계) ============ -->
-<div id="eqDrawer" class="fixed inset-0 z-50 hidden">
-  <div class="absolute inset-0 bg-black/50" onclick="closeEqDrawer()"></div>
-  <div class="absolute right-0 top-0 h-full w-full max-w-3xl bg-white shadow-2xl flex flex-col" id="eqDrawerPanel" style="transform:translateX(100%);transition:transform .35s cubic-bezier(.2,.8,.2,1)">
-    <!-- Header -->
-    <div class="px-7 py-5 border-b border-gray-100 flex items-start justify-between">
-      <div>
-        <div class="text-xs tracking-widest font-bold text-brand-600">성공방정식 빌더</div>
-        <h2 class="text-xl font-extrabold mt-1">우리 학원만의 공식을 찾아볼게요</h2>
-      </div>
-      <button onclick="closeEqDrawer()" class="w-10 h-10 rounded-full hover:bg-gray-100 grid place-items-center text-2xl">×</button>
-    </div>
-
-    <!-- Step Progress -->
-    <div class="px-7 py-4 border-b border-gray-100 bg-gray-50">
-      <div class="flex items-center justify-between mb-2">
-        <div class="text-xs font-semibold">진행 단계 <span id="eqStepLabel" class="text-brand-600">1</span> / 4</div>
-        <div class="text-xs text-ink-500">3분 소요</div>
-      </div>
-      <div class="h-1.5 rounded-full bg-gray-200 overflow-hidden">
-        <div id="eqProgBar" class="h-1.5 bg-brand-500 transition-all" style="width:25%"></div>
-      </div>
-    </div>
-
-    <!-- Step Body (스크롤) -->
-    <div class="flex-1 overflow-y-auto px-7 py-6" id="eqBody">
-
-      <!-- STEP 1 · 대상 (Who) -->
-      <div class="eq-step" data-step="1">
-        <div class="text-xs tracking-widest font-bold text-brand-600 mb-2">STEP 1 · 대상</div>
-        <h3 class="text-xl font-bold">이 방정식은 누구에게 적용할까요?</h3>
-        <p class="mt-2 text-sm text-ink-500">같은 환경의 학생들끼리 묶어야 정확한 분석이 됩니다.</p>
-
-        <div class="mt-5">
-          <label class="block text-sm font-bold mb-2">분석 그룹 선택 <span class="text-xs font-normal text-ink-500">· 복수 선택 가능</span></label>
-          <div class="grid grid-cols-2 gap-2" id="eqGroupList">
-            <button class="eq-group rounded-xl border-2 border-brand-500 bg-brand-50 text-brand-700 p-3 text-sm font-semibold" data-g="m3math">중3 수학반 <span class="text-xs font-normal">(24명)</span></button>
-            <button class="eq-group rounded-xl border-2 border-gray-200 p-3 text-sm font-semibold hover:border-brand-300" data-g="m2math">중2 수학반 <span class="text-xs font-normal">(18명)</span></button>
-            <button class="eq-group rounded-xl border-2 border-gray-200 p-3 text-sm font-semibold hover:border-brand-300" data-g="h1math">고1 수학반 <span class="text-xs font-normal">(22명)</span></button>
-            <button class="eq-group rounded-xl border-2 border-gray-200 p-3 text-sm font-semibold hover:border-brand-300" data-g="m3eng">중3 영어반 <span class="text-xs font-normal">(12명)</span></button>
-            <button class="eq-group rounded-xl border-2 border-gray-200 p-3 text-sm font-semibold hover:border-brand-300" data-g="all">전체 학생 <span class="text-xs font-normal">(76명)</span></button>
-          </div>
-        </div>
-
-        <div class="mt-5 rounded-xl bg-soft-navy p-4 text-sm">
-          💡 <b>분석 대상:</b> <span id="eqTargetSummary" class="text-brand-600 font-bold">중3 수학반 · 24명</span><br/>
-          <span class="text-xs text-ink-500">통계적으로 의미 있으려면 최소 15명 이상 권장해요.</span>
-        </div>
-
-        <div class="mt-5">
-          <label class="block text-sm font-bold mb-2">방정식 이름 <span class="text-xs font-normal text-ink-500">· 선택사항 · 자동 생성됨</span></label>
-          <input id="eqName" placeholder="예: 중3 수학반 · 성적 향상 v1" class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 text-sm focus:border-brand-400 outline-none"/>
-        </div>
-      </div>
-
-      <!-- STEP 2 · 목표 (Y) -->
-      <div class="eq-step hidden" data-step="2">
-        <div class="text-xs tracking-widest font-bold text-brand-600 mb-2">STEP 2 · 목표</div>
-        <h3 class="text-xl font-bold">이 그룹의 무엇을 올리고 싶으세요?</h3>
-        <p class="mt-2 text-sm text-ink-500">개선하고 싶은 결과(Y)를 선택해주세요.</p>
-
-        <div class="mt-5 grid grid-cols-2 gap-3">
-          <button class="eq-y-card rounded-2xl border-2 border-brand-500 bg-brand-50 p-5 text-left">
-            <div class="text-2xl">📈</div><div class="mt-2 font-bold">성적</div>
-            <div class="text-xs text-ink-500 mt-0.5">다음 시험 점수</div>
-          </button>
-          <button class="eq-y-card rounded-2xl border-2 border-gray-100 p-5 text-left hover:border-brand-300">
-            <div class="text-2xl">🔁</div><div class="mt-2 font-bold">재등록률</div>
-            <div class="text-xs text-ink-500 mt-0.5">이번 분기</div>
-          </button>
-          <button class="eq-y-card rounded-2xl border-2 border-gray-100 p-5 text-left hover:border-brand-300">
-            <div class="text-2xl">✅</div><div class="mt-2 font-bold">출석률</div>
-            <div class="text-xs text-ink-500 mt-0.5">최근 평균</div>
-          </button>
-          <button class="eq-y-card rounded-2xl border-2 border-gray-100 p-5 text-left hover:border-brand-300">
-            <div class="text-2xl">➕</div><div class="mt-2 font-bold">직접 입력</div>
-            <div class="text-xs text-ink-500 mt-0.5">우리 학원만의 목표</div>
-          </button>
-        </div>
-
-        <div class="mt-5 rounded-xl bg-gray-50 p-4">
-          <div class="text-sm font-semibold mb-2">구체적인 측정 기준</div>
-          <div class="flex gap-2 flex-wrap text-sm">
-            <select class="px-3 py-2 rounded-lg border border-gray-200">
-              <option>내신 점수</option>
-              <option>모의고사 백분위</option>
-              <option>등급</option>
-              <option>자체 테스트 점수</option>
-            </select>
-            <select class="px-3 py-2 rounded-lg border border-gray-200">
-              <option>절대값</option>
-              <option>변화량 (향상도)</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <!-- STEP 3 · 변수 (X) -->
-      <div class="eq-step hidden" data-step="3">
-        <div class="text-xs tracking-widest font-bold text-brand-600 mb-2">STEP 3 · 변수</div>
-        <h3 class="text-xl font-bold">어떤 변수로 분석할까요?</h3>
-        <p class="mt-2 text-sm text-ink-500">관리 중인 변수와 직접 추가 변수 중 선택하세요.</p>
-
-        <!-- 관리 중 -->
-        <div class="mt-5">
-          <div class="flex items-center gap-2 mb-2">
-            <span class="text-xs font-bold text-ink-500">📊 현재 데이터 허브에서 관리 중인 변수</span>
-          </div>
-          <div class="grid grid-cols-2 gap-2" id="eqVarManaged"></div>
-        </div>
-
-        <!-- 직접 추가 -->
-        <div class="mt-5 pt-5 border-t border-gray-100">
-          <div class="flex items-center gap-2 mb-2">
-            <span class="text-xs font-bold text-ink-500">✍️ 이 방정식을 위해 직접 추가</span>
-          </div>
-          <button class="w-full py-3 rounded-xl border-2 border-dashed border-brand-200 text-brand-600 font-semibold text-sm hover:bg-brand-50" id="eqAddCustomX">+ 새 변수 추가하기</button>
-          <div class="mt-2 space-y-1.5" id="eqCustomList"></div>
-        </div>
-
-        <!-- 직관 (inline) -->
-        <div class="mt-6 pt-5 border-t border-gray-100">
-          <div class="flex items-center gap-2 mb-3">
-            <span class="text-xs font-bold text-ink-500">⭐ 원장님의 직관 (선택)</span>
-            <span class="text-[10px] text-ink-400">· STEP 4 결과와 대조됩니다</span>
-          </div>
-          <div class="space-y-2" id="eqIntuition"></div>
-        </div>
-      </div>
-
-      <!-- STEP 4 · 분석 결과 -->
-      <div class="eq-step hidden" data-step="4">
-        <div class="text-xs tracking-widest font-bold text-brand-600 mb-2">STEP 4 · 분석 완료</div>
-        <h3 class="text-xl font-bold">우리 학원만의 성공방정식이 완성됐어요</h3>
-        <p class="mt-2 text-sm text-ink-500">지금 쌓여있는 모든 데이터로 회귀분석을 돌린 결과입니다.</p>
-
-        <!-- 방정식 카드 -->
-        <div class="mt-5 rounded-3xl bg-gradient-to-br from-brand-50 to-soft-blush p-6 text-center">
-          <div class="text-xs tracking-widest font-bold text-brand-700 mb-2">우리 학원 성공방정식</div>
-          <div class="text-xl font-extrabold leading-relaxed">
-            성적 = <span class="text-brand-600">0.42</span> × 복습 + <span class="text-brand-600">0.28</span> × 숙제 + <span class="text-brand-600">0.19</span> × 출석 + <span class="text-accent-600">62</span>
-          </div>
-          <div class="mt-4 inline-flex items-center gap-2 bg-white rounded-full px-3 py-1.5 text-sm font-semibold">
-            🟢 신뢰도 <span class="text-emerald-600">78%</span>
-          </div>
-        </div>
-
-        <!-- 해석 -->
-        <div class="mt-4 rounded-xl bg-soft-navy p-4 text-sm text-ink-700">
-          💡 <b>핵심 해석:</b> 이 그룹에서는 <b class="text-brand-600">복습시간</b>이 가장 강력해요. 복습 1시간 늘리면 평균 <b>+3.2점</b> 오를 것으로 예측됩니다.
-        </div>
-
-        <!-- 함정 진단 + 직관 비교 (간결하게) -->
-        <div class="mt-4 grid grid-cols-2 gap-2 text-xs">
-          <div class="rounded-xl bg-emerald-50 p-3 flex items-center gap-2">
-            <span class="text-base">✅</span>
-            <div><div class="font-bold text-emerald-700">다중공선성 PASS</div><div class="text-emerald-600">변수 간 중복 없음</div></div>
-          </div>
-          <div class="rounded-xl bg-amber-50 p-3 flex items-center gap-2">
-            <span class="text-base">⚠️</span>
-            <div><div class="font-bold text-amber-700">과적합 주의</div><div class="text-amber-600">데이터 더 쌓이면 개선</div></div>
-          </div>
-        </div>
-
-        <!-- 직관 vs 실제 비교 (있을 때만) -->
-        <div class="mt-4 rounded-xl bg-soft-blush p-4 text-sm">
-          <div class="font-bold mb-2">💡 원장님 직관과의 비교</div>
-          <div class="text-ink-700">가장 중요하다고 보신 "출석"보다 <b class="text-accent-600">복습</b>이 2배 강력했어요.</div>
-        </div>
-
-        <div class="mt-5 text-[11px] text-ink-500 text-center">중3 수학반 24명 · 누적 데이터 기반 · 2026.04.14 생성</div>
-      </div>
-
-    </div>
-
-    <!-- Footer Nav -->
-    <div class="px-7 py-4 border-t border-gray-100 flex items-center justify-between">
-      <button id="eqPrevBtn" class="px-5 py-2.5 rounded-xl border border-gray-200 font-semibold text-sm hover:bg-gray-50 disabled:opacity-30" disabled>← 이전</button>
-      <div class="text-xs text-ink-500"><span id="eqStepLabel2" class="font-bold text-brand-600">1</span> / 4</div>
-      <button id="eqNextBtn" class="px-5 py-2.5 rounded-xl bg-brand-500 text-white font-semibold text-sm hover:bg-brand-600">다음 →</button>
-    </div>
-  </div>
-</div>
-
-<!-- ============ 데이터 기록 알림받기 모달 ============ -->
-<div class="modal" id="alertModal">
-  <div class="modal-box bg-white rounded-3xl w-full max-w-2xl overflow-hidden">
-    <div class="p-7">
-      <div class="flex items-center justify-between mb-5">
-        <div>
-          <div class="text-xs tracking-widest font-bold text-accent-600">🔔 알림 설정</div>
-          <h2 class="text-2xl font-bold mt-1">언제 데이터 기록 알림을 받으시겠어요?</h2>
-          <p class="text-sm text-ink-500 mt-1">설정한 주기에 맞춰 입력하실 수 있도록 저희가 챙겨드릴게요.</p>
-        </div>
-        <button onclick="closeModal('alertModal')" class="w-10 h-10 rounded-full hover:bg-gray-100 grid place-items-center text-2xl">×</button>
-      </div>
-
-      <!-- 1. 알림 주기 -->
-      <div class="mb-5">
-        <label class="block text-sm font-bold mb-2">1. 알림 주기</label>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
-          <button class="alert-cycle-opt rounded-xl border-2 border-gray-200 p-4 text-center hover:border-brand-300 text-sm font-semibold" data-c="day">매일</button>
-          <button class="alert-cycle-opt rounded-xl border-2 border-brand-500 bg-brand-50 text-brand-700 p-4 text-center text-sm font-semibold" data-c="week">매주</button>
-          <button class="alert-cycle-opt rounded-xl border-2 border-gray-200 p-4 text-center hover:border-brand-300 text-sm font-semibold" data-c="biweek">격주</button>
-          <button class="alert-cycle-opt rounded-xl border-2 border-gray-200 p-4 text-center hover:border-brand-300 text-sm font-semibold" data-c="month">매월</button>
-        </div>
-      </div>
-
-      <!-- 2. 요일 (주간 모드일 때만) -->
-      <div class="mb-5" id="alertDayRow">
-        <label class="block text-sm font-bold mb-2">2. 요일</label>
-        <div class="grid grid-cols-7 gap-2">
-          <button class="alert-day-opt rounded-xl border-2 border-gray-200 p-3 text-center text-sm font-semibold hover:border-brand-300" data-d="mon">월</button>
-          <button class="alert-day-opt rounded-xl border-2 border-gray-200 p-3 text-center text-sm font-semibold hover:border-brand-300" data-d="tue">화</button>
-          <button class="alert-day-opt rounded-xl border-2 border-gray-200 p-3 text-center text-sm font-semibold hover:border-brand-300" data-d="wed">수</button>
-          <button class="alert-day-opt rounded-xl border-2 border-gray-200 p-3 text-center text-sm font-semibold hover:border-brand-300" data-d="thu">목</button>
-          <button class="alert-day-opt rounded-xl border-2 border-brand-500 bg-brand-50 text-brand-700 p-3 text-center text-sm font-semibold" data-d="fri">금</button>
-          <button class="alert-day-opt rounded-xl border-2 border-gray-200 p-3 text-center text-sm font-semibold hover:border-brand-300" data-d="sat">토</button>
-          <button class="alert-day-opt rounded-xl border-2 border-gray-200 p-3 text-center text-sm font-semibold hover:border-brand-300" data-d="sun">일</button>
-        </div>
-      </div>
-
-      <!-- 3. 시각 -->
-      <div class="mb-5">
-        <label class="block text-sm font-bold mb-2">3. 알림 시각</label>
-        <div class="flex items-center gap-3">
-          <input type="time" value="18:00" class="px-4 py-3 rounded-xl border-2 border-gray-200 text-base font-semibold focus:border-brand-400 outline-none"/>
-          <div class="flex gap-2">
-            <button class="alert-time-preset px-3 py-2 rounded-lg border border-gray-200 text-xs font-semibold hover:bg-gray-50">아침 9:00</button>
-            <button class="alert-time-preset px-3 py-2 rounded-lg border border-gray-200 text-xs font-semibold hover:bg-gray-50">점심 12:00</button>
-            <button class="alert-time-preset px-3 py-2 rounded-lg border-2 border-brand-300 bg-brand-50 text-brand-700 text-xs font-semibold">저녁 18:00</button>
-            <button class="alert-time-preset px-3 py-2 rounded-lg border border-gray-200 text-xs font-semibold hover:bg-gray-50">밤 21:00</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- 4. 채널 -->
-      <div class="mb-5">
-        <label class="block text-sm font-bold mb-2">4. 알림 채널 <span class="text-xs font-normal text-ink-500">· 중복 선택 가능</span></label>
-        <div class="grid grid-cols-3 gap-2">
-          <label class="alert-channel-opt rounded-xl border-2 border-brand-500 bg-brand-50 p-4 cursor-pointer flex items-center gap-2">
-            <input type="checkbox" checked class="w-4 h-4"/>
-            <span class="text-2xl">💬</span>
-            <span class="text-sm font-semibold text-brand-700">카카오톡</span>
-          </label>
-          <label class="alert-channel-opt rounded-xl border-2 border-gray-200 p-4 cursor-pointer flex items-center gap-2 hover:border-brand-300">
-            <input type="checkbox" class="w-4 h-4"/>
-            <span class="text-2xl">📧</span>
-            <span class="text-sm font-semibold">이메일</span>
-          </label>
-          <label class="alert-channel-opt rounded-xl border-2 border-gray-200 p-4 cursor-pointer flex items-center gap-2 hover:border-brand-300">
-            <input type="checkbox" class="w-4 h-4"/>
-            <span class="text-2xl">📱</span>
-            <span class="text-sm font-semibold">앱 푸시</span>
-          </label>
-        </div>
-      </div>
-
-      <!-- 미리보기 -->
-      <div class="rounded-xl bg-gray-50 p-4 text-sm">
-        💡 <b>알림 미리보기</b><br/>
-        <span class="text-ink-700">매주 금요일 오후 6시 카카오톡으로 데이터 기록 알림을 받으십니다.</span>
-      </div>
-
-      <div class="mt-7 pt-5 border-t border-gray-100 flex items-center justify-between">
-        <button onclick="confirmTurnOff()" class="px-4 py-2.5 rounded-xl text-rose-600 font-semibold text-sm hover:bg-rose-50">알림 끄기</button>
-        <div class="flex gap-2">
-          <button onclick="closeModal('alertModal')" class="px-4 py-2.5 rounded-xl border border-gray-200 font-semibold text-sm hover:bg-gray-50">취소</button>
-          <button onclick="closeModal('alertModal')" class="px-5 py-2.5 rounded-xl bg-brand-500 text-white font-semibold text-sm hover:bg-brand-600">저장</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ============ 변수 수정 모달 ============ -->
-<div class="modal" id="editVarModal">
-  <div class="modal-box bg-white rounded-3xl w-full max-w-lg overflow-hidden">
-    <div class="p-7">
-      <div class="flex items-center justify-between mb-5">
-        <div>
-          <div class="text-xs tracking-widest font-bold text-brand-600">변수 관리</div>
-          <h2 class="text-2xl font-bold mt-1" id="editVarTitle">복습시간</h2>
-        </div>
-        <button onclick="closeModal('editVarModal')" class="w-10 h-10 rounded-full hover:bg-gray-100 grid place-items-center text-2xl">×</button>
-      </div>
-
-      <div class="space-y-4">
-        <div>
-          <label class="text-xs font-bold text-ink-500">변수 이름</label>
-          <input id="editVarName" class="mt-1 w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold"/>
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="text-xs font-bold text-ink-500">단위</label>
-            <select id="editVarUnit" class="mt-1 w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm">
-              <option>0~100%</option><option>5점 척도</option><option>횟수</option><option>시간(분)</option><option>시간</option><option>점</option><option>회</option><option>O · X</option>
-            </select>
-          </div>
-          <div>
-            <label class="text-xs font-bold text-ink-500">기록 주기</label>
-            <select id="editVarCycle" class="mt-1 w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm">
-              <option>매 수업</option><option>매일</option><option>매주</option><option>매월</option><option>시험마다</option>
-            </select>
-          </div>
-        </div>
-        <div class="rounded-xl bg-gray-50 p-4 text-xs text-ink-500">
-          📊 <b>현재 누적 데이터:</b> <span id="editVarCount">312건</span> · <b>수집 시작:</b> <span id="editVarStart">2025.09.01</span>
-        </div>
-      </div>
-
-      <div class="mt-7 pt-5 border-t border-gray-100 flex items-center justify-between">
-        <button onclick="openDeleteVarModal()" class="px-4 py-2.5 rounded-xl text-rose-600 font-semibold text-sm hover:bg-rose-50 flex items-center gap-1.5">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
-          변수 삭제
-        </button>
-        <div class="flex gap-2">
-          <button onclick="closeModal('editVarModal')" class="px-4 py-2.5 rounded-xl border border-gray-200 font-semibold text-sm hover:bg-gray-50">취소</button>
-          <button onclick="saveEditVar()" class="px-5 py-2.5 rounded-xl bg-brand-500 text-white font-semibold text-sm hover:bg-brand-600">저장</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ============ 변수 삭제 모달 - Step 1: 옵션 선택 ============ -->
-<div class="modal" id="deleteVarModal">
-  <div class="modal-box bg-white rounded-3xl w-full max-w-xl overflow-hidden">
-    <div class="p-7">
-      <div class="flex items-center justify-between mb-2">
-        <div class="text-xs tracking-widest font-bold text-rose-600">삭제 확인</div>
-        <button onclick="closeModal('deleteVarModal')" class="w-10 h-10 rounded-full hover:bg-gray-100 grid place-items-center text-2xl">×</button>
-      </div>
-      <h2 class="text-2xl font-bold"><span id="delVarName">복습시간</span> 변수를 삭제할까요?</h2>
-      <p class="text-sm text-ink-500 mt-2">이전에 기록한 데이터를 어떻게 처리할지 선택해주세요.</p>
-
-      <div class="mt-6 space-y-3">
-        <button class="del-opt w-full text-left rounded-2xl border-2 border-gray-200 p-5 hover:border-emerald-500 transition" data-opt="keep">
-          <div class="flex items-start gap-3">
-            <div class="text-2xl">🗂️</div>
-            <div class="flex-1">
-              <div class="font-bold">이전 데이터는 남겨주세요</div>
-              <p class="mt-1 text-sm text-ink-500">기록한 값은 그대로 두고, 앞으로만 입력을 중단할게요. 이전 데이터를 활용한 리포트는 계속 만들 수 있어요.</p>
-            </div>
-          </div>
-        </button>
-        <button class="del-opt w-full text-left rounded-2xl border-2 border-gray-200 p-5 hover:border-rose-500 transition" data-opt="delete">
-          <div class="flex items-start gap-3">
-            <div class="text-2xl">🗑️</div>
-            <div class="flex-1">
-              <div class="font-bold">이전 데이터 모두 삭제해주세요</div>
-              <p class="mt-1 text-sm text-ink-500">변수 자체를 완전히 없애고, 입력했던 모든 값도 함께 지울게요.</p>
-            </div>
-          </div>
-        </button>
-      </div>
-
-      <div class="mt-6 pt-5 border-t border-gray-100 flex justify-end">
-        <button onclick="closeModal('deleteVarModal')" class="px-4 py-2.5 rounded-xl border border-gray-200 font-semibold text-sm hover:bg-gray-50">취소</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ============ Step 2-A: 데이터 보존 + 입력 중단 시점 설정 ============ -->
-<div class="modal" id="keepDataModal">
-  <div class="modal-box bg-white rounded-3xl w-full max-w-xl overflow-hidden">
-    <div class="p-7">
-      <div class="flex items-center justify-between mb-2">
-        <div class="text-xs tracking-widest font-bold text-brand-600">입력 중단 시점</div>
-        <button onclick="closeModal('keepDataModal')" class="w-10 h-10 rounded-full hover:bg-gray-100 grid place-items-center text-2xl">×</button>
-      </div>
-      <h2 class="text-2xl font-bold">언제부터 입력을 중단할까요?</h2>
-      <p class="text-sm text-ink-500 mt-2">선택하신 날짜 이후의 데이터부터는 기록하지 않습니다.</p>
-
-      <div class="mt-6 grid grid-cols-2 gap-3 mb-5">
-        <button class="stop-preset rounded-xl border-2 border-brand-500 bg-brand-50 text-brand-700 p-4 text-sm font-semibold" data-when="today">오늘부터</button>
-        <button class="stop-preset rounded-xl border border-gray-200 p-4 text-sm font-semibold hover:border-brand-400 hover:bg-brand-50" data-when="next-week">다음 주부터</button>
-        <button class="stop-preset rounded-xl border border-gray-200 p-4 text-sm font-semibold hover:border-brand-400 hover:bg-brand-50" data-when="next-month">다음 달부터</button>
-        <button class="stop-preset rounded-xl border border-gray-200 p-4 text-sm font-semibold hover:border-brand-400 hover:bg-brand-50" data-when="custom">직접 선택</button>
-      </div>
-
-      <div class="rounded-2xl bg-gray-50 p-4 flex items-center gap-3">
-        <span class="text-sm text-ink-700">중단 날짜:</span>
-        <input id="stopDate" type="date" class="px-3 py-2 rounded-lg border border-gray-200 text-sm" value="2026-04-14"/>
-        <span class="text-ink-500 text-sm">부터 미입력</span>
-      </div>
-
-      <div class="mt-5 p-4 rounded-xl bg-soft-blush text-sm">
-        ⚠️ <b>안내사항</b><br/>
-        앞으로 <b><span id="keepVarName">복습시간</span></b> 변수를 사용하는 리포트는 <b id="keepStopDate">2026.04.14</b> 이전 데이터만으로 추출됩니다.
-        그 이후 기간 데이터를 기반으로 한 리포트에서는 이 변수가 자동으로 제외돼요.
-      </div>
-
-      <div class="mt-7 pt-5 border-t border-gray-100 flex justify-end gap-2">
-        <button onclick="closeModal('keepDataModal')" class="px-4 py-2.5 rounded-xl border border-gray-200 font-semibold text-sm hover:bg-gray-50">취소</button>
-        <button onclick="confirmKeepDelete()" class="px-5 py-2.5 rounded-xl bg-brand-500 text-white font-semibold text-sm hover:bg-brand-600">변수 숨기기</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ============ Step 2-B: 완전 삭제 확인 ============ -->
-<div class="modal" id="hardDeleteModal">
-  <div class="modal-box bg-white rounded-3xl w-full max-w-xl overflow-hidden">
-    <div class="p-7">
-      <div class="flex items-center justify-between mb-2">
-        <div class="text-xs tracking-widest font-bold text-rose-600">완전 삭제</div>
-        <button onclick="closeModal('hardDeleteModal')" class="w-10 h-10 rounded-full hover:bg-gray-100 grid place-items-center text-2xl">×</button>
-      </div>
-      <h2 class="text-2xl font-bold text-rose-700">정말 모두 삭제하시겠어요?</h2>
-
-      <div class="mt-5 rounded-2xl border-2 border-rose-200 bg-rose-50 p-5 space-y-3">
-        <div class="flex items-start gap-2 text-sm">
-          <span class="text-rose-600 mt-0.5">⚠️</span>
-          <div><b>이전 데이터를 보유하고 있지 않게 됩니다.</b><br/><span class="text-rose-700"><b id="hardDelVarName">복습시간</b> 변수에 대해 입력하신 <b id="hardDelCount">312건</b>의 데이터가 모두 사라져요.</span></div>
-        </div>
-        <div class="flex items-start gap-2 text-sm">
-          <span class="text-rose-600 mt-0.5">⚠️</span>
-          <div><b>이전 기간을 기반으로 한 리포트를 더 이상 만들 수 없어요.</b><br/><span class="text-rose-700">이 변수가 포함된 모든 과거 기간 회귀분석 리포트는 생성이 불가능해집니다.</span></div>
-        </div>
-        <div class="flex items-start gap-2 text-sm">
-          <span class="text-rose-600 mt-0.5">⚠️</span>
-          <div><b>되돌릴 수 없어요.</b><br/><span class="text-rose-700">삭제된 데이터는 복구할 수 없습니다.</span></div>
-        </div>
-      </div>
-
-      <div class="mt-5 rounded-xl bg-gray-50 p-4 text-sm">
-        💡 데이터를 보존하고 싶으시면 <button class="text-brand-600 font-semibold underline" onclick="closeModal('hardDeleteModal');openModal('deleteVarModal')">"이전 데이터는 남겨주세요"</button> 옵션을 선택하세요.
-      </div>
-
-      <div class="mt-6 pt-5 border-t border-gray-100 flex justify-end gap-2">
-        <button onclick="closeModal('hardDeleteModal')" class="px-4 py-2.5 rounded-xl border border-gray-200 font-semibold text-sm hover:bg-gray-50">취소</button>
-        <button onclick="confirmHardDelete()" class="px-5 py-2.5 rounded-xl bg-rose-600 text-white font-semibold text-sm hover:bg-rose-700">완전 삭제</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ============ 변수 추가 모달 ============ -->
-<div class="modal" id="addVarModal">
-  <div class="modal-box bg-white rounded-3xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
-    <div class="p-7">
-      <div class="flex items-center justify-between mb-6">
-        <div>
-          <div class="text-xs tracking-widest font-bold text-brand-600" id="modalStepLabel">STEP 1 / 3</div>
-          <h2 class="text-2xl font-bold mt-1" id="modalTitle">어떤 변수를 추가하시나요?</h2>
-        </div>
-        <button onclick="closeAddVarModal()" class="w-10 h-10 rounded-full hover:bg-gray-100 grid place-items-center text-2xl">×</button>
-      </div>
-
-      <div class="addvar-step" data-s="1">
-        <p class="text-sm text-ink-500 mb-5">수업 시간에 정하신 X-Factor 중에서 담고 싶으신 변수를 골라주세요.</p>
-        <div class="grid grid-cols-2 md:grid-cols-3 gap-3" id="varMenu"></div>
-      </div>
-
-      <!-- STEP 1.5: 우리 학원만의 변수 만들기 -->
-      <div class="addvar-step hidden" data-s="custom">
-        <p class="text-sm text-ink-500 mb-5">우리 학원에서만 관리하는 데이터를 직접 정의해주세요.</p>
-
-        <!-- 변수 이름 -->
-        <div class="mb-5">
-          <label class="block text-sm font-bold mb-2">1. 변수 이름</label>
-          <input id="customVarName" placeholder="예: 오답노트 작성률" class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 text-base font-semibold focus:border-brand-400 outline-none"/>
-        </div>
-
-        <!-- 단위 -->
-        <div class="mb-5">
-          <label class="block text-sm font-bold mb-2">2. 단위 <span class="text-xs font-normal text-ink-500">· 어떤 형식으로 기록하시나요?</span></label>
-          <div class="grid grid-cols-3 gap-2" id="unitToggle">
-            <button class="unit-opt rounded-xl border-2 border-gray-200 p-3 text-center hover:border-brand-300" data-u="percent">
-              <div class="text-2xl mb-1">📊</div><div class="text-sm font-semibold">0~100%</div>
-            </button>
-            <button class="unit-opt rounded-xl border-2 border-gray-200 p-3 text-center hover:border-brand-300" data-u="score">
-              <div class="text-2xl mb-1">⭐</div><div class="text-sm font-semibold">점수</div>
-            </button>
-            <button class="unit-opt rounded-xl border-2 border-gray-200 p-3 text-center hover:border-brand-300" data-u="count">
-              <div class="text-2xl mb-1">🔢</div><div class="text-sm font-semibold">횟수</div>
-            </button>
-            <button class="unit-opt rounded-xl border-2 border-gray-200 p-3 text-center hover:border-brand-300" data-u="time">
-              <div class="text-2xl mb-1">⏱️</div><div class="text-sm font-semibold">시간</div>
-            </button>
-            <button class="unit-opt rounded-xl border-2 border-gray-200 p-3 text-center hover:border-brand-300" data-u="ox">
-              <div class="text-2xl mb-1">⭕</div><div class="text-sm font-semibold">O · X</div>
-            </button>
-            <button class="unit-opt rounded-xl border-2 border-gray-200 p-3 text-center hover:border-brand-300" data-u="check">
-              <div class="text-2xl mb-1">✅</div><div class="text-sm font-semibold">체크박스</div>
-            </button>
-          </div>
-
-          <!-- 점수: 만점 척도 -->
-          <div id="unitScoreOpts" class="hidden mt-3 rounded-xl bg-gray-50 p-4">
-            <div class="text-sm font-semibold mb-2">📌 몇 점 만점인가요?</div>
-            <div class="flex gap-2 flex-wrap" id="scoreScale">
-              <button class="score-opt px-4 py-2 rounded-lg border-2 border-gray-200 bg-white text-sm font-semibold hover:border-brand-400" data-s="3">3점</button>
-              <button class="score-opt px-4 py-2 rounded-lg border-2 border-gray-200 bg-white text-sm font-semibold hover:border-brand-400" data-s="5">5점</button>
-              <button class="score-opt px-4 py-2 rounded-lg border-2 border-gray-200 bg-white text-sm font-semibold hover:border-brand-400" data-s="10">10점</button>
-              <button class="score-opt px-4 py-2 rounded-lg border-2 border-gray-200 bg-white text-sm font-semibold hover:border-brand-400" data-s="100">100점</button>
-              <div class="flex items-center gap-2">
-                <span class="text-sm text-ink-500">직접</span>
-                <input id="scoreCustom" type="number" placeholder="N" class="w-20 px-3 py-2 rounded-lg border-2 border-gray-200 text-sm font-semibold text-center"/>
-                <span class="text-sm text-ink-500">점 만점</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- 시간: 단위 -->
-          <div id="unitTimeOpts" class="hidden mt-3 rounded-xl bg-gray-50 p-4">
-            <div class="text-sm font-semibold mb-2">📌 어떤 단위로 기록하시나요?</div>
-            <div class="flex gap-2" id="timeScale">
-              <button class="time-opt flex-1 py-2 rounded-lg border-2 border-gray-200 bg-white text-sm font-semibold hover:border-brand-400" data-t="sec">초 단위</button>
-              <button class="time-opt flex-1 py-2 rounded-lg border-2 border-gray-200 bg-white text-sm font-semibold hover:border-brand-400" data-t="min">분 단위</button>
-              <button class="time-opt flex-1 py-2 rounded-lg border-2 border-gray-200 bg-white text-sm font-semibold hover:border-brand-400" data-t="hour">시간 단위</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- 기록 주기 -->
-        <div class="mb-5">
-          <label class="block text-sm font-bold mb-2">3. 기록 주기 <span class="text-xs font-normal text-ink-500">· 얼마나 자주 입력하시나요?</span></label>
-          <div class="grid grid-cols-5 gap-2" id="cycleToggle">
-            <button class="cycle-opt rounded-xl border-2 border-gray-200 p-3 text-center hover:border-brand-300 text-sm font-semibold" data-c="lesson">매 수업</button>
-            <button class="cycle-opt rounded-xl border-2 border-gray-200 p-3 text-center hover:border-brand-300 text-sm font-semibold" data-c="day">매일</button>
-            <button class="cycle-opt rounded-xl border-2 border-gray-200 p-3 text-center hover:border-brand-300 text-sm font-semibold" data-c="week">매주</button>
-            <button class="cycle-opt rounded-xl border-2 border-gray-200 p-3 text-center hover:border-brand-300 text-sm font-semibold" data-c="month">매월</button>
-            <button class="cycle-opt rounded-xl border-2 border-gray-200 p-3 text-center hover:border-brand-300 text-sm font-semibold" data-c="exam">시험마다</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="addvar-step hidden" data-s="2">
-        <p class="text-sm text-ink-500 mb-5"><b id="selectedVarName">복습시간</b>에 대한 데이터를 이미 가지고 계신가요?</p>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <button class="status-btn group rounded-2xl border-2 border-gray-200 p-6 text-left hover:border-emerald-500" data-status="have">
-            <div class="text-3xl">🟢</div>
-            <div class="mt-3 font-bold text-lg">이미 보유 중이에요</div>
-            <p class="mt-1 text-sm text-ink-500">엑셀이나 노트에 이미 기록해둔 데이터가 있어요. 바로 입력해서 리포트를 만들래요.</p>
-          </button>
-          <button class="status-btn group rounded-2xl border-2 border-gray-200 p-6 text-left hover:border-amber-500" data-status="new">
-            <div class="text-3xl">🟡</div>
-            <div class="mt-3 font-bold text-lg">지금부터 수집할게요</div>
-            <p class="mt-1 text-sm text-ink-500">데이터는 아직 없어요. 오늘부터 사이트에 꾸준히 기록해나갈게요.</p>
-          </button>
-        </div>
-      </div>
-
-      <div class="addvar-step hidden" data-s="3a">
-        <p class="text-sm text-ink-500 mb-5">언제부터 기록된 데이터를 가지고 계신가요? 그 시점부터 입력 칸이 열립니다.</p>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
-          <button class="date-preset rounded-xl border border-gray-200 p-4 text-sm font-semibold hover:border-brand-400 hover:bg-brand-50" data-preset="2w">최근 2주</button>
-          <button class="date-preset rounded-xl border border-gray-200 p-4 text-sm font-semibold hover:border-brand-400 hover:bg-brand-50" data-preset="1m">최근 1개월</button>
-          <button class="date-preset rounded-xl border-2 border-brand-500 bg-brand-50 text-brand-700 p-4 text-sm font-semibold" data-preset="3m">최근 3개월</button>
-          <button class="date-preset rounded-xl border border-gray-200 p-4 text-sm font-semibold hover:border-brand-400 hover:bg-brand-50" data-preset="6m">최근 6개월</button>
-        </div>
-        <div class="rounded-2xl bg-gray-50 p-4 flex items-center gap-3">
-          <span class="text-sm text-ink-700">직접 선택:</span>
-          <input type="date" class="px-3 py-2 rounded-lg border border-gray-200 text-sm" value="2026-01-14"/>
-          <span class="text-ink-500 text-sm">부터</span>
-        </div>
-        <div class="mt-5 p-4 rounded-xl bg-soft-blush text-sm">
-          💡 <b>선택하신 시점부터 현재까지의 입력 칸이 자동으로 열립니다.</b> 그 칸부터 데이터를 채워주시면 돼요.
-        </div>
-      </div>
-
-      <div class="addvar-step hidden" data-s="3b">
-        <p class="text-sm text-ink-500 mb-5">얼마나 자주 기록하실 예정인가요?</p>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
-          <button class="period-preset rounded-xl border border-gray-200 p-5 text-center hover:border-brand-400 hover:bg-brand-50"><div class="text-2xl mb-1">📅</div><div class="font-semibold">매일</div></button>
-          <button class="period-preset rounded-xl border-2 border-brand-500 bg-brand-50 p-5 text-center"><div class="text-2xl mb-1">📆</div><div class="font-semibold text-brand-700">매주</div></button>
-          <button class="period-preset rounded-xl border border-gray-200 p-5 text-center hover:border-brand-400 hover:bg-brand-50"><div class="text-2xl mb-1">🗓️</div><div class="font-semibold">매월</div></button>
-          <button class="period-preset rounded-xl border border-gray-200 p-5 text-center hover:border-brand-400 hover:bg-brand-50"><div class="text-2xl mb-1">📝</div><div class="font-semibold">시험마다</div></button>
-        </div>
-        <div class="rounded-xl bg-soft-blush p-4 text-sm">
-          🔔 <b>입력 알림을 받고 싶으세요?</b><br/>
-          상단 <b>"데이터 기록 알림받기"</b> 버튼에서 한 번에 설정하실 수 있어요. 변수마다 따로 설정하실 필요는 없습니다.
-        </div>
-      </div>
-
-      <div class="mt-8 pt-5 border-t border-gray-100 flex items-center justify-between">
-        <button id="modalPrev" class="px-4 py-2.5 rounded-xl border border-gray-200 font-semibold text-sm hover:bg-gray-50">← 이전</button>
-        <button id="modalNext" class="px-6 py-2.5 rounded-xl bg-brand-500 text-white font-semibold text-sm hover:bg-brand-600">다음 →</button>
-      </div>
-    </div>
-  </div>
-</div>
-
 <script>
   if(!__auth.requireAuth()) throw new Error('redirecting');
-  document.getElementById('sidebar').outerHTML = __renderLayout('hub');
-  document.getElementById('topbar').outerHTML = __renderTopbar(['홈','데이터 허브']);
+  document.getElementById('sidebar').outerHTML = __renderLayout('hub2');
+  document.getElementById('topbar').outerHTML = __renderTopbar(['홈','데이터 허브 2']);
+  document.getElementById('pageFooter').outerHTML = __renderFooter();
 
-  // ===== 학생 (12명 샘플) =====
-  const firstNames = ['민재','서연','하윤','지우','도윤','소율','지호','예진','준서','서윤','시우','지민'];
-  const surnames = ['김','박','이','최','정','강','조','윤','한','오','서','신'];
-  const classes = ['중3 수학반','중2 수학반','고1 수학반'];
-  const studentsOriginal = firstNames.map((n,i)=>({ n: surnames[i%surnames.length]+n, cls: classes[i%classes.length] }));
-  let students = [...studentsOriginal];
-  let sortMode = 0; // 0: 원본, 1: 가나다, 2: 역순
-
-  function cycleStudentSort(){
-    sortMode = (sortMode + 1) % 3;
-    const ind = document.getElementById('sortIndicator');
-    if(sortMode === 0){
-      students = [...studentsOriginal];
-      ind.textContent = '⇅';
-    } else if(sortMode === 1){
-      students = [...studentsOriginal].sort((a,b)=>a.n.localeCompare(b.n,'ko'));
-      ind.textContent = '↑';
-    } else {
-      students = [...studentsOriginal].sort((a,b)=>b.n.localeCompare(a.n,'ko'));
-      ind.textContent = '↓';
-    }
-    renderInputTable();
-  }
-  window.cycleStudentSort = cycleStudentSort;
-
-  // ===== 변수 =====
-  const availableVars = [
-    {id:'att', emoji:'✅', name:'출결률', unit:'%', cycle:'매 수업'},
-    {id:'hw', emoji:'📝', name:'숙제이행률', unit:'%', cycle:'매 수업'},
-    {id:'review', emoji:'🕐', name:'복습시간', unit:'시간', cycle:'매주'},
-    {id:'q', emoji:'🙋', name:'질문횟수', unit:'회', cycle:'매 수업'},
-    {id:'score', emoji:'📊', name:'시험 성적', unit:'점', cycle:'시험마다'},
-    {id:'counsel', emoji:'🗣️', name:'학생 상담', unit:'회', cycle:'매월'},
-    {id:'parent', emoji:'👨‍👩‍👧', name:'학부모 상담', unit:'회', cycle:'매월'},
-    {id:'self', emoji:'📚', name:'자습시간', unit:'시간', cycle:'매주'},
-    {id:'focus', emoji:'⭐', name:'수업 집중도', unit:'5점', cycle:'매 수업'}
-  ];
-  // inEq: true면 현재 방정식에 포함된 변수
-  let activeVars = [
-    {id:'att', inEq:true, beta:0.19},
-    {id:'hw', inEq:true, beta:0.28},
-    {id:'review', inEq:true, beta:0.42},
-    {id:'q', inEq:false},
-    {id:'score', inEq:true, isY:true}
+  // ===== AI 자동 매핑 사전 (우선순위 순서) =====
+  const COL_DICT = [
+    // Y 후보 — '향상/등급/재등록' 같은 결과성 키워드 우선
+    {k:'성적 향상', r:'y', v:'성적 향상'},
+    {k:'재등록', r:'y', v:'재등록 여부'},
+    {k:'모의고사', r:'y', v:'모의고사 등급'},
+    {k:'기말고사', r:'y', v:'기말고사 점수'},
+    {k:'기말', r:'y', v:'기말고사 점수'},
+    {k:'중간고사', r:'y', v:'중간고사 점수'},
+    {k:'중간', r:'y', v:'중간고사 점수'},
+    {k:'최종점수', r:'y', v:'최종 점수'},
+    // X 후보
+    {k:'만족도', r:'x', v:'만족도'},
+    {k:'복습 시간', r:'x', v:'복습시간'}, {k:'복습시간', r:'x', v:'복습시간'}, {k:'복습', r:'x', v:'복습'},
+    {k:'예습 시간', r:'x', v:'예습시간'}, {k:'예습시간', r:'x', v:'예습시간'}, {k:'예습', r:'x', v:'예습'},
+    {k:'숙제', r:'x', v:'숙제이행률'}, {k:'과제', r:'x', v:'숙제이행률'},
+    {k:'출결', r:'x', v:'출결률'}, {k:'출석', r:'x', v:'출결률'},
+    {k:'결석', r:'x', v:'결석횟수'}, {k:'지각', r:'x', v:'지각횟수'},
+    {k:'질문', r:'x', v:'질문횟수'}, {k:'발표', r:'x', v:'발표횟수'},
+    {k:'집중', r:'x', v:'수업집중도'}, {k:'자습', r:'x', v:'자습시간'},
+    {k:'단어', r:'x', v:'단어암기'}, {k:'상담', r:'x', v:'상담횟수'},
+    // Meta
+    {k:'학생ID', r:'meta', v:'학생 ID'},
+    {k:'학부모 전화', r:'meta', v:'학부모 전화번호'},
+    {k:'학부모전화', r:'meta', v:'학부모 전화번호'},
+    {k:'전화번호', r:'meta', v:'학부모 전화번호'},
+    {k:'연락처', r:'meta', v:'학부모 전화번호'},
+    {k:'학생', r:'meta', v:'학생'},
+    {k:'이름', r:'meta', v:'이름'}, {k:'성명', r:'meta', v:'이름'},
+    {k:'학년', r:'meta', v:'학년'},
+    {k:'날짜', r:'meta', v:'측정일'}, {k:'일자', r:'meta', v:'측정일'},
+    // 무시
+    {k:'순서', r:'ignore', v:'순서'}, {k:'번호', r:'ignore', v:'번호'}
   ];
 
-  let currentMode = 'week';
-  const days = ['월','화','수','목','금','토','일'];
-  const dayDates = ['4/13','4/14','4/15','4/16','4/17','4/18','4/19'];
-
-  function randVal(id){
-    if(id==='att') return 85+Math.floor(Math.random()*15);
-    if(id==='hw') return 70+Math.floor(Math.random()*30);
-    if(id==='review') return (3+Math.random()*5).toFixed(1);
-    if(id==='q') return Math.floor(Math.random()*8);
-    if(id==='score') return 65+Math.floor(Math.random()*25);
-    if(id==='counsel'||id==='parent') return Math.floor(Math.random()*3);
-    if(id==='self') return (Math.random()*4).toFixed(1);
-    if(id==='focus') return (2+Math.random()*3).toFixed(1);
-    return '';
-  }
-
-  function renderInputTable(){
-    const vars = activeVars.map(a => ({...availableVars.find(v=>v.id===a.id), ...a}));
-    const table = document.getElementById('inputTable');
-    table.className = 'grid-table mode-' + currentMode;
-
-    let thead, tbody;
-    if(currentMode === 'week'){
-      thead = `<thead>
-        <tr>
-          <th class="name-col cursor-pointer hover:bg-gray-100" id="sortStudentBtn" onclick="cycleStudentSort()">
-            <div class="flex items-center justify-center gap-1">
-              <span class="text-[15px] font-bold text-ink-700">학생</span>
-              <span id="sortIndicator" class="text-xs text-ink-700">⇅</span>
-            </div>
-          </th>
-          ${vars.map(v=>`<th class="var-group ${v.inEq?'in-eq':''}" title="${v.cycle}">
-            <div class="flex items-center justify-center gap-1.5">
-              <span class="text-lg">${v.emoji}</span><span class="text-sm font-bold">${v.name}</span>
-              ${v.inEq?`<span class="text-[10px] font-bold bg-accent-500 text-white px-1.5 py-0.5 rounded-full ml-1">${v.isY?'Y':'β '+v.beta}</span>`:''}
-            </div>
-            <div class="text-[11px] font-normal mt-1 ${v.inEq?'text-accent-600':'text-ink-500'}">${v.unit} · ${v.cycle}</div>
-          </th>`).join('')}
-        </tr>
-      </thead>`;
-      tbody = `<tbody>${students.map((s,si)=>`
-        <tr>
-          <td class="name-col">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-full bg-soft-navy text-brand-700 font-bold grid place-items-center text-base">${s.n[0]}</div>
-              <div><div class="text-base font-semibold">${s.n}</div><div class="text-xs text-ink-500 mt-0.5">${s.cls}</div></div>
-            </div>
-          </td>
-          ${vars.map((v,vi)=>{
-            const isTargetStart = v.isNew && si===0;
-            const isCheck = v.unitType === 'check';
-            const dataAttr = isTargetStart ? 'data-target="1"' : '';
-            if(isCheck){
-              return `<td class="cell" data-col="${vi}" ${dataAttr}><label class="cell-check"><input type="checkbox"/></label><div class="cell-handle"></div></td>`;
-            }
-            const hasVal = Math.random() > 0.35 && !v.isNew;
-            const val = hasVal ? randVal(v.id) : '';
-            const cls = hasVal ? 'filled' : '';
-            return `<td class="cell ${cls}" data-col="${vi}" ${dataAttr}><input type="text" value="${val}"/><div class="cell-handle"></div></td>`;
-          }).join('')}
-        </tr>`).join('')}</tbody>`;
-    } else {
-      // 일간 모드: 요일이 상단 그룹, 변수가 하위
-      thead = `<thead>
-        <tr>
-          <th class="name-col text-left" rowspan="2">학생</th>
-          ${days.map((d,di)=>`<th class="day-group" colspan="${vars.length}">
-            <div class="text-[15px] font-bold">${d}요일</div>
-            <div class="text-[11px] font-normal text-ink-500 mt-0.5">${dayDates[di]}</div>
-          </th>`).join('')}
-        </tr>
-        <tr>
-          ${days.map(()=>vars.map((v,vi)=>{
-            const dayEnd = vi===vars.length-1;
-            return `<th class="var-sub ${v.inEq?'in-eq':''} ${dayEnd?'day-end':''}" title="${v.name} · ${v.cycle}">
-              <div class="flex items-center justify-center gap-1"><span class="text-base">${v.emoji}</span><span class="text-[13px] font-semibold">${v.name}</span></div>
-            </th>`;
-          }).join('')).join('')}
-        </tr>
-      </thead>`;
-      tbody = `<tbody>${students.map((s,si)=>`
-        <tr>
-          <td class="name-col">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-full bg-soft-navy text-brand-700 font-bold grid place-items-center text-base">${s.n[0]}</div>
-              <div><div class="text-base font-semibold">${s.n}</div><div class="text-xs text-ink-500 mt-0.5">${s.cls}</div></div>
-            </div>
-          </td>
-          ${days.map((d,di)=>vars.map((v,vi)=>{
-            const isTargetStart = v.isNew && si===0 && di===0;
-            const isCheck = v.unitType === 'check';
-            const dayEnd = vi===vars.length-1;
-            const dataAttr = isTargetStart ? 'data-target="1"' : '';
-            const colIdx = di*vars.length + vi;
-            if(isCheck){
-              const cls = dayEnd ? 'day-end' : '';
-              return `<td class="cell ${cls}" data-col="${colIdx}" ${dataAttr}><label class="cell-check"><input type="checkbox"/></label><div class="cell-handle"></div></td>`;
-            }
-            const hasVal = Math.random() > 0.5 && !v.isNew;
-            const val = hasVal ? randVal(v.id) : '';
-            const cls = [hasVal ? 'filled' : '', dayEnd ? 'day-end' : ''].join(' ');
-            return `<td class="cell ${cls}" data-col="${colIdx}" ${dataAttr}><input type="text" value="${val}"/><div class="cell-handle"></div></td>`;
-          }).join('')).join('')}
-        </tr>`).join('')}</tbody>`;
+  function autoMapOne(colName){
+    const key = String(colName || '').trim();
+    if(!key) return {r:'ignore', v:'(빈 컬럼)'};
+    for(const e of COL_DICT){
+      if(key.includes(e.k)) return {r:e.r, v:e.v};
     }
-    table.innerHTML = thead + tbody;
-
-    const totalCells = currentMode==='week' ? students.length*vars.length : students.length*vars.length*7;
-    document.getElementById('progressTotal').textContent = totalCells;
-    updateProgress();
-    document.querySelectorAll('#inputTable input').forEach(el=>{
-      el.addEventListener('input', updateProgress);
-      el.addEventListener('change', updateProgress);
-    });
-    bindCellInteractions();
+    return {r:'ignore', v:key};
   }
 
-  // ===== Excel 스타일 셀 포커스 + Fill 드래그 =====
-  function bindCellInteractions(){
-    document.querySelectorAll('#inputTable td.cell').forEach(td=>{
-      const inp = td.querySelector('input');
-      if(inp){
-        inp.addEventListener('focus', ()=>{
-          document.querySelectorAll('#inputTable td.cell.cell-active').forEach(x=>x.classList.remove('cell-active'));
-          td.classList.add('cell-active');
-        });
-        inp.addEventListener('blur', ()=>{
-          setTimeout(()=>{ if(!td.contains(document.activeElement) && !filling) td.classList.remove('cell-active'); }, 80);
-        });
-        // checkbox 클릭 시 셀 활성화
-        if(inp.type === 'checkbox'){
-          inp.addEventListener('click', ()=>{
-            document.querySelectorAll('#inputTable td.cell.cell-active').forEach(x=>x.classList.remove('cell-active'));
-            td.classList.add('cell-active');
-          });
-        }
-      }
-      const handle = td.querySelector('.cell-handle');
-      if(handle){
-        handle.addEventListener('mousedown', e=>startFill(e, td));
-      }
-    });
+  // 컬럼이 숫자 데이터인지 판정
+  function isNumericColumn(col, rows){
+    if(!rows || rows.length === 0) return false;
+    const sample = rows.slice(0, Math.min(30, rows.length));
+    let numCount = 0, nonNull = 0;
+    for(const r of sample){
+      const v = r[col];
+      if(v == null || v === '') continue;
+      nonNull++;
+      if(!isNaN(Number(v))) numCount++;
+    }
+    return nonNull > 0 && numCount / nonNull >= 0.7;
   }
 
-  let filling = false;
-  function startFill(e, sourceCell){
+  // 전체 컬럼 매핑: Y 중복 제거, 숫자 ignore → X 승격
+  function autoMapAll(columns, rows){
+    const out = {};
+    columns.forEach(c => { out[c] = autoMapOne(c); });
+    // Y가 여러 개면 '성적 향상 > 재등록 > 모의 > 기말 > 중간' 우선순위로 하나만 유지
+    const yPriority = ['성적 향상','재등록','모의','기말','중간'];
+    const yCols = columns.filter(c => out[c].r === 'y');
+    if(yCols.length > 1){
+      let chosen = null;
+      for(const p of yPriority){
+        chosen = yCols.find(c => c.includes(p));
+        if(chosen) break;
+      }
+      if(!chosen) chosen = yCols[yCols.length - 1];
+      yCols.forEach(c => { if(c !== chosen) out[c] = {r:'x', v:out[c].v}; });
+    }
+    // ignore인데 숫자 컬럼이면 X로 승격
+    columns.forEach(c => {
+      if(out[c].r === 'ignore' && isNumericColumn(c, rows)){
+        out[c] = {r:'x', v:out[c].v};
+      }
+    });
+    return out;
+  }
+
+  // ===== 상태 =====
+  let parsedData = null; // {columns, rows}
+  let mapping = {};      // {colName: {r:'y'|'x'|'meta'|'ignore', v:표시이름}}
+  let analysisResult = null;
+
+  // ===== 드래그 & 드롭 =====
+  const dz = document.getElementById('dropZone');
+  dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag'); });
+  dz.addEventListener('dragleave', () => dz.classList.remove('drag'));
+  dz.addEventListener('drop', e => {
     e.preventDefault();
-    filling = true;
-    const sourceInput = sourceCell.querySelector('input');
-    const sourceVal = sourceInput.type === 'checkbox' ? sourceInput.checked : sourceInput.value;
-    const colIdx = sourceCell.dataset.col;
-    const tbody = sourceCell.closest('tbody');
-    const sourceRow = sourceCell.closest('tr');
-    const allRows = [...tbody.querySelectorAll('tr')];
-    const sourceRowIdx = allRows.indexOf(sourceRow);
-    let lastTargetIdx = sourceRowIdx;
-
-    function clearPreview(){
-      document.querySelectorAll('#inputTable td.cell.cell-fill-preview').forEach(x=>x.classList.remove('cell-fill-preview'));
-    }
-
-    function onMove(ev){
-      const el = document.elementFromPoint(ev.clientX, ev.clientY);
-      const targetCell = el && el.closest && el.closest('td.cell');
-      if(!targetCell || targetCell.dataset.col !== colIdx){ return; }
-      const targetRow = targetCell.closest('tr');
-      const targetIdx = allRows.indexOf(targetRow);
-      if(targetIdx < sourceRowIdx) return;
-      lastTargetIdx = targetIdx;
-      clearPreview();
-      for(let i = sourceRowIdx + 1; i <= targetIdx; i++){
-        const c = allRows[i].children[ [...sourceRow.children].indexOf(sourceCell) ];
-        if(c) c.classList.add('cell-fill-preview');
-      }
-    }
-    function onUp(){
-      document.removeEventListener('mousemove', onMove);
-      document.removeEventListener('mouseup', onUp);
-      clearPreview();
-      // apply fill
-      const sourceColPos = [...sourceRow.children].indexOf(sourceCell);
-      for(let i = sourceRowIdx + 1; i <= lastTargetIdx; i++){
-        const c = allRows[i].children[sourceColPos];
-        if(!c) continue;
-        const inp = c.querySelector('input');
-        if(!inp) continue;
-        if(inp.type === 'checkbox') inp.checked = sourceVal;
-        else { inp.value = sourceVal; c.classList.add('filled'); }
-      }
-      filling = false;
-      updateProgress();
-    }
-    document.addEventListener('mousemove', onMove);
-    document.addEventListener('mouseup', onUp);
-  }
-
-  function updateProgress(){
-    const filled = [...document.querySelectorAll('#inputTable input')].filter(x=>{
-      if(x.disabled) return false;
-      if(x.type === 'checkbox') return x.checked;
-      return x.value;
-    }).length;
-    document.getElementById('progressCount').textContent = filled;
-  }
-
-  function renderActiveVars(){
-    const vars = activeVars.map(a => ({...availableVars.find(v=>v.id===a.id), ...a}));
-    document.getElementById('activeVars').innerHTML = vars.map((v,idx)=>{
-      const badge = v.inEq
-        ? (v.isY
-          ? '<span class="text-[10px] font-bold border border-accent-300 text-accent-600 bg-white px-2 py-0.5 rounded-full">🎯 결과 변수 Y</span>'
-          : `<span class="text-[10px] font-bold border border-brand-300 text-brand-700 bg-white px-2 py-0.5 rounded-full">방정식 포함 · β ${v.beta}</span>`)
-        : '<span class="text-[10px] font-bold border border-gray-200 text-ink-500 bg-white px-2 py-0.5 rounded-full">분석 후보</span>';
-      return `
-      <div class="rounded-2xl border-2 border-gray-100 bg-white p-4 hover:border-brand-300 hover:shadow-soft transition cursor-pointer relative" onclick="openEditVarModal(${idx})">
-        <div class="flex items-center justify-between">
-          <div class="text-2xl">${v.emoji}</div>
-          <div class="flex items-center gap-1.5">
-            ${v.isNew ? '<span class="text-[10px] font-bold bg-accent-100 text-accent-600 px-2 py-0.5 rounded-full">NEW</span>' : ''}
-            <svg class="w-4 h-4 text-ink-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
-          </div>
-        </div>
-        <div class="mt-2 font-bold">${v.name}</div>
-        <div class="text-xs text-ink-500 mt-0.5">${v.unit} · ${v.cycle}</div>
-        <div class="mt-2.5">${badge}</div>
-      </div>`;
-    }).join('');
-  }
-
-  // ===== 공통 모달 헬퍼 =====
-  function openModal(id){ document.getElementById(id).classList.add('on'); }
-  function closeModal(id){ document.getElementById(id).classList.remove('on'); }
-  window.openModal = openModal;
-  window.closeModal = closeModal;
-  ['editVarModal','deleteVarModal','keepDataModal','hardDeleteModal','addVarModal','alertModal'].forEach(id=>{
-    document.getElementById(id).onclick = e=>{ if(e.target.id===id) closeModal(id); };
+    dz.classList.remove('drag');
+    if(e.dataTransfer.files[0]) processFile(e.dataTransfer.files[0]);
   });
-  function confirmTurnOff(){ closeModal('alertModal'); }
-  window.confirmTurnOff = confirmTurnOff;
 
-  // ===== 성공방정식 (캐러셀 + 빌더) =====
-  const equations = [
-    {
-      id: 'eq1', name: '중3 수학반 · 성적 향상', group: '중3 수학반', groupCount: 24,
-      formula: {intercept: 62, terms: [
-        {name:'복습', beta:0.42}, {name:'숙제', beta:0.28}, {name:'출석', beta:0.19}
-      ]},
-      y: '성적', trust: 78, created: '2026.04.14', version: 2
-    },
-    {
-      id: 'eq2', name: '고1 영어반 · 모의고사 등급', group: '고1 영어반', groupCount: 22,
-      formula: {intercept: 3.1, terms: [
-        {name:'단어', beta:-0.008}, {name:'리스닝', beta:-0.005}
-      ]},
-      y: '모의고사 등급', trust: 65, created: '2026.03.28', version: 1
-    },
-    {
-      id: 'eq3', name: '전체 · 재등록 예측', group: '전체 학생', groupCount: 76,
-      formula: {intercept: 0.35, terms: [
-        {name:'만족도', beta:0.18}, {name:'성적변화', beta:0.12}
-      ]},
-      y: '재등록 확률', trust: 71, created: '2026.02.10', version: 1
+  function handleFile(e){ if(e.target.files[0]) processFile(e.target.files[0]); }
+
+  async function processFile(file){
+    document.getElementById('fileName').textContent = file.name;
+    try{
+      const buf = await file.arrayBuffer();
+      const wb = XLSX.read(buf);
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      // 2D 배열로 받아서 빈 선행행을 스킵하고 실제 헤더 찾기
+      const aoa = XLSX.utils.sheet_to_json(ws, {header: 1, defval: null, blankrows: false});
+      if(aoa.length === 0){ alert('빈 파일이에요.'); return; }
+      let headerIdx = 0;
+      for(let i = 0; i < aoa.length; i++){
+        const strCount = aoa[i].filter(v => typeof v === 'string' && v.trim()).length;
+        if(strCount >= 2){ headerIdx = i; break; }
+      }
+      const headerRow = aoa[headerIdx].map((c, i) => (c == null || c === '') ? `컬럼${i+1}` : String(c).trim());
+      const seen = {};
+      const columns = headerRow.map(c => {
+        if(seen[c]){ seen[c]++; return `${c} (${seen[c]})`; }
+        seen[c] = 1; return c;
+      });
+      const rows = aoa.slice(headerIdx + 1)
+        .filter(r => r.some(v => v != null && v !== ''))
+        .map(r => {
+          const obj = {};
+          columns.forEach((c, i) => { obj[c] = r[i] ?? null; });
+          return obj;
+        });
+      if(rows.length === 0){ alert('데이터 행이 없어요.'); return; }
+      parsedData = {columns, rows};
+      mapping = autoMapAll(columns, rows);
+      renderMapping();
+      renderPreview();
+      showStep('stepMapping');
+    }catch(err){
+      alert('파일을 읽지 못했어요: ' + err.message);
     }
-  ];
-  let eqCurrentIndex = 0;
+  }
 
-  function renderEqCarousel(){
-    const track = document.getElementById('eqTrack');
-    if(equations.length === 0){
-      document.getElementById('eqEmpty').classList.remove('hidden');
-      document.getElementById('eqCarouselWrap').classList.add('hidden');
-      return;
-    }
-    document.getElementById('eqEmpty').classList.add('hidden');
-    document.getElementById('eqCarouselWrap').classList.remove('hidden');
+  // 샘플 데이터 (시연용)
+  function loadSample(){
+    const students = ['김민재','박서연','이하윤','최지우','정도윤','강소율','조지호','윤예진','한준서','오서윤','신시우','홍지민','김현우','박유진','이서준','최하은','정시은','강재민','조수현','윤혜원'];
+    const rows = students.map(n => ({
+      '학생이름': n,
+      '반': Math.random() > 0.5 ? '중3 수학반' : '중2 수학반',
+      '복습시간(시간/주)': +(3 + Math.random()*5).toFixed(1),
+      '숙제이행률(%)': 60 + Math.floor(Math.random()*40),
+      '출결률(%)': 85 + Math.floor(Math.random()*15),
+      '질문횟수(회/주)': Math.floor(Math.random()*8),
+      '기말고사점수': Math.floor(55 + Math.random()*40)
+    }));
+    // 인공적 선형 관계 주입 (복습·숙제 영향 반영)
+    rows.forEach(r => {
+      r['기말고사점수'] = Math.min(100, Math.max(30, Math.round(
+        55 + 2.5*r['복습시간(시간/주)'] + 0.18*r['숙제이행률(%)'] + 0.12*r['출결률(%)'] - 20 + (Math.random()*8-4)
+      )));
+    });
+    const columns = Object.keys(rows[0]);
+    parsedData = {columns, rows};
+    mapping = autoMapAll(columns, rows);
+    document.getElementById('fileName').textContent = '샘플_학원데이터.xlsx';
+    renderMapping();
+    renderPreview();
+    showStep('stepMapping');
+  }
 
-    track.innerHTML = equations.map((eq, i)=>{
-      const formula = 'Y = ' + eq.formula.terms.map(t=>`<span class="text-brand-600">${t.beta}</span> × ${t.name}`).join(' + ') + ` + <span class="text-accent-600">${eq.formula.intercept}</span>`;
-      const topInfl = [...eq.formula.terms].sort((a,b)=>Math.abs(b.beta)-Math.abs(a.beta))[0];
+  function downloadTemplate(){
+    // 상단 5행 merge 설명
+    const msg1 = '📊 우리학원 성공방정식 · 데이터 입력 템플릿';
+    const msg2 = '학원에서 기록하는 데이터들을 입력하여 업로드하시면, 회귀분석을 기반으로 우리 학원만의 성공방정식을 자동으로 찾아드려요.';
+    const msg3 = '💡 입력 방법: 학생 이름과 학부모 전화번호(알림톡 발송용)는 그대로 두시고, 변수 컬럼명은 실제 관리하시는 지표명으로 바꿔주세요. 각 행에 학생별 측정값을 기록해주세요.';
+    const msg4 = '⚠️ 변수(X)는 최소 2개 이상 권장하며, 예측 대상(Y)이 되는 결과 지표(예: 시험 성적)는 가장 오른쪽 열에 두시면 자동으로 인식돼요.';
+    const msg5 = '🔒 파일은 원장님 브라우저에서 직접 처리되며 서버로 전송되지 않아요. 학부모 연락처는 알림톡 발송 시에만 솔라피 API로 전달됩니다.';
+    const NCOL = 8;
+    const pad = (row) => { while(row.length < NCOL) row.push(null); return row; };
+    const aoa = [
+      pad([msg1]),
+      pad([msg2]),
+      pad([msg3]),
+      pad([msg4]),
+      pad([msg5]),
+      ['학생 이름', '학부모 전화번호', '변수 1 (복습시간)', '변수 2 (숙제이행률)', '변수 3 (출결률)', '변수 4 (질문횟수)', '변수 5 (수업집중도)', '결과 · 시험 성적'],
+      ['김민재', '010-1234-5678', 5,  85, 95, 3, 4.2, 78],
+      ['박서연', '010-2345-6789', 7,  92, 100, 5, 4.8, 88],
+      ['이하윤', '010-3456-7890', 3,  70, 88, 1, 3.1, 65],
+      ['최지우', '010-4567-8901', 4,  78, 92, 2, 3.8, 71]
+    ];
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    // 1~5행 전체 컬럼 병합
+    ws['!merges'] = [
+      { s:{r:0,c:0}, e:{r:0,c:NCOL-1} },
+      { s:{r:1,c:0}, e:{r:1,c:NCOL-1} },
+      { s:{r:2,c:0}, e:{r:2,c:NCOL-1} },
+      { s:{r:3,c:0}, e:{r:3,c:NCOL-1} },
+      { s:{r:4,c:0}, e:{r:4,c:NCOL-1} }
+    ];
+    // 컬럼 너비
+    ws['!cols'] = [
+      {wch:12},{wch:16},{wch:16},{wch:20},{wch:14},{wch:14},{wch:16},{wch:18}
+    ];
+    // 설명행 높이
+    ws['!rows'] = [
+      {hpt:28},{hpt:40},{hpt:48},{hpt:40},{hpt:40},{hpt:30}
+    ];
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, '학원 데이터');
+    XLSX.writeFile(wb, '우리학원_데이터_템플릿.xlsx');
+  }
+
+  function renderMapping(){
+    document.getElementById('rowCount').textContent = parsedData.rows.length;
+    document.getElementById('colCount').textContent = parsedData.columns.length;
+    const roleName = {y:'결과 (Y)', x:'변수 (X)', meta:'메타', ignore:'분석 제외'};
+    document.getElementById('mappingList').innerHTML = parsedData.columns.map(col => {
+      const m = mapping[col];
       return `
-      <div class="flex-shrink-0" style="width:100%;padding:0 10px">
-      <div class="bg-white rounded-3xl p-7 shadow-card ring-soft">
-        <div class="flex items-start justify-between gap-4 flex-wrap mb-4">
-          <div>
-            <div class="flex items-center gap-2 mb-2">
-              <span class="text-xs font-bold text-brand-600 bg-brand-50 px-2.5 py-1 rounded-full">v${eq.version}</span>
-              <span class="text-xs text-ink-500">${eq.created} 생성</span>
-            </div>
-            <h3 class="text-xl font-extrabold">${eq.name}</h3>
-            <div class="text-xs text-ink-500 mt-1">적용 대상: <b>${eq.group} · ${eq.groupCount}명</b></div>
-          </div>
-          <div class="flex gap-2">
-            <button onclick="openEqBuilder('edit', ${i})" class="px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-semibold hover:bg-gray-50">수정</button>
-            <button onclick="deleteEquation(${i})" class="px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-semibold text-rose-600 hover:bg-rose-50">삭제</button>
-          </div>
+      <div class="border border-gray-100 rounded-xl p-4 flex items-center gap-3">
+        <div class="flex-1 min-w-0">
+          <div class="font-bold text-[14px] text-ink-900 truncate">${col}</div>
+          <div class="text-[11px] text-ink-500 mt-0.5">표시 이름: <b class="text-ink-700">${m.v}</b></div>
         </div>
-        <div class="text-[22px] font-extrabold leading-tight">
-          <span class="text-ink-900">${eq.y}</span> = ${formula}
-        </div>
-        <div class="mt-4 flex items-center gap-3 flex-wrap">
-          <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full">🟢 신뢰도 ${eq.trust}%</span>
-          <span class="text-xs text-ink-500">학생 ${eq.groupCount}명 · 누적 데이터 기반</span>
-        </div>
-        <div class="mt-4 text-sm text-ink-700 bg-soft-navy rounded-xl p-4">
-          💡 <b>핵심:</b> 이 그룹에서는 <b class="text-brand-600">${topInfl.name}</b>이 ${eq.y}에 가장 큰 영향을 줘요.
-        </div>
-      </div>
+        <select class="role-select" onchange="changeMapping('${escapeAttr(col)}', this.value)">
+          <option value="y" ${m.r==='y'?'selected':''}>📊 결과 (Y)</option>
+          <option value="x" ${m.r==='x'?'selected':''}>🎯 변수 (X)</option>
+          <option value="meta" ${m.r==='meta'?'selected':''}>📝 메타 (이름/반)</option>
+          <option value="ignore" ${m.r==='ignore'?'selected':''}>🚫 분석 제외</option>
+        </select>
       </div>`;
     }).join('');
+    updateMappingStatus();
+  }
 
-    // 한 장당 100% 이동
-    track.style.transform = `translateX(-${eqCurrentIndex * 100}%)`;
+  function escapeAttr(s){ return String(s).replace(/'/g, "\\'"); }
 
-    // 상단 도트 (현재 인덱스만 브랜드 컬러 + 확장)
-    document.getElementById('eqDots').innerHTML = equations.map((_,i)=>
-      `<button onclick="setEqIndex(${i})" aria-label="방정식 ${i+1}" class="h-2 rounded-full transition-all ${i===eqCurrentIndex?'bg-brand-500 w-6':'bg-gray-300 w-2 hover:bg-gray-400'}"></button>`
+  function changeMapping(col, role){
+    mapping[col].r = role;
+    // Y는 하나만
+    if(role === 'y'){
+      Object.keys(mapping).forEach(k => {
+        if(k !== col && mapping[k].r === 'y') mapping[k].r = 'x';
+      });
+      renderMapping();
+    }
+    renderPreview();
+    updateMappingStatus();
+  }
+  window.changeMapping = changeMapping;
+
+  function renderPreview(){
+    const cols = parsedData.columns;
+    document.getElementById('previewHead').innerHTML = `<tr>${cols.map(c=>{
+      const m = mapping[c];
+      const chipCls = m.r === 'y' ? 'y' : m.r === 'x' ? 'x' : m.r === 'meta' ? 'meta' : 'ignore';
+      const chipLabel = m.r === 'y' ? 'Y' : m.r === 'x' ? 'X' : m.r === 'meta' ? 'META' : '—';
+      return `<th><div class="flex items-center gap-2"><span class="role-chip ${chipCls}">${chipLabel}</span>${c}</div></th>`;
+    }).join('')}</tr>`;
+    // 성능을 위해 최대 500행까지만 렌더링 (충분히 큰 수치지만 브라우저 과부하 방지)
+    const previewRows = parsedData.rows.slice(0, 500);
+    document.getElementById('previewBody').innerHTML = previewRows.map(r =>
+      `<tr>${cols.map(c=>{
+        const m = mapping[c];
+        const cls = m.r === 'y' ? 'role-y' : m.r === 'x' ? 'role-x' : m.r === 'ignore' ? 'role-ignore' : '';
+        return `<td class="${cls}">${r[c] ?? '—'}</td>`;
+      }).join('')}</tr>`
     ).join('');
   }
 
-  function navEq(dir){
-    eqCurrentIndex = (eqCurrentIndex + dir + equations.length) % equations.length;
-    renderEqCarousel();
-  }
-  function setEqIndex(i){ eqCurrentIndex = i; renderEqCarousel(); }
-  function deleteEquation(i){
-    if(!confirm(`"${equations[i].name}" 방정식을 삭제할까요?`)) return;
-    equations.splice(i, 1);
-    if(eqCurrentIndex >= equations.length) eqCurrentIndex = Math.max(0, equations.length-1);
-    renderEqCarousel();
-  }
-  window.navEq = navEq;
-  window.setEqIndex = setEqIndex;
-  window.deleteEquation = deleteEquation;
-
-  // ===== 방정식 빌더 드로어 (4단계) =====
-  let eqStep = 1;
-  let eqBuilderMode = 'new';
-  let eqBuilderEditIndex = null;
-
-  function openEqBuilder(mode, idx){
-    eqBuilderMode = mode || 'new';
-    eqBuilderEditIndex = idx ?? null;
-    eqStep = 1;
-    setEqStep(1);
-    renderEqManagedVars();
-    renderEqIntuition();
-    const drawer = document.getElementById('eqDrawer');
-    drawer.classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-    setTimeout(()=>{ document.getElementById('eqDrawerPanel').style.transform = 'translateX(0)'; }, 10);
-  }
-  function closeEqDrawer(){
-    document.getElementById('eqDrawerPanel').style.transform = 'translateX(100%)';
-    document.body.style.overflow = '';
-    setTimeout(()=>{ document.getElementById('eqDrawer').classList.add('hidden'); }, 350);
-  }
-  window.openEqBuilder = openEqBuilder;
-  window.closeEqDrawer = closeEqDrawer;
-
-  function setEqStep(n){
-    eqStep = Math.max(1, Math.min(4, n));
-    document.querySelectorAll('.eq-step').forEach(p=>p.classList.toggle('hidden', +p.dataset.step !== eqStep));
-    document.getElementById('eqStepLabel').textContent = eqStep;
-    document.getElementById('eqStepLabel2').textContent = eqStep;
-    document.getElementById('eqProgBar').style.width = (eqStep/4*100)+'%';
-    document.getElementById('eqPrevBtn').disabled = eqStep === 1;
-    document.getElementById('eqNextBtn').textContent = eqStep === 4 ? '방정식 저장' : (eqStep === 3 ? '분석 실행 →' : '다음 →');
-    document.getElementById('eqBody').scrollTop = 0;
-  }
-  document.getElementById('eqNextBtn').onclick = ()=>{
-    if(eqStep === 4){
-      // 저장 시뮬레이션
-      if(eqBuilderMode === 'new'){
-        const newEq = {
-          id:'eq_'+Date.now(), name: document.getElementById('eqName').value || '새 방정식',
-          group: '중3 수학반', groupCount: 24,
-          formula: {intercept:62, terms:[{name:'복습',beta:0.42},{name:'숙제',beta:0.28},{name:'출석',beta:0.19}]},
-          y:'성적', trust:78, created:'2026.04.14', version:1
-        };
-        equations.unshift(newEq);
-        eqCurrentIndex = 0;
-      }
-      renderEqCarousel();
-      closeEqDrawer();
+  function updateMappingStatus(){
+    const yCols = Object.values(mapping).filter(m => m.r === 'y');
+    const xCols = Object.values(mapping).filter(m => m.r === 'x');
+    const btn = document.getElementById('runBtn');
+    const status = document.getElementById('mappingStatus');
+    if(yCols.length !== 1){
+      btn.disabled = true;
+      status.textContent = '결과(Y) 컬럼을 1개 지정해주세요';
+      status.className = 'text-xs text-rose-600 font-semibold';
       return;
     }
-    setEqStep(eqStep + 1);
-  };
-  document.getElementById('eqPrevBtn').onclick = ()=> setEqStep(eqStep - 1);
+    if(xCols.length < 1){
+      btn.disabled = true;
+      status.textContent = '변수(X) 컬럼을 1개 이상 지정해주세요';
+      status.className = 'text-xs text-rose-600 font-semibold';
+      return;
+    }
+    btn.disabled = false;
+    status.textContent = `Y 1개, X ${xCols.length}개로 분석 준비 완료`;
+    status.className = 'text-xs text-emerald-600 font-semibold';
+  }
 
-  // 그룹 선택 (복수)
-  document.querySelectorAll('.eq-group').forEach(b=>{
-    b.onclick = ()=>{
-      b.classList.toggle('border-brand-500');
-      b.classList.toggle('bg-brand-50');
-      b.classList.toggle('text-brand-700');
-      b.classList.toggle('border-gray-200');
-      // 요약 업데이트
-      const selected = [...document.querySelectorAll('.eq-group.border-brand-500')];
-      if(selected.length === 0){
-        document.getElementById('eqTargetSummary').textContent = '선택 필요';
-      } else {
-        const sum = selected.length === 1 ? selected[0].textContent.trim() : `${selected.length}개 그룹 선택`;
-        document.getElementById('eqTargetSummary').textContent = sum;
+  // ===== 회귀분석 (순수 JS OLS) =====
+  function multiLinearRegression(X, y){
+    const n = X.length, k = X[0].length;
+    const XtX = Array.from({length:k},()=>new Array(k).fill(0));
+    const Xty = new Array(k).fill(0);
+    for(let i=0;i<n;i++){
+      for(let j=0;j<k;j++){
+        Xty[j] += X[i][j]*y[i];
+        for(let l=0;l<k;l++) XtX[j][l] += X[i][j]*X[i][l];
       }
-    };
-  });
-  // Y 카드
-  document.querySelectorAll('.eq-y-card').forEach(c=>{
-    c.onclick = ()=>{
-      document.querySelectorAll('.eq-y-card').forEach(x=>{x.classList.remove('border-brand-500','bg-brand-50'); x.classList.add('border-gray-100')});
-      c.classList.remove('border-gray-100'); c.classList.add('border-brand-500','bg-brand-50');
-    };
-  });
+    }
+    // augmented matrix
+    const M = XtX.map((row,i) => [...row, Xty[i]]);
+    // Gauss-Jordan
+    for(let i=0;i<k;i++){
+      let maxR = i;
+      for(let r=i+1;r<k;r++) if(Math.abs(M[r][i]) > Math.abs(M[maxR][i])) maxR = r;
+      [M[i],M[maxR]] = [M[maxR],M[i]];
+      const piv = M[i][i];
+      if(Math.abs(piv) < 1e-10) return null;
+      for(let j=i;j<=k;j++) M[i][j] /= piv;
+      for(let r=0;r<k;r++) if(r !== i){
+        const f = M[r][i];
+        for(let j=i;j<=k;j++) M[r][j] -= f*M[i][j];
+      }
+    }
+    const beta = M.map(row => row[k]);
+    // R²
+    const yMean = y.reduce((a,b)=>a+b,0)/n;
+    let ssRes = 0, ssTot = 0;
+    for(let i=0;i<n;i++){
+      const pred = X[i].reduce((s,v,j)=>s+v*beta[j],0);
+      ssRes += (y[i]-pred)**2;
+      ssTot += (y[i]-yMean)**2;
+    }
+    return { beta, r2: 1 - ssRes/ssTot };
+  }
 
-  // 관리 중인 변수 렌더 (activeVars 기반)
-  function renderEqManagedVars(){
-    const vars = activeVars.map(a => ({...availableVars.find(v=>v.id===a.id), ...a}));
-    document.getElementById('eqVarManaged').innerHTML = vars.map((v,i)=>`
-      <button class="eq-x-managed rounded-xl border-2 border-brand-500 bg-brand-50 p-3 text-left" data-i="${i}">
-        <div class="flex items-center gap-2">
-          <span class="text-lg">${v.emoji}</span>
-          <div class="flex-1 min-w-0">
-            <div class="text-sm font-bold truncate">${v.name}</div>
-            <div class="text-[10px] text-ink-500">${v.unit}</div>
+  function stdDev(arr){
+    const m = arr.reduce((a,b)=>a+b,0)/arr.length;
+    return Math.sqrt(arr.reduce((a,b)=>a+(b-m)**2,0)/arr.length);
+  }
+
+  function runAnalysis(){
+    const yCol = Object.keys(mapping).find(k => mapping[k].r === 'y');
+    const xCols = Object.keys(mapping).filter(k => mapping[k].r === 'x');
+
+    // 숫자 변환 + null 필터
+    const cleaned = parsedData.rows.filter(r => {
+      const yv = Number(r[yCol]);
+      if(isNaN(yv)) return false;
+      return xCols.every(c => !isNaN(Number(r[c])));
+    }).map(r => ({
+      y: Number(r[yCol]),
+      xs: xCols.map(c => Number(r[c]))
+    }));
+
+    if(cleaned.length < xCols.length + 2){
+      alert(`유효한 행이 ${cleaned.length}개뿐이에요. 최소 ${xCols.length + 2}개 이상 필요합니다.`);
+      return;
+    }
+
+    // 절편 포함
+    const X = cleaned.map(r => [1, ...r.xs]);
+    const y = cleaned.map(r => r.y);
+
+    const reg = multiLinearRegression(X, y);
+    if(!reg){ alert('다중공선성 또는 데이터 문제로 분석 실패.'); return; }
+
+    // 표준화 계수 계산
+    const yStd = stdDev(y);
+    const betaStd = xCols.map((c, i) => {
+      const xArr = cleaned.map(r => r.xs[i]);
+      return reg.beta[i+1] * stdDev(xArr) / yStd;
+    });
+
+    analysisResult = {
+      yCol, xCols, beta: reg.beta, r2: reg.r2, betaStd,
+      n: cleaned.length,
+      yLabel: mapping[yCol].v,
+      xLabels: xCols.map(c => mapping[c].v)
+    };
+
+    renderResult();
+    persistUpload();
+    showStep('stepResult');
+  }
+  window.runAnalysis = runAnalysis;
+
+  function renderResult(){
+    const { beta, r2, betaStd, n, yLabel, xLabels, xCols } = analysisResult;
+    const r2Pct = Math.max(0, Math.round(r2 * 100));
+    document.getElementById('resR2').textContent = r2Pct + '%';
+    document.getElementById('resR2Level').textContent =
+      r2Pct >= 70 ? '🟢 신뢰할 수 있는 수준' :
+      r2Pct >= 50 ? '🟡 참고용 (데이터 더 쌓이면 ↑)' : '🔴 더 많은 데이터 필요';
+    document.getElementById('resN').textContent = n;
+    document.getElementById('resY').textContent = yLabel;
+    document.getElementById('resRows').textContent = n;
+
+    // 방정식 문자열
+    const terms = xCols.map((c, i) => {
+      const b = beta[i+1];
+      const sign = b >= 0 ? '+' : '−';
+      return `<span class="text-brand-600">${Math.abs(b).toFixed(2)}</span> × ${xLabels[i]}`;
+    });
+    const intercept = beta[0];
+    const intSign = intercept >= 0 ? '+' : '−';
+    const formula = `${yLabel} = ${terms.join(' + ')} ${intSign} <span class="text-accent-600">${Math.abs(intercept).toFixed(2)}</span>`;
+    document.getElementById('resFormula').innerHTML = formula;
+
+    // β* 막대
+    const maxAbs = Math.max(...betaStd.map(Math.abs), 0.01);
+    document.getElementById('betaBars').innerHTML = betaStd
+      .map((b, i) => ({ b, label: xLabels[i], abs: Math.abs(b) }))
+      .sort((a, b) => b.abs - a.abs)
+      .map(item => `
+        <div class="bar-row">
+          <div class="bar-label">${item.label}</div>
+          <div class="bar-track"><div class="bar-fill" style="width:${(item.abs/maxAbs*100).toFixed(0)}%"></div></div>
+          <div class="bar-val">β* ${item.b.toFixed(2)}</div>
+        </div>
+      `).join('');
+
+    // 계수 테이블
+    document.getElementById('coefTable').innerHTML = xCols.map((c, i) => {
+      const b = beta[i+1];
+      const bs = betaStd[i];
+      return `
+      <tr class="border-t border-gray-100">
+        <td class="px-4 py-3 font-semibold">${xLabels[i]}</td>
+        <td class="px-4 py-3 text-right font-mono">${b.toFixed(3)}</td>
+        <td class="px-4 py-3 text-right font-mono text-brand-600 font-bold">${bs.toFixed(3)}</td>
+        <td class="px-4 py-3 text-[12px] text-ink-500">${xLabels[i]} 1단위 ↑ → ${yLabel} ${b >= 0 ? '+' : ''}${b.toFixed(2)} 변화</td>
+      </tr>`;
+    }).join('') + `
+      <tr class="border-t border-gray-100 bg-gray-50">
+        <td class="px-4 py-3 font-semibold text-ink-500">절편 (기본값)</td>
+        <td class="px-4 py-3 text-right font-mono">${beta[0].toFixed(3)}</td>
+        <td class="px-4 py-3 text-right text-ink-400">—</td>
+        <td class="px-4 py-3 text-[12px] text-ink-500">모든 X가 0일 때 Y의 기본값</td>
+      </tr>`;
+  }
+
+  // ===== LocalStorage 이력 관리 =====
+  const UP_KEY = 'crabit_uploads_v1';
+  const EQ_KEY = 'crabit_equations_v1';
+
+  function fmtNow(){
+    const d = new Date();
+    const p = n => String(n).padStart(2,'0');
+    return `${d.getFullYear()}.${p(d.getMonth()+1)}.${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+  }
+  function loadList(key){ try{ return JSON.parse(localStorage.getItem(key) || '[]'); }catch(e){ return []; } }
+  function saveList(key, list){ localStorage.setItem(key, JSON.stringify(list)); }
+
+  // 분석 완료 시 업로드 이력에 자동 저장
+  function persistUpload(){
+    if(!parsedData || !analysisResult) return;
+    const uploads = loadList(UP_KEY);
+    const item = {
+      id: 'up_' + Date.now(),
+      fileName: document.getElementById('fileName').textContent || '업로드 파일',
+      uploadedAt: fmtNow(),
+      rowCount: parsedData.rows.length,
+      colCount: parsedData.columns.length,
+      columns: parsedData.columns,
+      rows: parsedData.rows.slice(0, 200), // 저장 용량 고려
+      mapping: mapping,
+      analysis: analysisResult,
+      insights: buildInsights(analysisResult)
+    };
+    uploads.unshift(item);
+    saveList(UP_KEY, uploads.slice(0, 50));
+    renderHome();
+    return item.id;
+  }
+
+  function buildInsights(res){
+    const { xLabels, betaStd, r2, n, yLabel } = res;
+    const sortedIdx = betaStd.map((b,i)=>({b:Math.abs(b),i})).sort((a,b)=>b.b-a.b).map(x=>x.i);
+    const top1 = sortedIdx[0], top2 = sortedIdx[1];
+    const r2Pct = Math.round(r2*100);
+    const parts = [];
+    parts.push(`이 데이터 ${n}건으로 <b>${yLabel}</b>의 변동을 약 <b>${r2Pct}%</b> 설명할 수 있어요.`);
+    if(top1 !== undefined){
+      parts.push(`가장 큰 영향 변수는 <b class="text-brand-600">${xLabels[top1]}</b> (β* ${betaStd[top1].toFixed(2)}).`);
+    }
+    if(top2 !== undefined){
+      parts.push(`그 다음은 <b>${xLabels[top2]}</b> (β* ${betaStd[top2].toFixed(2)}).`);
+    }
+    if(r2Pct >= 70) parts.push(`🟢 신뢰할 수 있는 수준이에요. 바로 리포트카드 생성에 활용하세요.`);
+    else if(r2Pct >= 50) parts.push(`🟡 참고용 수준. 데이터가 더 쌓이면 신뢰도가 올라가요.`);
+    else parts.push(`🔴 예측 범위가 넓어요. 변수를 조정하거나 데이터를 더 쌓는 걸 권장해요.`);
+    return parts.join(' ');
+  }
+
+  function saveEquation(){
+    if(!analysisResult){ alert('분석 결과가 없어요.'); return; }
+    const equations = loadList(EQ_KEY);
+    const { yLabel, xLabels, beta, r2, betaStd, n } = analysisResult;
+    const item = {
+      id: 'eq_' + Date.now(),
+      name: `${yLabel} 방정식`,
+      yLabel, xLabels, beta, r2, betaStd, n,
+      createdAt: fmtNow(),
+      fromFile: document.getElementById('fileName').textContent || ''
+    };
+    equations.unshift(item);
+    saveList(EQ_KEY, equations.slice(0, 30));
+    renderHome();
+    alert('방정식이 "만들어진 성공방정식" 목록에 저장됐어요.');
+  }
+  window.saveEquation = saveEquation;
+
+  // 홈 대시보드 렌더
+  function renderHome(){
+    const uploads = loadList(UP_KEY);
+    const equations = loadList(EQ_KEY);
+    document.getElementById('upCountLabel').textContent = uploads.length + '개';
+    document.getElementById('eqCountLabel').textContent = equations.length + '개';
+
+    const upHtml = uploads.length === 0
+      ? `<div class="text-center py-8 text-ink-500 text-sm">
+           아직 업로드한 엑셀이 없어요.<br/>
+           <span class="text-xs">위에서 파일을 올려주세요.</span>
+         </div>`
+      : uploads.map(u => `
+        <button onclick="openUpload('${u.id}')" class="w-full text-left rounded-xl border border-gray-100 p-4 hover:bg-brand-50 hover:border-brand-300 transition">
+          <div class="flex items-center justify-between">
+            <div class="font-bold text-[14px] text-ink-900 truncate">${u.fileName}</div>
+            <span class="text-[11px] text-ink-500 flex-shrink-0 ml-2">${u.uploadedAt}</span>
           </div>
-          <svg class="w-4 h-4 text-brand-600" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
-        </div>
-      </button>
-    `).join('');
-    document.querySelectorAll('.eq-x-managed').forEach(b=>{
-      b.onclick = ()=>{
-        const on = b.classList.toggle('border-brand-500');
-        b.classList.toggle('bg-brand-50', on);
-        b.classList.toggle('border-gray-200', !on);
-        const check = b.querySelector('svg');
-        if(check) check.style.opacity = on ? '1' : '0';
-      };
-    });
+          <div class="text-[12px] text-ink-500 mt-1">📊 ${u.rowCount}행 · 📋 ${u.colCount}컬럼 · 신뢰도 ${Math.round((u.analysis?.r2||0)*100)}%</div>
+        </button>
+      `).join('');
+    document.getElementById('uploadList').innerHTML = upHtml;
+
+    const eqHtml = equations.length === 0
+      ? `<div class="text-center py-8 text-ink-500 text-sm">
+           아직 저장된 방정식이 없어요.<br/>
+           <span class="text-xs">엑셀 분석 후 '방정식 저장'을 눌러주세요.</span>
+         </div>`
+      : equations.map(e => {
+          const top = e.betaStd.map((b,i)=>({b:Math.abs(b),i,label:e.xLabels[i]})).sort((a,b)=>b.b-a.b)[0];
+          return `
+          <div class="rounded-xl border border-gray-100 p-4">
+            <div class="flex items-center justify-between mb-1">
+              <div class="font-bold text-[14px] text-ink-900">${e.name}</div>
+              <span class="text-[11px] text-brand-700 bg-brand-50 px-2 py-0.5 rounded-full font-bold">R² ${Math.round(e.r2*100)}%</span>
+            </div>
+            <div class="text-[12px] text-ink-500">${e.createdAt} · ${e.n}건 기반</div>
+            <div class="text-[12px] text-ink-700 mt-2">🎯 최대 영향: <b class="text-brand-600">${top?.label || '—'}</b></div>
+          </div>`;
+        }).join('');
+    document.getElementById('savedEqList').innerHTML = eqHtml;
   }
 
-  // 직관 별점 (Step 3 내부)
-  function renderEqIntuition(){
-    const list = [
-      {emoji:'🕐', name:'복습시간', score:3},
-      {emoji:'📝', name:'숙제이행률', score:5},
-      {emoji:'✅', name:'출결률', score:5}
-    ];
-    const el = document.getElementById('eqIntuition');
-    if(!el) return;
-    el.innerHTML = list.map((v,idx)=>`
-      <div class="flex items-center gap-3 p-2.5 rounded-lg text-sm">
-        <span class="text-base">${v.emoji}</span>
-        <span class="flex-1 font-semibold">${v.name}</span>
-        <div class="flex gap-0.5" data-row="${idx}">
-          ${[1,2,3,4,5].map(s=>`<span class="eq-star text-xl cursor-pointer ${s<=v.score?'text-amber-400':'text-gray-200'}" data-s="${s}">★</span>`).join('')}
-        </div>
-      </div>
-    `).join('');
-    el.onclick = e=>{
-      const st = e.target.closest('.eq-star'); if(!st) return;
-      const s = +st.dataset.s;
-      st.parentElement.querySelectorAll('.eq-star').forEach(x=>{
-        const ss = +x.dataset.s;
-        x.classList.toggle('text-amber-400', ss<=s);
-        x.classList.toggle('text-gray-200', ss>s);
-      });
-    };
+  // 이력 클릭 시 해당 상태로 복원
+  function openUpload(id){
+    const uploads = loadList(UP_KEY);
+    const u = uploads.find(x => x.id === id);
+    if(!u) return;
+    parsedData = { columns: u.columns, rows: u.rows };
+    mapping = u.mapping;
+    analysisResult = u.analysis;
+    document.getElementById('fileName').textContent = u.fileName;
+    renderResult();
+    showStep('stepResult');
+  }
+  window.openUpload = openUpload;
+
+  function showStep(id){
+    ['stepUpload','stepMapping','stepResult'].forEach(s => document.getElementById(s).classList.add('hidden'));
+    document.getElementById('homeDash').classList.toggle('hidden', id !== 'stepUpload');
+    document.getElementById('stepUpload').classList.toggle('hidden', id !== 'stepUpload');
+    document.getElementById(id).classList.remove('hidden');
+    window.scrollTo({top:0, behavior:'smooth'});
   }
 
-  // Step 3 · 커스텀 변수 추가 (간단 prompt 기반 · 추후 개선)
-  document.getElementById('eqAddCustomX').onclick = ()=>{
-    const name = prompt('추가할 변수 이름을 입력하세요');
-    if(!name) return;
-    const list = document.getElementById('eqCustomList');
-    list.insertAdjacentHTML('beforeend', `
-      <div class="flex items-center gap-2 p-2.5 rounded-lg border border-brand-200 bg-brand-50 text-sm">
-        <span class="text-base">✨</span>
-        <span class="flex-1 font-semibold">${name}</span>
-        <button onclick="this.parentElement.remove()" class="text-ink-400 hover:text-rose-500">×</button>
-      </div>
-    `);
-  };
+  function resetFlow(){
+    parsedData = null;
+    mapping = {};
+    analysisResult = null;
+    document.getElementById('fileInput').value = '';
+    document.getElementById('stepMapping').classList.add('hidden');
+    document.getElementById('stepResult').classList.add('hidden');
+    document.getElementById('stepUpload').classList.remove('hidden');
+    document.getElementById('homeDash').classList.remove('hidden');
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+  window.resetFlow = resetFlow;
+
+  window.loadSample = loadSample;
+  window.downloadTemplate = downloadTemplate;
+  window.handleFile = handleFile;
 
   // 초기 렌더
-  renderEqCarousel();
-
-  // 알림 모달 토글들
-  function bindAlertToggles(){
-    document.querySelectorAll('.alert-cycle-opt').forEach(b=>{
-      b.onclick = ()=>{
-        document.querySelectorAll('.alert-cycle-opt').forEach(x=>{x.classList.remove('border-brand-500','bg-brand-50','text-brand-700'); x.classList.add('border-gray-200')});
-        b.classList.remove('border-gray-200'); b.classList.add('border-brand-500','bg-brand-50','text-brand-700');
-        document.getElementById('alertDayRow').style.display = (b.dataset.c==='day') ? 'none' : '';
-      };
-    });
-    document.querySelectorAll('.alert-day-opt').forEach(b=>{
-      b.onclick = ()=>{
-        document.querySelectorAll('.alert-day-opt').forEach(x=>{x.classList.remove('border-brand-500','bg-brand-50','text-brand-700'); x.classList.add('border-gray-200')});
-        b.classList.remove('border-gray-200'); b.classList.add('border-brand-500','bg-brand-50','text-brand-700');
-      };
-    });
-    document.querySelectorAll('.alert-time-preset').forEach(b=>{
-      b.onclick = ()=>{
-        document.querySelectorAll('.alert-time-preset').forEach(x=>{x.classList.remove('border-2','border-brand-300','bg-brand-50','text-brand-700'); x.classList.add('border','border-gray-200')});
-        b.classList.remove('border','border-gray-200'); b.classList.add('border-2','border-brand-300','bg-brand-50','text-brand-700');
-      };
-    });
-    document.querySelectorAll('.alert-channel-opt').forEach(label=>{
-      const cb = label.querySelector('input[type="checkbox"]');
-      cb.onchange = ()=>{
-        if(cb.checked){ label.classList.remove('border-gray-200'); label.classList.add('border-brand-500','bg-brand-50'); }
-        else { label.classList.remove('border-brand-500','bg-brand-50'); label.classList.add('border-gray-200'); }
-      };
-    });
-  }
-  bindAlertToggles();
-
-  // ===== 변수 수정/삭제 =====
-  let editingVarIdx = null;
-
-  function openEditVarModal(idx){
-    editingVarIdx = idx;
-    const a = activeVars[idx];
-    const v = {...availableVars.find(x=>x.id===a.id), ...a};
-    document.getElementById('editVarTitle').textContent = v.name;
-    document.getElementById('editVarName').value = v.name;
-    // 단위 셀렉트
-    const unitSelect = document.getElementById('editVarUnit');
-    [...unitSelect.options].forEach(o=>{ o.selected = o.value===v.unit || o.text===v.unit; });
-    // 주기 셀렉트
-    const cycleSelect = document.getElementById('editVarCycle');
-    [...cycleSelect.options].forEach(o=>{ o.selected = o.text===v.cycle; });
-    // 누적 데이터 (가짜 숫자)
-    const fakeCount = (60+Math.floor(Math.random()*350));
-    document.getElementById('editVarCount').textContent = fakeCount + '건';
-    document.getElementById('editVarStart').textContent = '2025.09.01';
-    openModal('editVarModal');
-  }
-  window.openEditVarModal = openEditVarModal;
-
-  function saveEditVar(){
-    if(editingVarIdx===null) return;
-    closeModal('editVarModal');
-    renderActiveVars();
-    renderInputTable();
-  }
-  window.saveEditVar = saveEditVar;
-
-  function openDeleteVarModal(){
-    if(editingVarIdx===null) return;
-    const a = activeVars[editingVarIdx];
-    const v = {...availableVars.find(x=>x.id===a.id), ...a};
-    document.getElementById('delVarName').textContent = v.name;
-    document.getElementById('keepVarName').textContent = v.name;
-    document.getElementById('hardDelVarName').textContent = v.name;
-    document.getElementById('hardDelCount').textContent = document.getElementById('editVarCount').textContent;
-    closeModal('editVarModal');
-    openModal('deleteVarModal');
-  }
-  window.openDeleteVarModal = openDeleteVarModal;
-
-  document.querySelectorAll('.del-opt').forEach(b=>{
-    b.onclick = ()=>{
-      closeModal('deleteVarModal');
-      if(b.dataset.opt==='keep') openModal('keepDataModal');
-      else openModal('hardDeleteModal');
-    };
-  });
-
-  // 입력 중단 시점 프리셋
-  document.querySelectorAll('.stop-preset').forEach(b=>{
-    b.onclick = ()=>{
-      document.querySelectorAll('.stop-preset').forEach(x=>{x.classList.remove('border-2','border-brand-500','bg-brand-50','text-brand-700'); x.classList.add('border','border-gray-200')});
-      b.classList.remove('border','border-gray-200');
-      b.classList.add('border-2','border-brand-500','bg-brand-50','text-brand-700');
-      // 날짜 자동 세팅
-      const dateInput = document.getElementById('stopDate');
-      const today = new Date(2026,3,14);
-      let d = today;
-      if(b.dataset.when==='next-week') d = new Date(2026,3,21);
-      else if(b.dataset.when==='next-month') d = new Date(2026,4,1);
-      const iso = d.toISOString().slice(0,10);
-      if(b.dataset.when!=='custom') dateInput.value = iso;
-      document.getElementById('keepStopDate').textContent = iso.replace(/-/g,'.');
-    };
-  });
-  document.getElementById('stopDate').addEventListener('input', e=>{
-    document.getElementById('keepStopDate').textContent = e.target.value.replace(/-/g,'.');
-  });
-
-  function confirmKeepDelete(){
-    if(editingVarIdx===null) return;
-    activeVars.splice(editingVarIdx,1);
-    editingVarIdx = null;
-    closeModal('keepDataModal');
-    renderActiveVars();
-    renderInputTable();
-  }
-  window.confirmKeepDelete = confirmKeepDelete;
-
-  function confirmHardDelete(){
-    if(editingVarIdx===null) return;
-    activeVars.splice(editingVarIdx,1);
-    editingVarIdx = null;
-    closeModal('hardDeleteModal');
-    renderActiveVars();
-    renderInputTable();
-  }
-  window.confirmHardDelete = confirmHardDelete;
-
-  // ===== 변수 추가 Modal =====
-  let modalStep = 1;
-  let selectedVar = null;
-  let selectedStatus = null;
-
-  function openAddVarModal(){
-    modalStep = 1; selectedVar = null; selectedStatus = null;
-    showStep(1); renderVarMenu();
-    document.getElementById('addVarModal').classList.add('on');
-  }
-  function closeAddVarModal(){ document.getElementById('addVarModal').classList.remove('on'); }
-  window.openAddVarModal = openAddVarModal;
-  window.closeAddVarModal = closeAddVarModal;
-
-  function showStep(step){
-    document.querySelectorAll('.addvar-step').forEach(el=>el.classList.add('hidden'));
-    const stepKey = String(step);
-    document.querySelector(`.addvar-step[data-s="${stepKey}"]`).classList.remove('hidden');
-    const labels = {'1':'STEP 1 / 3','custom':'STEP 1.5 · 맞춤 변수','2':'STEP 2 / 3','3a':'STEP 3 / 3','3b':'STEP 3 / 3'};
-    const titles = {'1':'어떤 변수를 추가하시나요?','custom':'우리 학원만의 변수를 정의해주세요','2':'이미 데이터가 있으신가요?','3a':'언제부터 기록된 데이터인가요?','3b':'앞으로 어떤 주기로 기록하실까요?'};
-    document.getElementById('modalStepLabel').textContent = labels[stepKey];
-    document.getElementById('modalTitle').textContent = titles[stepKey];
-    document.getElementById('modalPrev').style.visibility = stepKey==='1' ? 'hidden' : 'visible';
-    document.getElementById('modalNext').textContent = (stepKey==='3a'||stepKey==='3b') ? '변수 추가 완료' : '다음 →';
-  }
-
-  function renderVarMenu(){
-    const activeIds = activeVars.map(v=>v.id);
-    const available = availableVars.filter(v=>!activeIds.includes(v.id));
-    const cards = available.map(v=>`
-      <div class="var-chip rounded-2xl border-2 border-gray-100 p-4 cursor-pointer hover:border-brand-300" data-id="${v.id}">
-        <div class="flex items-center justify-between">
-          <div class="text-2xl">${v.emoji}</div>
-          <div class="w-5 h-5 rounded-full border-2 border-gray-300 check"></div>
-        </div>
-        <div class="mt-3 font-bold">${v.name}</div>
-        <div class="text-xs text-ink-500 mt-0.5">${v.unit} · ${v.cycle}</div>
-      </div>
-    `).join('');
-    const customCard = `
-      <div class="var-chip-custom rounded-2xl border-2 border-dashed border-brand-200 bg-gradient-to-br from-soft-navy to-soft-blush p-4 cursor-pointer hover:border-brand-400 transition" id="customVarCard">
-        <div class="flex items-center justify-between">
-          <div class="text-2xl">➕</div>
-          <span class="text-[10px] font-bold text-brand-600">맞춤</span>
-        </div>
-        <div class="mt-3 font-bold text-brand-700">우리 학원만의<br/>변수 만들기</div>
-        <div class="text-xs text-ink-500 mt-0.5">이름·단위·주기 직접 정의</div>
-      </div>
-    `;
-    document.getElementById('varMenu').innerHTML = cards + customCard;
-
-    document.querySelectorAll('.var-chip').forEach(c=>{
-      c.onclick = ()=>{
-        document.querySelectorAll('.var-chip').forEach(x=>x.classList.remove('selected'));
-        c.classList.add('selected');
-        c.querySelector('.check').style.background = '#3a74ff';
-        c.querySelector('.check').style.borderColor = '#3a74ff';
-        selectedVar = availableVars.find(v=>v.id===c.dataset.id);
-        document.getElementById('selectedVarName').textContent = selectedVar.name;
-      };
-    });
-    document.getElementById('customVarCard').onclick = ()=>{
-      modalStep = 'custom';
-      showStep('custom');
-    };
-  }
-
-  document.querySelectorAll('.status-btn').forEach(b=>{
-    b.onclick = ()=>{
-      selectedStatus = b.dataset.status;
-      document.querySelectorAll('.status-btn').forEach(x=>x.style.borderColor='#e5e7eb');
-      b.style.borderColor = selectedStatus==='have' ? '#10b981' : '#f59e0b';
-      setTimeout(()=>{ modalStep = selectedStatus==='have' ? '3a' : '3b'; showStep(modalStep); }, 150);
-    };
-  });
-
-  // 단위 토글
-  let customUnit = null, customScore = null, customTime = null, customCycle = null;
-  document.querySelectorAll('.unit-opt').forEach(b=>{
-    b.onclick = ()=>{
-      document.querySelectorAll('.unit-opt').forEach(x=>{x.classList.remove('border-brand-500','bg-brand-50'); x.classList.add('border-gray-200')});
-      b.classList.remove('border-gray-200'); b.classList.add('border-brand-500','bg-brand-50');
-      customUnit = b.dataset.u;
-      document.getElementById('unitScoreOpts').classList.toggle('hidden', customUnit!=='score');
-      document.getElementById('unitTimeOpts').classList.toggle('hidden', customUnit!=='time');
-    };
-  });
-  document.querySelectorAll('.score-opt').forEach(b=>{
-    b.onclick = ()=>{
-      document.querySelectorAll('.score-opt').forEach(x=>{x.classList.remove('border-brand-500','bg-brand-50','text-brand-700'); x.classList.add('border-gray-200')});
-      b.classList.remove('border-gray-200'); b.classList.add('border-brand-500','bg-brand-50','text-brand-700');
-      customScore = b.dataset.s;
-      document.getElementById('scoreCustom').value = '';
-    };
-  });
-  document.getElementById('scoreCustom').addEventListener('input', e=>{
-    if(e.target.value){
-      document.querySelectorAll('.score-opt').forEach(x=>{x.classList.remove('border-brand-500','bg-brand-50','text-brand-700'); x.classList.add('border-gray-200')});
-      customScore = e.target.value;
-    }
-  });
-  document.querySelectorAll('.time-opt').forEach(b=>{
-    b.onclick = ()=>{
-      document.querySelectorAll('.time-opt').forEach(x=>{x.classList.remove('border-brand-500','bg-brand-50','text-brand-700'); x.classList.add('border-gray-200')});
-      b.classList.remove('border-gray-200'); b.classList.add('border-brand-500','bg-brand-50','text-brand-700');
-      customTime = b.dataset.t;
-    };
-  });
-  document.querySelectorAll('.cycle-opt').forEach(b=>{
-    b.onclick = ()=>{
-      document.querySelectorAll('.cycle-opt').forEach(x=>{x.classList.remove('border-brand-500','bg-brand-50','text-brand-700'); x.classList.add('border-gray-200')});
-      b.classList.remove('border-gray-200'); b.classList.add('border-brand-500','bg-brand-50','text-brand-700');
-      customCycle = b.dataset.c;
-    };
-  });
-
-  function buildUnitLabel(){
-    const map = {percent:'%', score: customScore?`${customScore}점 척도`:'점수', count:'회', time: ({sec:'초',min:'분',hour:'시간'}[customTime]||'시간'), ox:'O · X', check:'✅'};
-    return map[customUnit] || '';
-  }
-  function buildCycleLabel(){
-    return ({lesson:'매 수업',day:'매일',week:'매주',month:'매월',exam:'시험마다'}[customCycle]) || '';
-  }
-
-  document.getElementById('modalNext').onclick = ()=>{
-    if(modalStep===1){
-      if(!selectedVar){ alert('추가할 변수를 선택하시거나 "+ 우리 학원만의 변수 만들기"를 눌러주세요'); return; }
-      modalStep = 2; showStep(2);
-    } else if(modalStep==='custom'){
-      const name = document.getElementById('customVarName').value.trim();
-      if(!name){ alert('변수 이름을 입력해주세요'); return; }
-      if(!customUnit){ alert('단위를 선택해주세요'); return; }
-      if(customUnit==='score' && !customScore){ alert('몇 점 만점인지 선택해주세요'); return; }
-      if(customUnit==='time' && !customTime){ alert('시간 단위(초·분·시간)를 선택해주세요'); return; }
-      if(!customCycle){ alert('기록 주기를 선택해주세요'); return; }
-      // 커스텀 변수 등록
-      const newId = 'custom_' + Date.now();
-      availableVars.push({id:newId, emoji:'⭐', name, unit:buildUnitLabel(), cycle:buildCycleLabel(), unitType:customUnit});
-      selectedVar = availableVars[availableVars.length-1];
-      document.getElementById('selectedVarName').textContent = selectedVar.name;
-      modalStep = 2; showStep(2);
-    } else if(modalStep===2){
-      // status-btn 클릭이 처리
-    } else {
-      activeVars.push({id:selectedVar.id, isNew:true});
-      closeAddVarModal();
-      renderActiveVars();
-      renderInputTable();
-      setTimeout(()=>{
-        const targetCell = document.querySelector('.cell[data-target="1"]');
-        if(targetCell){
-          targetCell.scrollIntoView({behavior:'smooth', inline:'center', block:'center'});
-          targetCell.querySelector('input').focus();
-        }
-      }, 300);
-    }
-  };
-  document.getElementById('modalPrev').onclick = ()=>{
-    if(modalStep==='3a'||modalStep==='3b'){ modalStep = 2; showStep(2); }
-    else if(modalStep===2){
-      // 직전이 custom이었는지 1이었는지: selectedVar의 id로 판단
-      if(selectedVar && selectedVar.id.startsWith('custom_')){ modalStep = 'custom'; showStep('custom'); }
-      else { modalStep = 1; showStep(1); }
-    }
-    else if(modalStep==='custom'){ modalStep = 1; showStep(1); }
-  };
-
-  document.querySelectorAll('.date-preset').forEach(b=>{
-    b.onclick = ()=>{
-      document.querySelectorAll('.date-preset').forEach(x=>{x.classList.remove('border-2','border-brand-500','bg-brand-50','text-brand-700'); x.classList.add('border','border-gray-200')});
-      b.classList.remove('border','border-gray-200');
-      b.classList.add('border-2','border-brand-500','bg-brand-50','text-brand-700');
-    };
-  });
-  document.querySelectorAll('.period-preset').forEach(b=>{
-    b.onclick = ()=>{
-      document.querySelectorAll('.period-preset').forEach(x=>{x.classList.remove('border-2','border-brand-500','bg-brand-50'); x.classList.add('border','border-gray-200')});
-      b.classList.remove('border','border-gray-200');
-      b.classList.add('border-2','border-brand-500','bg-brand-50');
-    };
-  });
-
-  // 주기 토글
-  document.querySelectorAll('.period-btn').forEach(b=>{
-    b.onclick = ()=>{
-      document.querySelectorAll('.period-btn').forEach(x=>x.classList.remove('on'));
-      b.classList.add('on');
-      currentMode = b.dataset.period;
-      const label = currentMode==='week' ? '2026년 4월 2주차' : '2026.04.13 ~ 04.19';
-      document.getElementById('periodLabel').textContent = label;
-      renderInputTable();
-    };
-  });
-
-  // 초기 렌더
-  renderActiveVars();
-  renderInputTable();
-  document.getElementById('pageFooter').outerHTML = __renderFooter();
+  renderHome();
 </script>
 </body>
 </html>
