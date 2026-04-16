@@ -9,7 +9,7 @@
 <title>데이터 허브 · 우리학원 성공방정식</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="shared.js?v=1776381669669"></script>
+<script src="shared.js?v=1776381745187"></script>
 <script>__applyTheme();</script>
 <!-- 엑셀 파싱 (SheetJS, MIT 라이선스, 무료) -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -1194,23 +1194,205 @@
     return parts.join(' ');
   }
 
-  function saveEquation(){
-    if(!analysisResult){ alert('분석 결과가 없어요.'); return; }
+  function autoSaveEquation(){
+    if(!analysisResult) return null;
     const equations = loadList(EQ_KEY);
     const { yLabel, xLabels, beta, r2, betaStd, n } = analysisResult;
     const item = {
       id: 'eq_' + Date.now(),
-      name: `${yLabel} 방정식`,
+      name: `${yLabel} 성장 공식`,
       yLabel, xLabels, beta, r2, betaStd, n,
       createdAt: fmtNow(),
       fromFile: document.getElementById('fileName').textContent || ''
     };
     equations.unshift(item);
     saveList(EQ_KEY, equations.slice(0, 30));
-    renderHome();
-    alert('방정식이 "만들어진 성공방정식" 목록에 저장됐어요.');
+    return item.id;
   }
-  window.saveEquation = saveEquation;
+
+  // ===== 학생별 리포트 생성 =====
+  function extractMetaCols(){
+    const m = { nameCol:null, phoneCol:null, classCol:null };
+    for(const col of parsedData.columns){
+      const role = mapping[col]?.r;
+      if(role === 'x' || role === 'y') continue;
+      if(!m.nameCol && /이름|학생|성명/.test(col)) m.nameCol = col;
+      if(!m.phoneCol && /전화|연락|폰|phone/i.test(col)) m.phoneCol = col;
+      if(!m.classCol && /반|학년|클래스/.test(col)) m.classCol = col;
+    }
+    if(!m.nameCol){
+      for(const col of parsedData.columns){
+        const role = mapping[col]?.r;
+        if(role === 'x' || role === 'y') continue;
+        const samples = parsedData.rows.slice(0,5).map(r => r[col]);
+        if(samples.some(s => typeof s === 'string' && s.trim())){ m.nameCol = col; break; }
+      }
+    }
+    return m;
+  }
+
+  function percentile(arr, p){
+    const sorted = [...arr].sort((a,b)=>a-b);
+    const i = (sorted.length - 1) * p;
+    const lo = Math.floor(i), hi = Math.ceil(i);
+    if(lo === hi) return sorted[lo];
+    return sorted[lo] + (sorted[hi] - sorted[lo]) * (i - lo);
+  }
+
+  async function generateStudentReports(){
+    if(!analysisResult){ alert('분석 결과가 없어요.'); return; }
+    const { beta, xCols, yCol, xLabels, yLabel, betaStd } = analysisResult;
+    const meta = extractMetaCols();
+
+    const validStudents = parsedData.rows.filter(r =>
+      xCols.every(c => r[c] != null && !isNaN(Number(r[c])))
+    );
+    const total = validStudents.length;
+    if(total === 0){ alert('리포트를 만들 학생이 없어요.'); return; }
+
+    const loading = document.getElementById('genLoading');
+    const barEl = document.getElementById('genBar');
+    const curEl = document.getElementById('genCur');
+    const totalEl = document.getElementById('genTotal');
+    loading.classList.remove('hidden');
+    totalEl.textContent = total;
+    curEl.textContent = 0;
+    barEl.style.width = '0%';
+
+    const classStats = xCols.map((c, i) => {
+      const arr = validStudents.map(r => Number(r[c]));
+      const avg = arr.reduce((a,b)=>a+b,0)/arr.length;
+      return {
+        label: xLabels[i], col: c,
+        min: Math.min(...arr),
+        max: Math.max(...arr),
+        avg,
+        p25: percentile(arr, 0.25),
+        p75: percentile(arr, 0.75)
+      };
+    });
+    // y 통계
+    const yArr = validStudents.map(r => Number(r[yCol])).filter(v => !isNaN(v));
+    const yStats = {
+      min: yArr.length ? Math.min(...yArr) : 0,
+      max: yArr.length ? Math.max(...yArr) : 100,
+      avg: yArr.length ? yArr.reduce((a,b)=>a+b,0)/yArr.length : 0
+    };
+
+    const reports = [];
+    for(let idx = 0; idx < total; idx++){
+      const r = validStudents[idx];
+      const xs = xCols.map(c => Number(r[c]));
+      const yActual = (r[yCol] != null && !isNaN(Number(r[yCol]))) ? Number(r[yCol]) : null;
+      const yPredicted = beta[0] + xs.reduce((s, v, i) => s + beta[i+1] * v, 0);
+
+      const scenarios = xCols.map((c, i) => {
+        const stats = classStats[i];
+        const currentX = xs[i];
+        const targetX = stats.max;
+        const gain = beta[i+1] * (targetX - currentX);
+        return {
+          label: xLabels[i],
+          current: currentX,
+          classAvg: stats.avg,
+          classMax: stats.max,
+          classMin: stats.min,
+          gain,
+          coef: beta[i+1],
+          betaStd: betaStd[i]
+        };
+      });
+
+      reports.push({
+        id: 'rep_' + Date.now() + '_' + idx,
+        studentName: meta.nameCol ? String(r[meta.nameCol] ?? `학생${idx+1}`) : `학생${idx+1}`,
+        parentPhone: meta.phoneCol ? String(r[meta.phoneCol] ?? '') : '',
+        className: meta.classCol ? String(r[meta.classCol] ?? '') : '',
+        yActual, yPredicted,
+        xValues: xs,
+        scenarios,
+        sentAlimtalk: false,
+        createdAt: fmtNow()
+      });
+
+      curEl.textContent = idx + 1;
+      barEl.style.width = ((idx + 1) / total * 100).toFixed(1) + '%';
+      if((idx+1) % 4 === 0 || idx === total - 1){
+        await new Promise(r => setTimeout(r, 30));
+      }
+    }
+
+    const eqId = autoSaveEquation();
+    const uploadId = persistUploadWithReports(reports, classStats, yStats, eqId);
+
+    loading.classList.add('hidden');
+    document.getElementById('genDoneN').textContent = total;
+    document.getElementById('genDone').classList.remove('hidden');
+    launchConfetti();
+
+    window.__lastUploadId = uploadId;
+  }
+  window.generateStudentReports = generateStudentReports;
+
+  function persistUploadWithReports(reports, classStats, yStats, eqId){
+    const uploads = loadList(UP_KEY);
+    const { yLabel, xLabels, beta, r2, betaStd, n, xCols, yCol } = analysisResult;
+    const item = {
+      id: 'up_' + Date.now(),
+      fileName: document.getElementById('fileName').textContent || '업로드 파일',
+      uploadedAt: fmtNow(),
+      rowCount: parsedData.rows.length,
+      colCount: parsedData.columns.length,
+      columns: parsedData.columns,
+      rows: parsedData.rows.slice(0, 500),
+      mapping: mapping,
+      analysis: { yLabel, xLabels, beta, r2, betaStd, n, xCols, yCol },
+      classStats,
+      yStats,
+      reports,
+      eqId,
+      sentCount: 0,
+      insights: buildInsights(analysisResult)
+    };
+    uploads.unshift(item);
+    saveList(UP_KEY, uploads.slice(0, 50));
+    renderHome();
+    return item.id;
+  }
+
+  function launchConfetti(){
+    const stage = document.getElementById('confettiStage');
+    if(!stage) return;
+    stage.innerHTML = '';
+    const colors = ['#7c3aed','#a78bfa','#c4b5fd','#ec4899','#f9a8d4','#fbcfe8','#fde68a','#ffffff','#ddd6fe'];
+    for(let i=0;i<70;i++){
+      const c = document.createElement('div');
+      c.className = 'confetti';
+      c.style.left = (Math.random()*100) + 'vw';
+      c.style.background = colors[Math.floor(Math.random()*colors.length)];
+      c.style.animationDuration = (1.8 + Math.random()*1.5) + 's';
+      c.style.animationDelay = (Math.random()*0.3) + 's';
+      const w = 6 + Math.random()*8;
+      c.style.width = w + 'px';
+      c.style.height = (w * (1 + Math.random()*0.8)) + 'px';
+      c.style.transform = `rotate(${Math.random()*360}deg)`;
+      stage.appendChild(c);
+    }
+    setTimeout(() => { if(stage) stage.innerHTML = ''; }, 4500);
+  }
+
+  function goToStudentReports(){
+    const id = window.__lastUploadId;
+    location.href = id ? `report.html?upload=${encodeURIComponent(id)}` : 'report.html';
+  }
+  window.goToStudentReports = goToStudentReports;
+
+  function hideGenDone(){
+    document.getElementById('genDone').classList.add('hidden');
+    const stage = document.getElementById('confettiStage');
+    if(stage) stage.innerHTML = '';
+  }
+  window.hideGenDone = hideGenDone;
 
   // 홈 대시보드 렌더
   function renderHome(){
