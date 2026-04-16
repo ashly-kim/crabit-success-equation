@@ -9,7 +9,7 @@
 <title>데이터 허브 · 우리학원 성공방정식</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="shared.js?v=1776381523898"></script>
+<script src="shared.js?v=1776381564270"></script>
 <script>__applyTheme();</script>
 <!-- 엑셀 파싱 (SheetJS, MIT 라이선스, 무료) -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -433,12 +433,40 @@
           </div>
         </div>
 
-        <div class="flex gap-3 flex-wrap">
-          <button onclick="saveEquation()" class="px-5 py-3 rounded-xl bg-brand-600 text-white font-bold hover:bg-brand-700 shadow-soft">💾 이 방정식 저장하기</button>
-          <button onclick="location.href='report.html'" class="px-5 py-3 rounded-xl font-bold transition hover:opacity-90" style="background:#fce7f3;color:#be185d">📄 이 방정식으로 리포트 만들기 →</button>
-          <button onclick="resetFlow()" class="px-5 py-3 rounded-xl border border-gray-200 font-semibold hover:bg-gray-50">다른 파일로 다시 분석</button>
+        <div class="flex gap-3 flex-wrap items-center">
+          <button onclick="generateStudentReports()" id="genReportBtn" class="px-6 py-3.5 rounded-xl bg-brand-600 text-white font-bold hover:bg-brand-700 shadow-soft inline-flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            학생별 리포트 생성하기
+          </button>
+          <button onclick="resetFlow()" class="px-5 py-3.5 rounded-xl border border-gray-200 font-semibold hover:bg-gray-50">다른 파일로 다시 분석</button>
         </div>
       </section>
+
+      <!-- 학생 리포트 생성 중 오버레이 -->
+      <div id="genLoading" class="hidden fixed inset-0 z-[60] flex items-center justify-center" style="background:rgba(17,24,39,.55);backdrop-filter:blur(2px)">
+        <div class="bg-white rounded-3xl p-10 max-w-[420px] w-[90%] text-center shadow-2xl">
+          <div class="relative w-20 h-20 mx-auto mb-5">
+            <div class="absolute inset-0 rounded-full border-4" style="border-color:#ede9fe;border-top-color:#7c3aed;animation:genSpin 1s linear infinite"></div>
+          </div>
+          <h3 class="text-[18px] font-extrabold text-ink-900">학생별 리포트 생성 중…</h3>
+          <p class="text-sm text-ink-500 mt-2"><span id="genCur">0</span> / <span id="genTotal">0</span>명</p>
+          <div class="h-2 rounded-full bg-gray-100 overflow-hidden mt-4">
+            <div id="genBar" class="h-full" style="width:0%;background:linear-gradient(90deg,#c4b5fd,#7c3aed);transition:width .2s"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 완료 모달 + 폭죽 -->
+      <div id="genDone" class="hidden fixed inset-0 z-[60] flex items-center justify-center" style="background:rgba(17,24,39,.55);backdrop-filter:blur(2px)">
+        <div id="confettiStage" class="absolute inset-0 pointer-events-none overflow-hidden"></div>
+        <div class="relative bg-white rounded-3xl p-10 max-w-[460px] w-[90%] text-center shadow-2xl" style="animation:scaleInPop .35s cubic-bezier(.2,.8,.2,1)">
+          <div class="text-6xl mb-4">🎉</div>
+          <h3 class="text-[22px] font-extrabold text-ink-900 leading-snug">학생별 리포트 생성이<br/>완료되었습니다!</h3>
+          <p class="text-sm text-ink-500 mt-3 leading-relaxed"><b id="genDoneN" class="text-brand-700">0</b>명 학생 각자의 <b>성장 공식</b>과 <b>개인별 예측 리포트</b>가 만들어졌어요.</p>
+          <button onclick="goToStudentReports()" class="mt-6 w-full py-3.5 rounded-xl bg-brand-600 text-white font-extrabold hover:bg-brand-700">학생별 리포트 확인하기 →</button>
+          <button onclick="hideGenDone()" class="mt-2 w-full py-2.5 text-sm text-ink-500 font-semibold hover:text-ink-700">나중에 보기</button>
+        </div>
+      </div>
 
     </div>
     <div id="pageFooter"></div>
