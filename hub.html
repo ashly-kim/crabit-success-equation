@@ -9,7 +9,7 @@
 <title>데이터 허브 · 우리학원 성공방정식</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="shared.js?v=1776380344278"></script>
+<script src="shared.js?v=1776380559197"></script>
 <script>__applyTheme();</script>
 <!-- 엑셀 파싱 (SheetJS, MIT 라이선스, 무료) -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -20,30 +20,125 @@
   .ring-soft{box-shadow:inset 0 0 0 1px #eef0f5}
 
   .drop-zone{border:2px dashed #cbd5e1;border-radius:20px;padding:48px 32px;text-align:center;transition:all .15s;background:#ffffff;cursor:pointer}
-  .drop-zone:hover{border-color:#3a74ff;background:#f9fbff}
-  .drop-zone.drag{border-color:#3a74ff;background:#eef4ff;transform:scale(1.01)}
+  .drop-zone:hover{border-color:#a78bfa;background:#f9f7ff}
+  .drop-zone.drag{border-color:#7c3aed;background:#f5f3ff;transform:scale(1.01)}
 
-  .preview-table{border-collapse:separate;border-spacing:0;width:100%;font-size:13px}
-  .preview-table th{background:#f3f4f6;padding:10px 12px;text-align:left;font-weight:700;color:#374151;border-bottom:1px solid #e5e7eb;white-space:nowrap;position:sticky;top:0;z-index:2;box-shadow:0 1px 0 #e5e7eb}
-  .preview-table td{padding:8px 12px;border-bottom:1px solid #f1f3f8;color:#1e293b;white-space:nowrap}
-  .preview-table td.role-y{background:#fff7ed}
-  .preview-table td.role-x{background:#eff6ff}
-  .preview-table td.role-ignore{background:#f9fafb;color:#9ca3af}
+  /* ===== 통합 테이블 (컬럼명 + 역할 드롭다운 + 데이터) ===== */
+  .unified-table{border-collapse:separate;border-spacing:0;width:100%;font-size:13px}
+  .unified-table th,.unified-table td{white-space:nowrap;text-align:left}
+  .unified-table thead tr.col-name th{
+    background:#ffffff;font-weight:800;color:#191f28;font-size:13.5px;
+    padding:14px 14px 6px 14px;
+    position:sticky;top:0;z-index:3;
+    border-bottom:1px solid #f1f3f8;
+  }
+  .unified-table thead tr.col-role th{
+    background:#ffffff;
+    padding:4px 10px 12px 10px;
+    position:sticky;top:44px;z-index:3;
+    border-bottom:2px solid #e5e7eb;
+  }
+  .unified-table tbody td{
+    padding:9px 14px;
+    border-bottom:1px solid #f6f7fb;color:#1e293b;
+  }
+  .unified-table tbody tr:hover td{filter:brightness(.985)}
+  .unified-table .rownum{
+    background:#fafafa;color:#9ca3af;font-size:11px;text-align:center;font-weight:600;
+    position:sticky;left:0;z-index:2;width:44px;
+    border-right:1px solid #f1f3f8;padding:9px 0;
+  }
+  .unified-table thead th.rownum{z-index:4;color:#6b7280;background:#f5f5f7}
 
-  .role-chip{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:9999px;font-size:11px;font-weight:700;border:1.5px solid}
-  .role-chip.y{background:#fff7ed;color:#9a3412;border-color:#fed7aa}
-  .role-chip.x{background:#eff6ff;color:#1e48b8;border-color:#bfdbfe}
-  .role-chip.ignore{background:#f9fafb;color:#6b7280;border-color:#e5e7eb}
-  .role-chip.meta{background:#f5f3ff;color:#6d28d9;border-color:#ddd6fe}
+  /* 역할별 컬러링 (연보라=X / 연핑크=Y / 연회색=분석제외 / 퍼플틴트=META) */
+  .unified-table .role-x{background:#f5f3ff}
+  .unified-table thead tr.col-name th.role-x{background:#ede9fe;color:#6d28d9}
+  .unified-table thead tr.col-role th.role-x{background:#ede9fe}
 
-  .role-select{padding:6px 10px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:12px;font-weight:600;background:white;outline:none;cursor:pointer}
-  .role-select:focus{border-color:#3a74ff}
+  .unified-table .role-y{background:#fdf2f8}
+  .unified-table thead tr.col-name th.role-y{background:#fce7f3;color:#be185d}
+  .unified-table thead tr.col-role th.role-y{background:#fce7f3}
+
+  .unified-table .role-ignore{background:#fafafa;color:#9ca3af}
+  .unified-table thead tr.col-name th.role-ignore{background:#f5f5f5;color:#9ca3af;text-decoration:line-through;text-decoration-color:#cbd5e1}
+  .unified-table thead tr.col-role th.role-ignore{background:#f5f5f5}
+
+  .unified-table .role-meta{background:#faf5ff}
+  .unified-table thead tr.col-name th.role-meta{background:#f3e8ff;color:#6d28d9}
+  .unified-table thead tr.col-role th.role-meta{background:#f3e8ff}
+
+  .unified-table thead tr.col-name th.role-none{background:#ffffff;color:#374151}
+  .unified-table thead tr.col-role th.role-none{background:#ffffff}
+
+  /* 역할 선택 셀렉트 (헤더 내부) */
+  .role-select-inline{
+    width:100%;padding:7px 10px;border:1.5px solid #e5e7eb;border-radius:9px;
+    font-size:12px;font-weight:700;background:white;outline:none;cursor:pointer;
+    color:#4b5563;transition:.15s;appearance:none;
+    background-image:url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.6' d='m5 7 5 5 5-5'/%3e%3c/svg%3e");
+    background-repeat:no-repeat;background-position:right 8px center;background-size:16px;padding-right:28px;
+  }
+  .role-select-inline:hover{border-color:#c4b5fd}
+  .role-select-inline:focus{border-color:#7c3aed;box-shadow:0 0 0 3px rgba(124,58,237,.1)}
+  .role-select-inline.sel-x{border-color:#c4b5fd;background-color:#f5f3ff;color:#6d28d9}
+  .role-select-inline.sel-y{border-color:#fbcfe8;background-color:#fdf2f8;color:#be185d}
+  .role-select-inline.sel-ignore{border-color:#e5e7eb;background-color:#f3f4f6;color:#6b7280}
+
+  /* 범례 칩 */
+  .legend-chip{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:9999px;font-size:11.5px;font-weight:700}
+  .legend-chip .dot{width:10px;height:10px;border-radius:3px}
+  .legend-chip.x{background:#f5f3ff;color:#6d28d9}
+  .legend-chip.x .dot{background:#c4b5fd}
+  .legend-chip.y{background:#fdf2f8;color:#be185d}
+  .legend-chip.y .dot{background:#fbcfe8}
+  .legend-chip.ig{background:#f5f5f5;color:#6b7280}
+  .legend-chip.ig .dot{background:#d1d5db}
+
+  /* 정보 툴팁 (i 아이콘 + 호버 시 친절한 설명) */
+  .info-wrap{position:relative;display:inline-flex;vertical-align:middle;margin-left:8px}
+  .info-icon{
+    width:20px;height:20px;border-radius:9999px;background:#ede9fe;color:#6d28d9;
+    font-size:12px;font-weight:800;cursor:help;display:inline-flex;align-items:center;justify-content:center;
+    font-family:Georgia,serif;font-style:italic;line-height:1;transition:.15s;
+  }
+  .info-wrap:hover .info-icon{background:#7c3aed;color:white;transform:scale(1.08)}
+  .info-popup{
+    display:none;position:absolute;top:calc(100% + 12px);left:-8px;
+    width:380px;background:white;border-radius:16px;padding:20px 22px;
+    box-shadow:0 16px 40px rgba(17,24,39,.15),0 2px 6px rgba(17,24,39,.06);
+    border:1px solid #ede9fe;z-index:100;font-size:13px;line-height:1.65;color:#374151;
+    font-weight:400;
+  }
+  .info-wrap:hover .info-popup{display:block;animation:pop-in .2s ease-out}
+  @keyframes pop-in{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+  .info-popup::before{
+    content:'';position:absolute;top:-6px;left:14px;width:12px;height:12px;
+    background:white;transform:rotate(45deg);border-left:1px solid #ede9fe;border-top:1px solid #ede9fe;
+  }
+  .info-popup .it-title{font-weight:800;font-size:14.5px;color:#191f28;margin-bottom:10px;letter-spacing:-.2px}
+  .info-popup .it-intro{color:#4b5563;margin-bottom:14px}
+  .info-popup .it-intro b{color:#191f28}
+  .info-popup .it-item{display:flex;gap:10px;padding:10px 0;border-top:1px dashed #ede9fe}
+  .info-popup .it-item:first-of-type{border-top:none;padding-top:0}
+  .info-popup .it-badge{
+    flex-shrink:0;width:44px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;
+    font-weight:800;font-size:11px;letter-spacing:.5px;
+  }
+  .info-popup .it-badge.x{background:#ede9fe;color:#6d28d9}
+  .info-popup .it-badge.y{background:#fce7f3;color:#be185d}
+  .info-popup .it-item b{color:#191f28;font-weight:700}
+  .info-popup .it-item .muted{color:#9ca3af;font-size:12px}
+  .info-popup .it-footer{
+    margin-top:14px;padding:12px 14px;border-radius:10px;background:#f5f3ff;color:#6d28d9;
+    font-size:12.5px;line-height:1.55;
+  }
+  .info-popup .it-footer b{color:#4c1d95}
 
   .bar-row{display:flex;align-items:center;gap:10px;margin:8px 0}
   .bar-label{width:120px;font-weight:600;font-size:13px;color:#374151;flex-shrink:0}
   .bar-track{flex:1;height:16px;background:#f1f5f9;border-radius:8px;overflow:hidden;position:relative}
-  .bar-fill{height:100%;background:linear-gradient(90deg,#3a74ff,#5a8eff);border-radius:8px;transition:width .4s ease}
-  .bar-val{width:70px;text-align:right;font-weight:700;font-size:13px;color:#3a74ff}
+  .bar-fill{height:100%;background:linear-gradient(90deg,#c4b5fd,#7c3aed);border-radius:8px;transition:width .4s ease}
+  .bar-val{width:70px;text-align:right;font-weight:700;font-size:13px;color:#7c3aed}
 
   @keyframes fade-up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
   .reveal{animation:fade-up .4s ease}
