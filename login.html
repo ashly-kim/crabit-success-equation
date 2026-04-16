@@ -9,104 +9,179 @@
 <title>로그인 · 우리학원 성공방정식</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="shared.js?v=1776358435592"></script>
+<script src="shared.js?v=1776358534719"></script>
 <script>__applyTheme();</script>
 <style>
-  html,body{background:#f6f7fb;min-height:100vh}
-  .kakao-btn{background:#FEE500;color:#3c1e1e}
+  html,body{background:#ffffff;min-height:100vh}
+  body{font-family:'Pretendard Variable',Pretendard,system-ui,sans-serif;color:#191f28}
+
+  .login-field{width:100%;padding:18px 16px;border:1px solid #e5e8eb;border-radius:12px;font-size:15px;font-weight:500;color:#191f28;background:#ffffff;outline:none;transition:border-color .15s}
+  .login-field::placeholder{color:#8b95a1;font-weight:400}
+  .login-field:focus{border-color:#3182f6}
+
+  .login-btn{width:100%;padding:16px;border-radius:12px;font-size:16px;font-weight:600;background:#c6d8f5;color:#ffffff;transition:background .15s;cursor:not-allowed;border:none}
+  .login-btn.active{background:#3182f6;cursor:pointer}
+  .login-btn.active:hover{background:#1b64da}
+
+  .kakao-btn{width:100%;padding:16px;border-radius:12px;background:#FEE500;color:#191f28;font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;transition:background .15s;border:none}
   .kakao-btn:hover{background:#fdd835}
+
+  .sub-link{font-size:14px;color:#4e5968;cursor:pointer;background:none;border:none;padding:0;font-family:inherit}
+  .sub-link:hover{color:#191f28;text-decoration:underline}
+
+  .eye-toggle{position:absolute;right:16px;top:50%;transform:translateY(-50%);color:#8b95a1;cursor:pointer;background:none;border:none;padding:0}
+  .eye-toggle:hover{color:#4e5968}
+
+  @keyframes toast-in{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+  .toast{position:fixed;bottom:28px;right:28px;max-width:360px;background:#ffffff;border:1px solid #e5e8eb;border-radius:16px;box-shadow:0 10px 30px rgba(17,24,39,.08),0 2px 6px rgba(17,24,39,.04);padding:16px 18px;z-index:100;display:none;animation:toast-in .3s cubic-bezier(.2,.8,.2,1)}
+  .toast.on{display:flex;align-items:flex-start;gap:12px}
 </style>
 </head>
-<body class="font-sans text-ink-900 antialiased">
+<body>
 
-<div class="min-h-screen flex flex-col">
-  <main class="flex-1 flex items-center justify-center px-6 py-12">
-    <div class="w-full max-w-md">
+<main class="min-h-screen flex items-center justify-center px-6 py-12">
+  <div class="w-full max-w-[400px]">
 
-      <a href="index.html" class="flex items-center justify-center gap-2 mb-8">
-        <div class="w-11 h-11 rounded-xl bg-brand-500 grid place-items-center text-white font-extrabold text-lg">우</div>
-        <div class="text-left">
-          <div class="text-[18px] font-extrabold leading-tight">우리학원 성공방정식</div>
-          <div class="text-[11px] text-ink-500">by CRABIT</div>
-        </div>
-      </a>
-
-      <div class="bg-white rounded-3xl shadow-card ring-soft p-8">
-        <h1 class="text-[24px] font-extrabold mb-1.5">다시 오신 걸 환영해요</h1>
-        <p class="text-sm text-ink-500 mb-7">가입하신 휴대폰 번호로 로그인해주세요.</p>
-
-        <!-- 카카오 -->
-        <button onclick="loginKakao()" class="kakao-btn w-full py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 mb-4">
-          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4C6.48 4 2 7.58 2 12c0 2.72 1.7 5.12 4.29 6.56-.18.66-.66 2.38-.76 2.75-.12.46.17.46.36.33.15-.1 2.4-1.63 3.35-2.28.91.13 1.82.19 2.76.19 5.52 0 10-3.58 10-8S17.52 4 12 4z"/></svg>
-          카카오로 로그인
-        </button>
-
-        <div class="flex items-center gap-3 my-5">
-          <div class="flex-1 h-px bg-gray-200"></div>
-          <div class="text-xs text-ink-500">또는</div>
-          <div class="flex-1 h-px bg-gray-200"></div>
-        </div>
-
-        <form onsubmit="doLogin(event)" class="space-y-4">
-          <div>
-            <label class="block text-xs font-bold text-ink-500 mb-1.5">휴대폰 번호 (아이디)</label>
-            <input id="loginPhone" type="tel" inputmode="numeric" placeholder="010-1234-5678" maxlength="13"
-              class="w-full px-4 py-3 rounded-xl border border-gray-200 text-[15px] font-semibold focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100"
-              oninput="this.value = __formatPhone(this.value)"/>
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-ink-500 mb-1.5">비밀번호</label>
-            <input id="loginPw" type="password" placeholder="비밀번호"
-              class="w-full px-4 py-3 rounded-xl border border-gray-200 text-[15px] focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100"/>
-          </div>
-          <div id="loginErr" class="hidden text-sm text-rose-600 font-semibold">—</div>
-          <button class="w-full py-3.5 rounded-xl bg-brand-500 text-white font-bold hover:bg-brand-600">
-            로그인
-          </button>
-        </form>
-
-        <div class="flex items-center justify-between mt-6 text-sm">
-          <a href="signup.html" class="text-brand-600 font-semibold hover:underline">회원가입</a>
-          <a href="#" onclick="alert('비밀번호 찾기는 준비 중이에요')" class="text-ink-500 hover:text-ink-900">비밀번호 찾기</a>
-        </div>
-
-        <!-- 데모 계정 안내 (프로토타입 전용) -->
-        <div class="mt-6 rounded-xl bg-soft-navy border border-brand-100 p-4 text-[11.5px] text-ink-700 leading-relaxed">
-          <div class="font-bold text-brand-700 mb-1">🔐 시연용 샘플 계정</div>
-          <div><b>010-1234-5678</b> · 비밀번호: <code class="bg-white px-1.5 py-0.5 rounded">test1234!</code></div>
-          <div><b>010-9876-5432</b> · 비밀번호: <code class="bg-white px-1.5 py-0.5 rounded">crabit@1</code></div>
-        </div>
-      </div>
-
-      <div class="text-center mt-6 text-xs text-ink-500">
-        계정이 없으신가요? <a href="signup.html" class="font-semibold text-brand-600 hover:underline">회원가입</a>
-      </div>
+    <!-- 로고 -->
+    <div class="text-center mb-10">
+      <div class="text-[22px] font-extrabold tracking-tight text-[#191f28]">우리학원 성공방정식</div>
     </div>
-  </main>
 
-  <div id="footer"></div>
+    <!-- 입력 폼 -->
+    <form onsubmit="doLogin(event)" class="space-y-3">
+      <input id="loginPhone" type="tel" inputmode="numeric" placeholder="휴대폰 번호" maxlength="13"
+        class="login-field" autocomplete="username"
+        oninput="this.value = __formatPhone(this.value); updateBtnState();"/>
+
+      <div class="relative">
+        <input id="loginPw" type="password" placeholder="비밀번호" class="login-field pr-12" autocomplete="current-password" oninput="updateBtnState()"/>
+        <button type="button" class="eye-toggle" onclick="togglePw()" aria-label="비밀번호 표시">
+          <svg id="eyeIcon" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 3l18 18"/><path d="M10.58 10.58a2 2 0 002.83 2.83"/><path d="M16.68 16.68A8.97 8.97 0 0112 18c-7 0-10-6-10-6a15.8 15.8 0 014.12-4.68"/><path d="M9.88 5.09A9 9 0 0112 5c7 0 10 6 10 6a15.7 15.7 0 01-1.67 2.68"/></svg>
+        </button>
+      </div>
+
+      <label class="flex items-center gap-2 pt-2 cursor-pointer text-[14px] text-[#4e5968]">
+        <input type="checkbox" id="rememberMe" class="w-4 h-4"/>
+        <span>아이디 기억하기</span>
+      </label>
+
+      <button id="loginSubmit" class="login-btn mt-5">로그인</button>
+    </form>
+
+    <!-- 보조 링크 -->
+    <div class="flex items-center justify-center gap-3 mt-5">
+      <button type="button" class="sub-link" onclick="showSignupToast()">회원가입</button>
+      <span class="text-[#d1d6db]">·</span>
+      <button type="button" class="sub-link" onclick="showFindToast()">내 계정 찾기</button>
+    </div>
+
+    <!-- 구분선 -->
+    <div class="flex items-center gap-4 my-8">
+      <div class="flex-1 h-px bg-[#e5e8eb]"></div>
+      <div class="text-xs text-[#8b95a1]">간편 로그인</div>
+      <div class="flex-1 h-px bg-[#e5e8eb]"></div>
+    </div>
+
+    <!-- 카카오 -->
+    <button type="button" onclick="loginKakao()" class="kakao-btn">
+      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4C6.48 4 2 7.58 2 12c0 2.72 1.7 5.12 4.29 6.56-.18.66-.66 2.38-.76 2.75-.12.46.17.46.36.33.15-.1 2.4-1.63 3.35-2.28.91.13 1.82.19 2.76.19 5.52 0 10-3.58 10-8S17.52 4 12 4z"/></svg>
+      카카오로 로그인
+    </button>
+
+    <!-- 데모 안내 -->
+    <div class="mt-8 text-center text-[12px] text-[#8b95a1] leading-relaxed">
+      시연용 계정 <b class="text-[#4e5968]">010-8791-2483</b> · <code class="text-[#4e5968]">crafthabit1@</code>
+    </div>
+  </div>
+</main>
+
+<!-- 회원가입 토스트 -->
+<div id="signupToast" class="toast">
+  <div class="w-8 h-8 rounded-full bg-[#eef4ff] grid place-items-center flex-shrink-0 text-base">🚧</div>
+  <div class="flex-1 pt-0.5">
+    <div class="text-[14px] font-bold text-[#191f28] mb-1">아직 지원하지 않는 기능이에요</div>
+    <div class="text-[12.5px] text-[#4e5968] leading-relaxed">4월 말 서비스 오픈 후 회원가입이 가능해질 예정이에요.</div>
+  </div>
+  <button onclick="hideToast('signupToast')" class="text-[#8b95a1] hover:text-[#4e5968] text-lg leading-none -mt-0.5 bg-transparent border-0 p-0 cursor-pointer">×</button>
+</div>
+
+<!-- 내 계정 찾기 토스트 -->
+<div id="findToast" class="toast">
+  <div class="w-8 h-8 rounded-full bg-[#eef4ff] grid place-items-center flex-shrink-0 text-base">🔍</div>
+  <div class="flex-1 pt-0.5">
+    <div class="text-[14px] font-bold text-[#191f28] mb-1">준비 중이에요</div>
+    <div class="text-[12.5px] text-[#4e5968] leading-relaxed">서비스 오픈 후 이용하실 수 있어요.</div>
+  </div>
+  <button onclick="hideToast('findToast')" class="text-[#8b95a1] hover:text-[#4e5968] text-lg leading-none -mt-0.5 bg-transparent border-0 p-0 cursor-pointer">×</button>
 </div>
 
 <script>
-  document.getElementById('footer').outerHTML = __renderFooter();
-
-  // 이미 로그인돼 있으면 홈으로
   if(__auth.getSession()) location.href = 'index.html';
 
+  function updateBtnState(){
+    const phone = document.getElementById('loginPhone').value.replace(/\D/g,'');
+    const pw = document.getElementById('loginPw').value;
+    const btn = document.getElementById('loginSubmit');
+    if(phone.length === 11 && pw.length > 0) btn.classList.add('active');
+    else btn.classList.remove('active');
+  }
+  function togglePw(){
+    const pw = document.getElementById('loginPw');
+    const icon = document.getElementById('eyeIcon');
+    if(pw.type === 'password'){
+      pw.type = 'text';
+      icon.innerHTML = '<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/>';
+    } else {
+      pw.type = 'password';
+      icon.innerHTML = '<path d="M3 3l18 18"/><path d="M10.58 10.58a2 2 0 002.83 2.83"/><path d="M16.68 16.68A8.97 8.97 0 0112 18c-7 0-10-6-10-6a15.8 15.8 0 014.12-4.68"/><path d="M9.88 5.09A9 9 0 0112 5c7 0 10 6 10 6a15.7 15.7 0 01-1.67 2.68"/>';
+    }
+  }
   function doLogin(e){
     e.preventDefault();
-    const phone = document.getElementById('loginPhone').value.replace(/\D/g, '');
+    const phone = document.getElementById('loginPhone').value.replace(/\D/g,'');
     const pw = document.getElementById('loginPw').value;
-    const err = document.getElementById('loginErr');
-    if(phone.length !== 11){ err.textContent = '휴대폰 번호를 정확히 입력해주세요.'; err.classList.remove('hidden'); return; }
-    if(!pw){ err.textContent = '비밀번호를 입력해주세요.'; err.classList.remove('hidden'); return; }
+    if(phone.length !== 11 || !pw) return;
     const r = __auth.login(phone, pw);
-    if(!r.ok){ err.textContent = r.error; err.classList.remove('hidden'); return; }
+    if(!r.ok){ showErrorToast(r.error); return; }
     location.href = 'index.html';
   }
   function loginKakao(){
     __auth.kakaoLogin();
     location.href = 'index.html';
+  }
+
+  let __toastT;
+  function showToast(id){
+    ['signupToast','findToast','errorToast'].forEach(x=>{
+      const el = document.getElementById(x);
+      if(el) el.classList.remove('on');
+    });
+    document.getElementById(id).classList.add('on');
+    clearTimeout(__toastT);
+    __toastT = setTimeout(()=>hideToast(id), 4000);
+  }
+  function hideToast(id){ const el = document.getElementById(id); if(el) el.classList.remove('on'); }
+  function showSignupToast(){ showToast('signupToast'); }
+  function showFindToast(){ showToast('findToast'); }
+
+  function showErrorToast(msg){
+    let el = document.getElementById('errorToast');
+    if(!el){
+      el = document.createElement('div');
+      el.id = 'errorToast';
+      el.className = 'toast';
+      el.innerHTML = `
+        <div class="w-8 h-8 rounded-full bg-[#fee2e2] grid place-items-center flex-shrink-0 text-base">⚠️</div>
+        <div class="flex-1 pt-0.5">
+          <div class="text-[14px] font-bold text-[#191f28] mb-1">로그인 실패</div>
+          <div class="text-[12.5px] text-[#4e5968] leading-relaxed" id="errorToastMsg">—</div>
+        </div>
+        <button onclick="hideToast('errorToast')" class="text-[#8b95a1] hover:text-[#4e5968] text-lg leading-none -mt-0.5 bg-transparent border-0 p-0 cursor-pointer">×</button>
+      `;
+      document.body.appendChild(el);
+    }
+    document.getElementById('errorToastMsg').textContent = msg;
+    showToast('errorToast');
   }
 </script>
 </body>
