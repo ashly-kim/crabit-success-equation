@@ -9,7 +9,7 @@
 <title>데이터 허브 · 우리학원 성공방정식</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="shared.js?v=1776380961946"></script>
+<script src="shared.js?v=1776381054947"></script>
 <script>__applyTheme();</script>
 <!-- 엑셀 파싱 (SheetJS, MIT 라이선스, 무료) -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -135,10 +135,40 @@
   .info-popup .it-footer b{color:#4c1d95}
 
   .bar-row{display:flex;align-items:center;gap:10px;margin:8px 0}
-  .bar-label{width:120px;font-weight:600;font-size:13px;color:#374151;flex-shrink:0}
-  .bar-track{flex:1;height:16px;background:#f1f5f9;border-radius:8px;overflow:hidden;position:relative}
-  .bar-fill{height:100%;background:linear-gradient(90deg,#c4b5fd,#7c3aed);border-radius:8px;transition:width .4s ease}
-  .bar-val{width:70px;text-align:right;font-weight:700;font-size:13px;color:#7c3aed}
+  .bar-label{width:140px;font-weight:600;font-size:13px;color:#374151;flex-shrink:0}
+  .bar-track{flex:1;height:18px;background:#f5f3ff;border-radius:9px;overflow:hidden;position:relative}
+  .bar-fill{height:100%;background:linear-gradient(90deg,#c4b5fd,#7c3aed);border-radius:9px;transition:width .8s cubic-bezier(.2,.8,.2,1)}
+  .bar-val{width:80px;text-align:right;font-weight:800;font-size:13px;color:#7c3aed}
+
+  /* ===== 인라인 용어 툴팁 (변수·계수·표준화·영향도 등) ===== */
+  .term{position:relative;cursor:help;font-weight:700;color:#6d28d9;border-bottom:1px dashed #a78bfa;display:inline-block;line-height:1.3;transition:.15s}
+  .term:hover{color:#4c1d95;border-color:#7c3aed;border-bottom-style:solid}
+  .tpop{
+    display:none;position:absolute;bottom:calc(100% + 10px);left:50%;transform:translateX(-50%);
+    width:300px;background:white;border:1px solid #ede9fe;color:#374151;
+    padding:14px 16px;border-radius:14px;font-size:12.5px;line-height:1.65;font-weight:400;
+    text-align:left;z-index:60;box-shadow:0 14px 36px rgba(17,24,39,.15),0 2px 6px rgba(17,24,39,.06);
+    white-space:normal;cursor:default;
+  }
+  .tpop b{color:#6d28d9;font-weight:800}
+  .tpop .tp-title{color:#191f28;font-weight:800;font-size:13.5px;margin-bottom:6px;display:block;letter-spacing:-.2px}
+  .tpop .tp-eg{margin-top:10px;padding:10px 12px;border-radius:9px;background:#f5f3ff;color:#6d28d9;font-size:12px;line-height:1.55}
+  .tpop .tp-eg b{color:#4c1d95}
+  .tpop::before{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:6px solid transparent;border-top-color:white;z-index:2}
+  .tpop::after{content:'';position:absolute;top:calc(100% + 1px);left:50%;transform:translateX(-50%);border:6px solid transparent;border-top-color:#ede9fe;z-index:1}
+  .term:hover .tpop{display:block;animation:pop-in .2s ease-out}
+
+  /* ===== 회귀분석 스캐터 애니메이션 ===== */
+  #scatterSvg .dot{opacity:0;transform-box:fill-box;transform-origin:center;transform:scale(0)}
+  #scatterSvg .dot.on{opacity:.75;transform:scale(1);transition:opacity .2s ease, transform .3s cubic-bezier(.2,.8,.2,1)}
+  #scatterSvg .reg-line{stroke-dasharray:1000;stroke-dashoffset:1000;transition:stroke-dashoffset 1.2s cubic-bezier(.2,.8,.2,1)}
+  #scatterSvg .reg-line.on{stroke-dashoffset:0}
+  #scatterSvg .ci-band{opacity:0;transition:opacity .6s ease}
+  #scatterSvg .ci-band.on{opacity:.32}
+  #scatterSvg .axis{stroke:#e5e7eb;stroke-width:1}
+  #scatterSvg .grid-line{stroke:#f1f5f9;stroke-width:1}
+  #scatterSvg .axis-label{fill:#9ca3af;font-size:11px;font-family:inherit;font-weight:600}
+  #scatterSvg .tick{fill:#9ca3af;font-size:10px;font-family:inherit}
 
   @keyframes fade-up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
   .reveal{animation:fade-up .4s ease}
