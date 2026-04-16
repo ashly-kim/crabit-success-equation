@@ -9,7 +9,7 @@
 <title>리포트카드 · 우리학원 성공방정식</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="shared.js?v=1776357234976"></script>
+<script src="shared.js?v=1776357258095"></script>
 <script>__applyTheme();</script>
 <style>
   html,body{background:#f6f7fb}
@@ -491,6 +491,20 @@
 </div>
 
 <!-- ============ PDF ZIP 다운로드 안내 모달 ============ -->
+<!-- ============ 낮은 신뢰도 리포트 생성 확인 모달 ============ -->
+<div class="modal" id="lowConfidenceModal">
+  <div class="modal-box bg-white rounded-3xl w-full max-w-md p-7">
+    <div class="text-3xl mb-3">⚠️</div>
+    <h3 class="text-xl font-extrabold mb-2">신뢰도가 낮아요</h3>
+    <p class="text-sm text-ink-700 leading-relaxed mb-1"><b id="lcmName">이</b> 학생의 현재 리포트 신뢰도는 <b class="text-rose-600"><span id="lcmConf">15</span>%</b>예요. 예측 범위가 넓어 참고용으로만 권장해요.</p>
+    <p class="text-xs text-ink-500 mt-2 leading-relaxed" id="lcmHint">—</p>
+    <div class="flex gap-2 mt-6">
+      <button onclick="closeModal('lowConfidenceModal')" class="flex-1 py-3 rounded-xl border border-gray-200 font-semibold hover:bg-gray-50">취소</button>
+      <button onclick="proceedStudentReport()" class="flex-1 py-3 rounded-xl bg-brand-500 text-white font-bold hover:bg-brand-600">그래도 만들기</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal" id="pdfZipModal">
   <div class="modal-box bg-white rounded-3xl w-full max-w-md p-7">
     <div class="text-3xl mb-3">📦</div>
