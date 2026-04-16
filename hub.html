@@ -9,7 +9,7 @@
 <title>데이터 허브 · 우리학원 성공방정식</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="shared.js?v=1776381054947"></script>
+<script src="shared.js?v=1776381187078"></script>
 <script>__applyTheme();</script>
 <!-- 엑셀 파싱 (SheetJS, MIT 라이선스, 무료) -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -318,54 +318,107 @@
       </section>
 
       <!-- STEP 3: 결과 -->
-      <section id="stepResult" class="hidden">
-        <div class="bg-gradient-to-br from-brand-500 to-brand-600 rounded-3xl p-8 text-white shadow-card reveal">
-          <div class="flex items-center gap-2 mb-3">
-            <span class="px-2.5 py-1 rounded-full bg-white/20 text-[11px] font-bold">✨ AI 분석 완료</span>
-          </div>
-          <h2 class="text-[22px] font-extrabold mb-1">우리 학원의 성공방정식을 찾았어요</h2>
-          <p class="text-sm opacity-90">업로드하신 데이터 <span id="resRows">0</span>건으로 계산한 결과예요.</p>
+      <section id="stepResult" class="hidden space-y-5">
 
-          <div class="mt-6 bg-white rounded-2xl p-6 text-ink-900">
-            <div class="text-[11px] font-bold text-brand-600 mb-2 tracking-wider">성공방정식</div>
-            <div class="text-[18px] font-extrabold leading-relaxed" id="resFormula">—</div>
-          </div>
+        <!-- 1. 히어로: 연보라+연핑크 파스텔 그라데이션 -->
+        <div class="rounded-3xl relative overflow-hidden shadow-card reveal" style="background:linear-gradient(135deg,#f5f3ff 0%,#ede9fe 45%,#fce7f3 100%)">
+          <div class="absolute -left-12 -top-10 w-48 h-48 rounded-full bg-white/50 blur-2xl pointer-events-none"></div>
+          <div class="absolute right-10 -bottom-8 w-36 h-36 rounded-full bg-white/40 blur-xl pointer-events-none"></div>
+          <div class="relative p-10">
+            <div class="inline-flex items-center gap-1.5 text-xs font-bold bg-white/85 text-brand-700 px-3 py-1 rounded-full mb-4 w-fit">
+              ✨ 분석 완료
+            </div>
+            <h2 class="text-[28px] font-extrabold leading-tight text-ink-900">
+              우리 학원만의 <span class="text-brand-600">성공방정식</span>을 찾았어요
+            </h2>
+            <p class="text-[14px] text-ink-700/80 mt-2">업로드하신 데이터 <b id="resRows" class="text-brand-700">0</b>건을 기반으로 계산했어요.</p>
 
-          <div class="mt-4 grid md:grid-cols-3 gap-3">
-            <div class="bg-white/15 rounded-xl p-4">
-              <div class="text-[11px] opacity-80">신뢰도 (R²)</div>
-              <div class="text-[22px] font-extrabold mt-1" id="resR2">—</div>
-              <div class="text-[11px] opacity-80 mt-1" id="resR2Level">—</div>
+            <div class="mt-6 bg-white/90 rounded-2xl p-6" style="backdrop-filter:blur(6px);box-shadow:0 8px 24px rgba(124,58,237,.1)">
+              <div class="text-[11px] font-bold text-brand-600 mb-2 tracking-wider">🧮 우리 학원 성공방정식</div>
+              <div class="text-[18px] font-extrabold leading-relaxed text-ink-900" id="resFormula">—</div>
             </div>
-            <div class="bg-white/15 rounded-xl p-4">
-              <div class="text-[11px] opacity-80">분석 학생 수</div>
-              <div class="text-[22px] font-extrabold mt-1"><span id="resN">0</span>명</div>
-              <div class="text-[11px] opacity-80 mt-1">유효 관측치</div>
-            </div>
-            <div class="bg-white/15 rounded-xl p-4">
-              <div class="text-[11px] opacity-80">예측 대상 (Y)</div>
-              <div class="text-[17px] font-extrabold mt-1" id="resY">—</div>
-              <div class="text-[11px] opacity-80 mt-1">종속변수</div>
+
+            <div class="mt-4 grid grid-cols-3 gap-3">
+              <div class="bg-white/85 rounded-xl p-4">
+                <div class="text-[11px] font-semibold text-ink-500">
+                  <span class="term">신뢰도 (R²)<span class="tpop"><span class="tp-title">📐 신뢰도 (R²)</span>방정식이 <b>Y의 변동을 얼마나 설명</b>하는지 보여주는 값이에요. 0~100% 사이이고, 높을수록 예측이 잘 맞아요.<span class="tp-eg"><b>70% 이상</b> → 자신있게 상담에 활용!<br/><b>50~70%</b> → 참고용<br/><b>50% 미만</b> → 데이터 더 필요</span></span></span>
+                </div>
+                <div class="text-[22px] font-extrabold mt-1 text-brand-700" id="resR2">—</div>
+                <div class="text-[11px] text-ink-500 mt-1" id="resR2Level">—</div>
+              </div>
+              <div class="bg-white/85 rounded-xl p-4">
+                <div class="text-[11px] font-semibold text-ink-500">분석 학생 수</div>
+                <div class="text-[22px] font-extrabold mt-1 text-brand-700"><span id="resN">0</span>명</div>
+                <div class="text-[11px] text-ink-500 mt-1">유효 관측치</div>
+              </div>
+              <div class="bg-white/85 rounded-xl p-4">
+                <div class="text-[11px] font-semibold text-ink-500">
+                  <span class="term">예측 대상 (Y)<span class="tpop"><span class="tp-title">📊 종속변수 Y</span>원장님이 <b>올리고 싶어하는 목표 수치</b>예요. 성적·재등록률·모의고사 등급 같은 게 여기 들어갑니다.<span class="tp-eg"><b>"복습을 더 시키면 성적(Y)이 얼마나 오를까?"</b>를 숫자로 확인하는 기준선.</span></span></span>
+                </div>
+                <div class="text-[17px] font-extrabold mt-1 text-brand-700 truncate" id="resY">—</div>
+                <div class="text-[11px] text-ink-500 mt-1">예측할 결과</div>
+              </div>
             </div>
           </div>
         </div>
 
-        <div class="bg-white rounded-3xl shadow-card ring-soft p-7 mt-5 reveal">
-          <h3 class="text-[16px] font-extrabold mb-4">변수별 영향도 (표준화 계수 β*)</h3>
+        <!-- 2. 회귀분석 그래프 (애니메이션) -->
+        <div class="bg-white rounded-3xl shadow-card ring-soft p-7 reveal">
+          <div class="flex items-end justify-between mb-4 flex-wrap gap-3">
+            <div>
+              <h3 class="text-[18px] font-extrabold flex items-center gap-1 flex-wrap">
+                📊&nbsp;<span class="term">회귀분석 그래프<span class="tpop"><span class="tp-title">📈 회귀분석 그래프란?</span>학생 <b>1명 = 점 1개</b>. 점들이 오른쪽 위로 쏠릴수록 X가 Y에 <b>긍정적 영향</b>을 준다는 뜻이에요.<span class="tp-eg"><b>회귀선</b>이 점들 가운데를 통과하면서 '평균적으로 얼마씩 변하는지'를 보여줘요.</span></span></span>
+              </h3>
+              <p class="text-xs text-ink-500 mt-1.5">점 하나 = 학생 한 명. 점들이 오른쪽 위로 쏠릴수록 X가 Y를 끌어올린다는 뜻이에요.</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <label class="text-xs text-ink-500 font-semibold">X축 변수</label>
+              <select id="scatterX" class="px-3 py-2 rounded-lg border border-gray-200 text-sm font-semibold bg-white cursor-pointer focus:border-brand-500 focus:outline-none" onchange="renderScatter()"></select>
+              <button onclick="replayScatterAnim()" class="px-3 py-2 rounded-lg text-xs font-bold bg-brand-50 text-brand-700 hover:bg-brand-100 transition">🔁 다시 그리기</button>
+            </div>
+          </div>
+
+          <div id="scatterStage" class="rounded-2xl overflow-hidden" style="background:linear-gradient(135deg,#faf5ff 0%,#fdf2f8 100%);padding:24px 20px 18px">
+            <svg id="scatterSvg" viewBox="0 0 640 360" class="w-full h-auto" preserveAspectRatio="xMidYMid meet"></svg>
+          </div>
+
+          <div class="mt-3 flex items-center gap-5 text-[11px] text-ink-500 flex-wrap">
+            <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full" style="background:#7c3aed;opacity:.75"></span>학생 데이터 (점)</span>
+            <span class="inline-flex items-center gap-1.5"><span class="w-5 h-[2.5px]" style="background:#7c3aed"></span>회귀선 (예측)</span>
+            <span class="inline-flex items-center gap-1.5"><span class="w-5 h-[6px] rounded" style="background:#c4b5fd;opacity:.35"></span>95% 신뢰구간</span>
+          </div>
+        </div>
+
+        <!-- 3. 변수별 영향도 -->
+        <div class="bg-white rounded-3xl shadow-card ring-soft p-7 reveal">
+          <h3 class="text-[18px] font-extrabold flex items-center gap-1 mb-5">
+            <span class="term">변수별 영향도<span class="tpop"><span class="tp-title">⭐ 영향도 순위</span>각 X 변수가 Y를 <b>얼마나 끌어올리는지</b>를 막대 길이로 비교할 수 있어요.<span class="tp-eg">단위가 서로 다르면 비교가 어렵기 때문에 <b>표준화 β*</b>로 변환해서 공평히 줄 세웠어요.</span></span></span>
+          </h3>
           <div id="betaBars"></div>
-          <p class="text-[11px] text-ink-500 mt-4">💡 β* 값이 클수록 Y에 미치는 영향이 커요. 단위가 다른 변수 간 비교를 위해 표준화됐어요.</p>
+          <p class="text-[12.5px] text-ink-500 mt-5 leading-relaxed">
+            💡 막대가 길수록 <b class="text-brand-700">Y를 크게 움직이는 변수</b>예요. 단위가 서로 다른 변수를 공평히 비교하려고 <span class="term">표준화<span class="tpop"><span class="tp-title">🔢 표준화란?</span>변수마다 단위가 달라요 (시간·점수·% 등). 그대로 두면 "100점"과 "3시간"을 직접 비교 못 하죠.<span class="tp-eg">모든 변수를 <b>평균=0, 표준편차=1 기준</b>으로 다시 계산해 '같은 잣대'로 줄 세운 게 <b>β*</b>예요.</span></span></span>를 했어요.
+          </p>
         </div>
 
-        <div class="bg-white rounded-3xl shadow-card ring-soft p-7 mt-5 reveal">
-          <h3 class="text-[16px] font-extrabold mb-4">계수 상세</h3>
-          <div class="overflow-auto">
+        <!-- 4. 초등학생도 이해하는 쉬운 설명 -->
+        <div class="bg-white rounded-3xl shadow-card ring-soft p-7 reveal">
+          <h3 class="text-[18px] font-extrabold mb-5">📖 이 숫자들, 어떻게 나온 걸까요?</h3>
+          <div id="simpleExplain" class="space-y-6 text-[14px] text-ink-700 leading-relaxed"></div>
+        </div>
+
+        <!-- 5. 계수 상세 테이블 -->
+        <div class="bg-white rounded-3xl shadow-card ring-soft p-7 reveal">
+          <h3 class="text-[16px] font-extrabold flex items-center gap-1 mb-4">
+            <span class="term">계수<span class="tpop"><span class="tp-title">🔑 계수 (β)</span>"X가 <b>1만큼</b> 늘면 Y가 <b>β만큼</b> 변한다"는 뜻이에요.<span class="tp-eg">β=0.42인 복습시간 → 복습 +1시간 하면 성적 +0.42점.</span></span></span> 상세
+          </h3>
+          <div class="overflow-auto rounded-2xl" style="background:#faf5ff">
             <table class="w-full text-sm">
               <thead>
-                <tr class="bg-gray-50 text-ink-500 text-[12px]">
-                  <th class="px-4 py-2.5 text-left">변수</th>
-                  <th class="px-4 py-2.5 text-right">계수 (β)</th>
-                  <th class="px-4 py-2.5 text-right">표준화 β*</th>
-                  <th class="px-4 py-2.5 text-left">해석</th>
+                <tr class="text-[12px]" style="background:#ede9fe;color:#6d28d9">
+                  <th class="px-4 py-3 text-left font-bold">변수</th>
+                  <th class="px-4 py-3 text-right font-bold">계수 (β)</th>
+                  <th class="px-4 py-3 text-right font-bold">표준화 β*</th>
+                  <th class="px-4 py-3 text-left font-bold">해석</th>
                 </tr>
               </thead>
               <tbody id="coefTable"></tbody>
@@ -373,9 +426,9 @@
           </div>
         </div>
 
-        <div class="flex gap-3 mt-5 flex-wrap">
-          <button onclick="saveEquation()" class="px-5 py-3 rounded-xl bg-accent-500 text-white font-bold hover:bg-accent-600">💾 이 방정식 저장하기</button>
-          <button onclick="location.href='report.html'" class="px-5 py-3 rounded-xl bg-brand-500 text-white font-bold hover:bg-brand-600">📄 이 방정식으로 리포트 만들기 →</button>
+        <div class="flex gap-3 flex-wrap">
+          <button onclick="saveEquation()" class="px-5 py-3 rounded-xl bg-brand-600 text-white font-bold hover:bg-brand-700 shadow-soft">💾 이 방정식 저장하기</button>
+          <button onclick="location.href='report.html'" class="px-5 py-3 rounded-xl font-bold transition hover:opacity-90" style="background:#fce7f3;color:#be185d">📄 이 방정식으로 리포트 만들기 →</button>
           <button onclick="resetFlow()" class="px-5 py-3 rounded-xl border border-gray-200 font-semibold hover:bg-gray-50">다른 파일로 다시 분석</button>
         </div>
       </section>
