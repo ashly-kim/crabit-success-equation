@@ -91,12 +91,11 @@ window.__auth = {
   getSession(){ try { return JSON.parse(localStorage.getItem(__SESS_KEY) || 'null'); } catch(e){ return null; } },
   setSession(s){ localStorage.setItem(__SESS_KEY, JSON.stringify(s)); },
   logout(){ localStorage.removeItem(__SESS_KEY); location.href = 'login.html'; },
-  // 보호된 페이지: 비로그인 시 로그인으로 리다이렉트
+  // 보호된 페이지: 비로그인 시 로그인으로 리다이렉트, 온보딩 미완료 시 온보딩으로
   requireAuth(){
-    if(!this.getSession()){
-      location.href = 'login.html';
-      return false;
-    }
+    const s = this.getSession();
+    if(!s){ location.href = 'login.html'; return false; }
+    if(s.isFreshSignup){ location.href = 'onboarding.html'; return false; }
     return true;
   }
 };
