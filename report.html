@@ -9,7 +9,7 @@
 <title>리포트카드 · 우리학원 성공방정식</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="shared.js?v=1776357205507"></script>
+<script src="shared.js?v=1776357219535"></script>
 <script>__applyTheme();</script>
 <style>
   html,body{background:#f6f7fb}
@@ -1220,11 +1220,8 @@
         <div class="text-[14px] text-ink-700 leading-relaxed pt-1">${a}</div>
       </div>`).join('');
 
-    const statusBadge = {
-      green:`<span class="inline-flex items-center text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full">🟢 예측 가능</span>`,
-      yellow:`<span class="inline-flex items-center text-xs font-bold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full">🟡 주의 필요</span>`,
-      red:`<span class="inline-flex items-center text-xs font-bold text-rose-700 bg-rose-50 px-2.5 py-1 rounded-full">🔴 데이터 부족</span>`
-    }[s.status];
+    const sdConf = calcStudentConfidence(s, s.eq);
+    const statusBadge = confidenceBadge(sdConf, true);
 
     document.getElementById('sdBody').innerHTML = `
       <!-- 프로필 카드 (통일된 회색 배경 + 검정 텍스트) -->
