@@ -9,7 +9,7 @@
 <title>리포트카드 · 우리학원 성공방정식</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="shared.js?v=1776348569205"></script>
+<script src="shared.js?v=1776357037976"></script>
 <script>__applyTheme();</script>
 <style>
   html,body{background:#f6f7fb}
@@ -75,6 +75,13 @@
   .mini-cal-cell.in-range{background:#ffe9ef !important;color:#a62256}
   .mini-cal-cell.range-end{background:#f04685 !important;color:white;font-weight:800}
   .mini-cal-dow{font-size:10px;color:#9ca3af;text-align:center;padding:4px 0;font-weight:600}
+
+  /* 정보 툴팁 (ⓘ 아이콘 hover) */
+  .info-tip{position:relative;display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:9999px;background:#e5e7eb;color:#6b7280;font-size:10px;font-weight:800;cursor:help;margin-left:4px;vertical-align:middle;user-select:none;font-family:serif;line-height:1}
+  .info-tip:hover{background:#3a74ff;color:white}
+  .info-tip::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:#1e293b;color:white;padding:10px 12px;border-radius:8px;font-size:11.5px;font-weight:500;width:260px;line-height:1.5;white-space:normal;text-align:left;display:none;z-index:100;pointer-events:none;box-shadow:0 4px 16px rgba(0,0,0,.25);font-family:inherit}
+  .info-tip::before{content:'';position:absolute;bottom:calc(100% + 3px);left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#1e293b;display:none;z-index:100}
+  .info-tip:hover::after,.info-tip:hover::before{display:block}
 </style>
 </head>
 <body class="font-sans text-ink-900 antialiased">
