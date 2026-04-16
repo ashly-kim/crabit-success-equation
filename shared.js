@@ -84,8 +84,8 @@ window.__auth = {
     return { ok:true };
   },
   kakaoLogin(){
-    // 카카오 신규 가입 플로우: 빈 상태로 로그인
-    this.setSession({ phone:'', academy:'신규 학원', director:'원장님', isFreshSignup:true });
+    // 카카오 신규 가입: 바로 홈으로 (온보딩 질문 스킵, 홈 CTA로 유도)
+    this.setSession({ phone:'', academy:'크래빗 영어학원', director:'김현지', isFreshSignup:true });
     return { ok:true };
   },
   getSession(){ try { return JSON.parse(localStorage.getItem(__SESS_KEY) || 'null'); } catch(e){ return null; } },
