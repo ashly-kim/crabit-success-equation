@@ -9,7 +9,7 @@
 <title>리포트카드 · 우리학원 성공방정식</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="shared.js?v=1776382054132"></script>
+<script src="shared.js?v=1776382063333"></script>
 <script>__applyTheme();</script>
 <!-- PDF 내보내기 (html2pdf = jsPDF + html2canvas 번들) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -725,12 +725,6 @@
       </div>
     `;
 
-    // 애니메이션 재생: transform 적용
-    requestAnimationFrame(() => {
-      document.querySelectorAll('#reportPage .gline-dot').forEach((el, i) => {
-        setTimeout(() => { el.style.transform = 'scale(1)'; }, i * 15);
-      });
-    });
   }
 
   function generateHomeTips(topScenario){
