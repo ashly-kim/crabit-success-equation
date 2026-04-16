@@ -50,6 +50,78 @@
   (document.head || document.documentElement).appendChild(style);
 })();
 
+// ===== 인증 & 계정 (LocalStorage 기반 · 백엔드 연결 전까지의 임시 구현) =====
+const __ACC_KEY = 'crabit_accounts_v1';
+const __SESS_KEY = 'crabit_session_v1';
+
+// 샘플 계정 2개 시딩 (한 번만)
+(function seedAccounts(){
+  if(localStorage.getItem(__ACC_KEY)) return;
+  const seed = [
+    { phone:'01012345678', password:'test1234!', academy:'행복수학학원', director:'김원장', createdAt: Date.now() },
+    { phone:'01098765432', password:'crabit@1', academy:'꿈나무영어학원', director:'이원장', createdAt: Date.now() }
+  ];
+  localStorage.setItem(__ACC_KEY, JSON.stringify(seed));
+})();
+
+window.__auth = {
+  getAccounts(){ return JSON.parse(localStorage.getItem(__ACC_KEY) || '[]'); },
+  saveAccounts(list){ localStorage.setItem(__ACC_KEY, JSON.stringify(list)); },
+  findByPhone(phone){ return this.getAccounts().find(a => a.phone === phone.replace(/-/g,'')); },
+  signup(data){
+    const list = this.getAccounts();
+    const norm = data.phone.replace(/-/g,'');
+    if(list.some(a => a.phone === norm)) return { ok:false, error:'이미 가입된 휴대폰 번호예요.' };
+    list.push({ ...data, phone:norm, createdAt: Date.now() });
+    this.saveAccounts(list);
+    this.setSession({ phone:norm, academy:data.academy, director:data.director });
+    return { ok:true };
+  },
+  login(phone, password){
+    const acc = this.findByPhone(phone);
+    if(!acc) return { ok:false, error:'등록되지 않은 휴대폰 번호예요.' };
+    if(acc.password !== password) return { ok:false, error:'비밀번호가 일치하지 않아요.' };
+    this.setSession({ phone:acc.phone, academy:acc.academy, director:acc.director });
+    return { ok:true };
+  },
+  kakaoLogin(){
+    // 데모: 첫 번째 계정으로 즉시 로그인 (실 연동 전까지)
+    const acc = this.getAccounts()[0];
+    if(acc) this.setSession({ phone:acc.phone, academy:acc.academy, director:acc.director });
+    return { ok:true };
+  },
+  getSession(){ try { return JSON.parse(localStorage.getItem(__SESS_KEY) || 'null'); } catch(e){ return null; } },
+  setSession(s){ localStorage.setItem(__SESS_KEY, JSON.stringify(s)); },
+  logout(){ localStorage.removeItem(__SESS_KEY); location.href = 'login.html'; },
+  // 보호된 페이지: 비로그인 시 로그인으로 리다이렉트
+  requireAuth(){
+    if(!this.getSession()){
+      location.href = 'login.html';
+      return false;
+    }
+    return true;
+  }
+};
+
+// 비밀번호 검증 (티처스 규칙: 8자+, 영문/숫자/특수문자 중 2종류 이상)
+window.__validatePassword = function(pw){
+  if(!pw || pw.length < 8) return { ok:false, error:'비밀번호는 8자 이상이어야 해요.' };
+  let kinds = 0;
+  if(/[A-Za-z]/.test(pw)) kinds++;
+  if(/[0-9]/.test(pw)) kinds++;
+  if(/[!@#$%^&*()_\-+=\[\]{};:'",.<>?/\\|`~]/.test(pw)) kinds++;
+  if(kinds < 2) return { ok:false, error:'영문·숫자·특수문자 중 2종류 이상을 포함해주세요.' };
+  return { ok:true };
+};
+
+// 휴대폰 번호 포맷: 01012345678 → 010-1234-5678
+window.__formatPhone = function(raw){
+  const digits = (raw || '').replace(/\D/g, '').slice(0, 11);
+  if(digits.length < 4) return digits;
+  if(digits.length < 8) return `${digits.slice(0,3)}-${digits.slice(3)}`;
+  return `${digits.slice(0,3)}-${digits.slice(3,7)}-${digits.slice(7)}`;
+};
+
 window.__applyTheme = function(){
   tailwind.config = {
     theme: {
