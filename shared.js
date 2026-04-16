@@ -56,11 +56,22 @@ const __SESS_KEY = 'crabit_session_v1';
 
 // 샘플 계정 2개 시딩 (한 번만)
 (function seedAccounts(){
-  // 샘플 계정 업데이트를 위해 덮어쓰기
   const seed = [
     { phone:'01087912483', password:'crafthabit1@', academy:'크래빗 영어학원', director:'김현지', createdAt: Date.now(), isDemo:true }
   ];
   localStorage.setItem(__ACC_KEY, JSON.stringify(seed));
+  // 기존 세션이 있으면 계정 정보로 director/academy 강제 동기화 (과거 이름 잔존 방지)
+  try{
+    const s = JSON.parse(localStorage.getItem(__SESS_KEY) || 'null');
+    if(s && s.phone){
+      const acc = seed.find(a => a.phone === s.phone);
+      if(acc){
+        s.director = acc.director;
+        s.academy = acc.academy;
+        localStorage.setItem(__SESS_KEY, JSON.stringify(s));
+      }
+    }
+  }catch(e){}
 })();
 
 window.__auth = {
