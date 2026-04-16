@@ -9,7 +9,7 @@
 <title>데이터 허브 · 우리학원 성공방정식</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="shared.js?v=1776380559197"></script>
+<script src="shared.js?v=1776380629633"></script>
 <script>__applyTheme();</script>
 <!-- 엑셀 파싱 (SheetJS, MIT 라이선스, 무료) -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -206,50 +206,68 @@
         </div>
       </section>
 
-      <!-- 매핑 확인 -->
+      <!-- 매핑 확인 (통합 테이블) -->
       <section id="stepMapping" class="hidden">
         <div class="bg-white rounded-3xl shadow-card ring-soft p-8 reveal">
-          <div class="flex items-center justify-between mb-5 flex-wrap gap-3">
-            <div>
-              <h2 class="text-[18px] font-extrabold">컬럼 역할을 지정해주세요</h2>
-              <p class="text-sm text-ink-500 mt-1">각 컬럼을 <b class="text-[#1e48b8]">변수(X)</b> / <b class="text-[#9a3412]">결과(Y)</b> / 분석 제외 중 하나로 선택해주세요.</p>
+          <div class="flex items-start justify-between mb-3 flex-wrap gap-3">
+            <div class="max-w-[680px]">
+              <h2 class="text-[20px] font-extrabold leading-snug flex items-start flex-wrap">
+                <span>각 데이터 요소를 <span class="text-brand-600">변수(X)</span> 또는 <span style="color:#be185d">결과값(Y)</span>로 선택해주세요</span>
+                <span class="info-wrap">
+                  <span class="info-icon">i</span>
+                  <div class="info-popup" role="tooltip">
+                    <div class="it-title">🧭 회귀분석, 이렇게 이해하세요</div>
+                    <div class="it-intro">
+                      "어떤 <b>원인(X)</b>이 <b>결과(Y)</b>를 얼마나 만드는지" 숫자로 보여주는 분석법이에요.
+                    </div>
+                    <div class="it-item">
+                      <div class="it-badge x">변수 X</div>
+                      <div>
+                        <b>영향을 주는 원인</b><br/>
+                        <span class="muted">예: 복습시간 · 숙제이행률 · 출결률</span>
+                      </div>
+                    </div>
+                    <div class="it-item">
+                      <div class="it-badge y">결과 Y</div>
+                      <div>
+                        <b>예측하고 싶은 목표</b><br/>
+                        <span class="muted">예: 시험 성적 · 재등록 여부</span>
+                      </div>
+                    </div>
+                    <div class="it-footer">
+                      X·Y만 선택해주시면 AI가 우리 학원만의 <b>성공방정식</b>을 자동으로 찾아드려요.
+                    </div>
+                  </div>
+                </span>
+              </h2>
+              <p class="text-[14px] text-ink-500 mt-2 leading-relaxed">
+                해당되지 않는 데이터는 <b class="text-ink-700">'분석 제외'</b>를 선택해주세요. 각 컬럼 아래 드롭다운에서 바로 지정하실 수 있어요.
+              </p>
             </div>
-            <div class="flex items-center gap-4 text-xs text-ink-500">
+            <div class="flex items-center gap-4 text-xs text-ink-500 pt-1">
               <span>📊 <b class="text-ink-900" id="rowCount">0</b>행</span>
               <span>📋 <b class="text-ink-900" id="colCount">0</b>컬럼</span>
               <span id="fileName" class="text-brand-700 font-semibold"></span>
             </div>
           </div>
 
-          <!-- 컬럼 역할 지정 (표 형태) -->
-          <div class="border border-gray-200 rounded-xl overflow-hidden mb-5">
-            <table class="w-full text-sm">
-              <thead>
-                <tr class="bg-gray-50 text-ink-500 text-[12px]">
-                  <th class="px-4 py-3 text-left font-bold w-10">#</th>
-                  <th class="px-4 py-3 text-left font-bold">엑셀 컬럼명</th>
-                  <th class="px-4 py-3 text-left font-bold">샘플 값</th>
-                  <th class="px-4 py-3 text-center font-bold w-48">역할</th>
-                </tr>
-              </thead>
-              <tbody id="mappingTable"></tbody>
-            </table>
-          </div>
-
-          <!-- 간단 도움말 + AI 제안 -->
-          <div class="flex items-center justify-between mb-5 flex-wrap gap-3 text-[12px]">
-            <div class="text-ink-500">
-              💡 <b class="text-[#9a3412]">결과(Y)</b>는 1개만 지정, <b class="text-[#1e48b8]">변수(X)</b>는 2~5개 권장
+          <!-- 범례 + AI 자동 제안 -->
+          <div class="flex items-center justify-between mb-4 flex-wrap gap-3">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="legend-chip x"><span class="dot"></span>변수 (X)</span>
+              <span class="legend-chip y"><span class="dot"></span>결과 (Y)</span>
+              <span class="legend-chip ig"><span class="dot"></span>분석 제외</span>
             </div>
-            <button onclick="applyAutoMapping()" class="text-brand-600 font-semibold hover:underline">✨ AI 자동 매핑 제안 적용 →</button>
+            <button onclick="applyAutoMapping()" class="text-brand-600 font-semibold text-sm hover:text-brand-700 inline-flex items-center gap-1">
+              ✨ AI 자동 매핑 제안 →
+            </button>
           </div>
 
-          <!-- 원본 데이터 미리보기 -->
-          <div class="text-[12px] text-ink-500 mb-2 font-semibold">📄 원본 데이터 미리보기</div>
-          <div class="border border-gray-100 rounded-xl overflow-auto mb-5" style="max-height:400px">
-            <table class="preview-table">
-              <thead id="previewHead"></thead>
-              <tbody id="previewBody"></tbody>
+          <!-- 통합 테이블: 컬럼명 + 역할 드롭다운(헤더 내부) + 데이터 -->
+          <div class="border border-gray-100 rounded-2xl overflow-auto mb-5 bg-white" style="max-height:560px">
+            <table class="unified-table" id="unifiedTable">
+              <thead id="unifiedHead"></thead>
+              <tbody id="unifiedBody"></tbody>
             </table>
           </div>
 
@@ -258,7 +276,7 @@
             <button onclick="resetFlow()" class="px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold hover:bg-gray-50">← 다른 파일 올리기</button>
             <div class="flex items-center gap-3">
               <div class="text-xs font-semibold" id="mappingStatus">—</div>
-              <button onclick="runAnalysis()" id="runBtn" class="px-6 py-2.5 rounded-xl bg-brand-500 text-white text-sm font-bold hover:bg-brand-600 disabled:bg-gray-300 disabled:cursor-not-allowed">
+              <button onclick="runAnalysis()" id="runBtn" class="px-6 py-2.5 rounded-xl bg-brand-600 text-white text-sm font-bold hover:bg-brand-700 disabled:bg-gray-300 disabled:cursor-not-allowed">
                 회귀분석 실행 →
               </button>
             </div>
