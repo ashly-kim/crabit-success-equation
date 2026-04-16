@@ -9,7 +9,7 @@
 <title>데이터 허브 · 우리학원 성공방정식</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="shared.js?v=1776381373539"></script>
+<script src="shared.js?v=1776381395379"></script>
 <script>__applyTheme();</script>
 <!-- 엑셀 파싱 (SheetJS, MIT 라이선스, 무료) -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -1217,6 +1217,19 @@
     parsedData = { columns: u.columns, rows: u.rows };
     mapping = u.mapping;
     analysisResult = u.analysis;
+    // 이력에서 복원할 때 cleaned 없으면 재생성 (스캐터 플롯용)
+    if(analysisResult && !analysisResult.cleaned && analysisResult.yCol && analysisResult.xCols){
+      const yCol = analysisResult.yCol;
+      const xCols = analysisResult.xCols;
+      analysisResult.cleaned = u.rows.filter(r => {
+        const yv = Number(r[yCol]);
+        if(r[yCol] == null || isNaN(yv)) return false;
+        return xCols.every(c => r[c] != null && !isNaN(Number(r[c])));
+      }).map(r => ({
+        y: Number(r[yCol]),
+        xs: xCols.map(c => Number(r[c]))
+      }));
+    }
     document.getElementById('fileName').textContent = u.fileName;
     renderResult();
     showStep('stepResult');
