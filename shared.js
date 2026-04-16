@@ -174,11 +174,9 @@ window.__renderLayout = function(active){
 
   return `
   <aside class="w-64 shrink-0 bg-white border-r border-gray-100 hidden lg:flex flex-col sticky top-0 h-screen">
-    <a href="index.html" class="px-6 py-6 flex items-center gap-2 hover:bg-gray-50 transition">
-      <div class="w-9 h-9 rounded-xl bg-brand-500 grid place-items-center text-white font-bold">우</div>
-      <div class="leading-tight">
-        <div class="font-bold text-lg">우리학원</div>
-        <div class="text-xs text-ink-500">성공방정식</div>
+    <a href="index.html" class="px-6 py-6 flex items-center hover:bg-gray-50 transition">
+      <div class="text-[22px] font-extrabold tracking-tight leading-none">
+        <span class="text-ink-900">Crab</span><span class="text-accent-500">it</span>
       </div>
     </a>
     <nav class="px-3 mt-2 space-y-1 text-[15px]">
