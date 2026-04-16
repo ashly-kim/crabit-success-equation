@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="shared.js?v=1776360351372"></script>
+<script src="shared.js?v=1776360397023"></script>
 <script>__applyTheme();</script>
 <style>
   html,body{background:#f6f7fb}
@@ -34,24 +34,39 @@
     <!-- Content -->
     <div class="px-8 py-8 max-w-[1280px] mx-auto space-y-8">
 
+      <!-- 온보딩 CTA 배너 -->
+      <section class="rounded-3xl bg-gradient-to-r from-brand-500 to-brand-600 p-7 text-white shadow-card relative overflow-hidden">
+        <div class="absolute -right-8 -top-8 w-40 h-40 rounded-full bg-white/10 blur-2xl"></div>
+        <div class="relative flex items-center justify-between gap-6 flex-wrap">
+          <div>
+            <div class="inline-flex items-center gap-2 text-xs font-bold bg-white/20 px-2.5 py-1 rounded-full mb-3">✨ 3분이면 끝나요</div>
+            <h2 class="text-[22px] font-extrabold leading-tight">우리 학원만의 <span class="underline decoration-white/40">성공방정식</span>, 지금 만들어볼까요?</h2>
+            <p class="text-sm opacity-90 mt-1.5">기존에 관리하시던 엑셀 파일만 올려주시면 AI가 자동으로 방정식을 찾아드려요.</p>
+          </div>
+          <a href="hub2.html" class="px-5 py-3 rounded-xl bg-white text-brand-700 font-extrabold hover:bg-brand-50 shadow flex items-center gap-2 whitespace-nowrap">
+            엑셀 올리고 시작하기 →
+          </a>
+        </div>
+      </section>
+
       <!-- Hero + Tester -->
       <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="lg:col-span-2 bg-white rounded-3xl p-8 shadow-card ring-soft">
-          <div class="text-sm text-brand-600 font-semibold">안녕하세요, 김원장 원장님 👋</div>
+          <div class="text-sm text-brand-600 font-semibold">안녕하세요, 김현지 원장님 👋</div>
           <h1 class="mt-2 text-[34px] leading-tight font-extrabold">
-            <span class="text-brand-700">행복수학학원</span>만의 무기가 되어드릴게요.<br/>
+            <span class="text-brand-700">크래빗 영어학원</span>만의 무기가 되어드릴게요.<br/>
             원장님은 데이터만 입력해주세요.
           </h1>
           <p class="mt-3 text-ink-500 text-[15px]">
             학원 고유의 성공방정식을 기반으로, 학생별 리포트카드와 학부모 알림톡까지 한 번에 생성됩니다.
           </p>
           <div class="mt-6 flex flex-wrap gap-3">
-            <button class="px-5 py-3 rounded-xl bg-brand-600 text-white font-semibold hover:bg-brand-700 shadow-soft">
+            <a href="hub2.html" class="px-5 py-3 rounded-xl bg-brand-600 text-white font-semibold hover:bg-brand-700 shadow-soft">
               데이터 입력하기
-            </button>
-            <button class="px-5 py-3 rounded-xl bg-white text-ink-700 font-semibold border border-gray-200 hover:bg-gray-50">
+            </a>
+            <a href="report.html" class="px-5 py-3 rounded-xl bg-white text-ink-700 font-semibold border border-gray-200 hover:bg-gray-50">
               리포트 생성하기
-            </button>
+            </a>
           </div>
         </div>
 
