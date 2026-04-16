@@ -9,7 +9,7 @@
 <title>리포트카드 · 우리학원 성공방정식</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="shared.js?v=1776382960503"></script>
+<script src="shared.js?v=1776382986973"></script>
 <script>__applyTheme();</script>
 <!-- PDF 내보내기 (html2pdf = jsPDF + html2canvas 번들) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -153,13 +153,31 @@
         </section>
 
         <!-- 빈 상태 -->
-        <section id="emptyList" class="hidden bg-white rounded-3xl shadow-card ring-soft p-14 text-center">
-          <div class="text-5xl mb-4">📂</div>
-          <h2 class="text-[18px] font-extrabold mb-2">아직 생성된 리포트가 없어요</h2>
-          <p class="text-sm text-ink-500 mb-6">데이터 허브에서 엑셀을 업로드하고 '학생별 리포트 생성하기'를 눌러주세요.</p>
-          <a href="hub.html" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-brand-600 text-white font-bold hover:bg-brand-700">
-            데이터 허브로 이동 →
-          </a>
+        <section id="emptyList" class="hidden">
+          <div class="bg-white rounded-3xl shadow-card ring-soft overflow-hidden">
+            <div class="p-12 text-center" style="background:linear-gradient(135deg,#f5f3ff 0%,#ede9fe 40%,#fce7f3 100%)">
+              <div class="w-16 h-16 rounded-2xl bg-white/80 flex items-center justify-center text-3xl mx-auto mb-4 shadow-sm">📊</div>
+              <h2 class="text-[20px] font-extrabold mb-2">아직 생성된 리포트가 없어요</h2>
+              <p class="text-sm text-ink-600/80 mb-6 max-w-sm mx-auto leading-relaxed">데이터 허브에서 엑셀을 업로드하고<br/><b>'학생별 리포트 생성하기'</b>를 누르면 여기에 쌓여요.</p>
+              <a href="hub.html" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-brand-600 text-white font-bold hover:bg-brand-700 shadow-soft">
+                데이터 허브에서 시작하기 →
+              </a>
+            </div>
+            <div class="grid grid-cols-3 divide-x divide-gray-100 border-t border-gray-100">
+              <div class="p-5 text-center">
+                <div class="text-2xl font-extrabold text-gray-300">—</div>
+                <div class="text-xs text-gray-400 mt-1">방정식 분석</div>
+              </div>
+              <div class="p-5 text-center">
+                <div class="text-2xl font-extrabold text-gray-300">—</div>
+                <div class="text-xs text-gray-400 mt-1">생성된 리포트</div>
+              </div>
+              <div class="p-5 text-center">
+                <div class="text-2xl font-extrabold text-gray-300">—</div>
+                <div class="text-xs text-gray-400 mt-1">발송 완료</div>
+              </div>
+            </div>
+          </div>
         </section>
 
         <!-- 목록 -->
