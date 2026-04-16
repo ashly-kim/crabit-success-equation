@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="shared.js?v=1776378559359"></script>
+<script src="shared.js?v=1776378662205"></script>
 <script>__applyTheme();</script>
 <style>
   html,body{background:#f6f7fb}
@@ -43,67 +43,59 @@
         </h1>
       </section>
 
-      <!-- 엑셀 업로드 CTA (세로 긴 섹션 · 핑크 퍼플 파스텔 그라디언트) -->
-      <section class="rounded-3xl relative overflow-hidden shadow-card" style="background:linear-gradient(135deg, #ede1ff 0%, #f6d7ea 55%, #ffe2d6 100%); min-height:420px;">
-        <!-- 장식 블러 원 -->
-        <div class="absolute -left-10 -top-10 w-40 h-40 rounded-full bg-white/40 blur-2xl"></div>
-        <div class="absolute right-20 bottom-10 w-24 h-24 rounded-full bg-white/30 blur-xl"></div>
+      <!-- 엑셀 업로드 CTA (연보라·연핑크·연회색 파스텔) -->
+      <section class="rounded-3xl relative overflow-hidden shadow-card" style="background:linear-gradient(135deg, #f5f3ff 0%, #ede9fe 45%, #fce7f3 100%); min-height:300px;">
+        <div class="absolute -left-10 -top-10 w-40 h-40 rounded-full bg-white/50 blur-2xl"></div>
+        <div class="absolute right-20 bottom-10 w-24 h-24 rounded-full bg-white/40 blur-xl"></div>
 
-        <div class="relative grid md:grid-cols-[1.2fr_1fr] gap-6 p-10 md:p-12 h-full" style="min-height:420px;">
-          <!-- 좌: 텍스트 (좌측 · 하단 정렬) -->
+        <div class="relative grid md:grid-cols-[1.2fr_1fr] gap-6 p-10 items-center" style="min-height:300px;">
           <div class="flex flex-col justify-end">
-            <div class="inline-flex items-center gap-1.5 text-xs font-bold bg-white/70 text-purple-700 px-3 py-1 rounded-full mb-4 w-fit">
+            <div class="inline-flex items-center gap-1.5 text-xs font-bold bg-white/80 text-brand-700 px-3 py-1 rounded-full mb-3 w-fit">
               ✨ 3분이면 끝나요
             </div>
-            <h2 class="text-[30px] md:text-[34px] font-extrabold leading-tight text-ink-900">
-              우리 학원만의 <span class="text-purple-600">성공방정식</span>,<br/>
+            <h2 class="text-[28px] md:text-[30px] font-extrabold leading-tight text-ink-900">
+              우리 학원만의 <span class="text-brand-600">성공방정식</span>,<br/>
               지금 만들어볼까요?
             </h2>
-            <p class="text-[15px] text-ink-700/80 mt-4 max-w-md leading-relaxed">
-              기존에 관리하시던 엑셀 파일만 올려주시면<br/>
-              AI가 자동으로 우리 학원의 방정식을 찾아드려요.
+            <p class="text-[14px] text-ink-700/80 mt-3 max-w-md leading-relaxed">
+              기존에 관리하시던 엑셀 파일만 올려주시면 AI가 자동으로 우리 학원의 방정식을 찾아드려요.
             </p>
-            <a href="hub.html" class="mt-6 px-6 py-3.5 rounded-xl bg-brand-500 text-white font-bold hover:bg-brand-600 shadow-soft inline-flex items-center gap-2 w-fit transition">
+            <a href="hub.html" class="mt-5 px-6 py-3 rounded-xl bg-brand-600 text-white font-bold hover:bg-brand-700 shadow-soft inline-flex items-center gap-2 w-fit transition">
               엑셀 올리고 시작하기 →
             </a>
           </div>
 
-          <!-- 우: 3D 업로드 아이콘 (SVG) -->
+          <!-- 3D 업로드 아이콘 (순수 퍼플 글래스 톤) -->
           <div class="flex items-center justify-center">
-            <svg viewBox="0 0 260 260" class="w-56 h-56 md:w-72 md:h-72" style="filter: drop-shadow(0 20px 40px rgba(168, 85, 247, 0.25));" xmlns="http://www.w3.org/2000/svg">
+            <svg viewBox="0 0 260 260" class="w-48 h-48 md:w-60 md:h-60" style="filter: drop-shadow(0 18px 32px rgba(124, 58, 237, 0.28));" xmlns="http://www.w3.org/2000/svg">
               <defs>
-                <linearGradient id="upArrowGrad" x1="20%" y1="0%" x2="80%" y2="100%">
-                  <stop offset="0%" stop-color="#f0e6ff"/>
-                  <stop offset="40%" stop-color="#d4bfff"/>
-                  <stop offset="100%" stop-color="#f5b5d7"/>
-                </linearGradient>
-                <linearGradient id="upArrowShine" x1="30%" y1="0%" x2="70%" y2="100%">
-                  <stop offset="0%" stop-color="#ffffff" stop-opacity="0.6"/>
-                  <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+                <linearGradient id="upArrowGrad" x1="25%" y1="0%" x2="75%" y2="100%">
+                  <stop offset="0%" stop-color="#f3f0ff"/>
+                  <stop offset="40%" stop-color="#c4b5fd"/>
+                  <stop offset="100%" stop-color="#8b5cf6"/>
                 </linearGradient>
                 <linearGradient id="upTrayGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="#e0ccff"/>
-                  <stop offset="100%" stop-color="#f6b6e0"/>
+                  <stop offset="0%" stop-color="#ddd6fe"/>
+                  <stop offset="100%" stop-color="#8b5cf6"/>
+                </linearGradient>
+                <linearGradient id="upShine" x1="30%" y1="0%" x2="70%" y2="100%">
+                  <stop offset="0%" stop-color="#ffffff" stop-opacity="0.85"/>
+                  <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
                 </linearGradient>
               </defs>
-              <!-- 그림자 -->
-              <ellipse cx="130" cy="238" rx="82" ry="10" fill="#a855f7" opacity="0.18"/>
-              <!-- 반짝이 -->
-              <circle cx="80" cy="75" r="3" fill="#ffffff" opacity="0.7"/>
-              <circle cx="190" cy="50" r="2.5" fill="#ffffff" opacity="0.6"/>
-              <circle cx="70" cy="130" r="2" fill="#ffffff" opacity="0.5"/>
-              <!-- 위쪽 화살표 -->
-              <path d="M130 40 L188 115 L158 115 L158 160 L102 160 L102 115 L72 115 Z"
+              <ellipse cx="130" cy="238" rx="82" ry="9" fill="#7c3aed" opacity="0.22"/>
+              <circle cx="80" cy="72" r="3" fill="#ffffff" opacity="0.85"/>
+              <circle cx="190" cy="48" r="2.5" fill="#ffffff" opacity="0.7"/>
+              <circle cx="68" cy="128" r="2" fill="#ffffff" opacity="0.6"/>
+              <circle cx="205" cy="150" r="2" fill="#ffffff" opacity="0.5"/>
+              <path d="M130 40 L190 115 L160 115 L160 160 L100 160 L100 115 L70 115 Z"
                     fill="url(#upArrowGrad)"
-                    stroke="#d9c4ff" stroke-width="2" stroke-linejoin="round"/>
-              <!-- 화살표 하이라이트 -->
-              <path d="M130 52 L175 110 L130 110 Z" fill="url(#upArrowShine)"/>
-              <!-- 받침대 (트레이) -->
+                    stroke="#c4b5fd" stroke-width="2" stroke-linejoin="round"/>
+              <path d="M130 55 L172 110 L130 110 Z" fill="url(#upShine)"/>
               <path d="M40 168 L220 168 Q228 168 228 178 L228 208 Q228 220 215 220 L45 220 Q32 220 32 208 L32 178 Q32 168 40 168 Z"
                     fill="url(#upTrayGrad)"
-                    stroke="#d9c4ff" stroke-width="2"/>
-              <!-- 받침대 하이라이트 -->
-              <path d="M52 178 L208 178 L208 192 L52 192 Z" fill="#ffffff" opacity="0.35"/>
+                    stroke="#c4b5fd" stroke-width="2"/>
+              <path d="M52 178 L208 178 L208 190 L52 190 Z" fill="#ffffff" opacity="0.4"/>
             </svg>
           </div>
         </div>
