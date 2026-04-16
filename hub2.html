@@ -9,7 +9,7 @@
 <title>데이터 허브 2 · 우리학원 성공방정식</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="shared.js?v=1776361183820"></script>
+<script src="shared.js?v=1776361242964"></script>
 <script>__applyTheme();</script>
 <!-- 엑셀 파싱 (SheetJS, MIT 라이선스, 무료) -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -656,21 +656,138 @@
       </tr>`;
   }
 
+  // ===== LocalStorage 이력 관리 =====
+  const UP_KEY = 'crabit_uploads_v1';
+  const EQ_KEY = 'crabit_equations_v1';
+
+  function fmtNow(){
+    const d = new Date();
+    const p = n => String(n).padStart(2,'0');
+    return `${d.getFullYear()}.${p(d.getMonth()+1)}.${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+  }
+  function loadList(key){ try{ return JSON.parse(localStorage.getItem(key) || '[]'); }catch(e){ return []; } }
+  function saveList(key, list){ localStorage.setItem(key, JSON.stringify(list)); }
+
+  // 분석 완료 시 업로드 이력에 자동 저장
+  function persistUpload(){
+    if(!parsedData || !analysisResult) return;
+    const uploads = loadList(UP_KEY);
+    const item = {
+      id: 'up_' + Date.now(),
+      fileName: document.getElementById('fileName').textContent || '업로드 파일',
+      uploadedAt: fmtNow(),
+      rowCount: parsedData.rows.length,
+      colCount: parsedData.columns.length,
+      columns: parsedData.columns,
+      rows: parsedData.rows.slice(0, 200), // 저장 용량 고려
+      mapping: mapping,
+      analysis: analysisResult,
+      insights: buildInsights(analysisResult)
+    };
+    uploads.unshift(item);
+    saveList(UP_KEY, uploads.slice(0, 50));
+    renderHome();
+    return item.id;
+  }
+
+  function buildInsights(res){
+    const { xLabels, betaStd, r2, n, yLabel } = res;
+    const sortedIdx = betaStd.map((b,i)=>({b:Math.abs(b),i})).sort((a,b)=>b.b-a.b).map(x=>x.i);
+    const top1 = sortedIdx[0], top2 = sortedIdx[1];
+    const r2Pct = Math.round(r2*100);
+    const parts = [];
+    parts.push(`이 데이터 ${n}건으로 <b>${yLabel}</b>의 변동을 약 <b>${r2Pct}%</b> 설명할 수 있어요.`);
+    if(top1 !== undefined){
+      parts.push(`가장 큰 영향 변수는 <b class="text-brand-600">${xLabels[top1]}</b> (β* ${betaStd[top1].toFixed(2)}).`);
+    }
+    if(top2 !== undefined){
+      parts.push(`그 다음은 <b>${xLabels[top2]}</b> (β* ${betaStd[top2].toFixed(2)}).`);
+    }
+    if(r2Pct >= 70) parts.push(`🟢 신뢰할 수 있는 수준이에요. 바로 리포트카드 생성에 활용하세요.`);
+    else if(r2Pct >= 50) parts.push(`🟡 참고용 수준. 데이터가 더 쌓이면 신뢰도가 올라가요.`);
+    else parts.push(`🔴 예측 범위가 넓어요. 변수를 조정하거나 데이터를 더 쌓는 걸 권장해요.`);
+    return parts.join(' ');
+  }
+
   function saveEquation(){
-    alert('방정식이 "우리 학원의 성공방정식" 목록에 저장됐어요. (백엔드 연결 후 실제 저장)');
+    if(!analysisResult){ alert('분석 결과가 없어요.'); return; }
+    const equations = loadList(EQ_KEY);
+    const { yLabel, xLabels, beta, r2, betaStd, n } = analysisResult;
+    const item = {
+      id: 'eq_' + Date.now(),
+      name: `${yLabel} 방정식`,
+      yLabel, xLabels, beta, r2, betaStd, n,
+      createdAt: fmtNow(),
+      fromFile: document.getElementById('fileName').textContent || ''
+    };
+    equations.unshift(item);
+    saveList(EQ_KEY, equations.slice(0, 30));
+    renderHome();
+    alert('방정식이 "만들어진 성공방정식" 목록에 저장됐어요.');
   }
   window.saveEquation = saveEquation;
 
+  // 홈 대시보드 렌더
+  function renderHome(){
+    const uploads = loadList(UP_KEY);
+    const equations = loadList(EQ_KEY);
+    document.getElementById('upCountLabel').textContent = uploads.length + '개';
+    document.getElementById('eqCountLabel').textContent = equations.length + '개';
+
+    const upHtml = uploads.length === 0
+      ? `<div class="text-center py-8 text-ink-500 text-sm">
+           아직 업로드한 엑셀이 없어요.<br/>
+           <span class="text-xs">위에서 파일을 올려주세요.</span>
+         </div>`
+      : uploads.map(u => `
+        <button onclick="openUpload('${u.id}')" class="w-full text-left rounded-xl border border-gray-100 p-4 hover:bg-brand-50 hover:border-brand-300 transition">
+          <div class="flex items-center justify-between">
+            <div class="font-bold text-[14px] text-ink-900 truncate">${u.fileName}</div>
+            <span class="text-[11px] text-ink-500 flex-shrink-0 ml-2">${u.uploadedAt}</span>
+          </div>
+          <div class="text-[12px] text-ink-500 mt-1">📊 ${u.rowCount}행 · 📋 ${u.colCount}컬럼 · 신뢰도 ${Math.round((u.analysis?.r2||0)*100)}%</div>
+        </button>
+      `).join('');
+    document.getElementById('uploadList').innerHTML = upHtml;
+
+    const eqHtml = equations.length === 0
+      ? `<div class="text-center py-8 text-ink-500 text-sm">
+           아직 저장된 방정식이 없어요.<br/>
+           <span class="text-xs">엑셀 분석 후 '방정식 저장'을 눌러주세요.</span>
+         </div>`
+      : equations.map(e => {
+          const top = e.betaStd.map((b,i)=>({b:Math.abs(b),i,label:e.xLabels[i]})).sort((a,b)=>b.b-a.b)[0];
+          return `
+          <div class="rounded-xl border border-gray-100 p-4">
+            <div class="flex items-center justify-between mb-1">
+              <div class="font-bold text-[14px] text-ink-900">${e.name}</div>
+              <span class="text-[11px] text-brand-700 bg-brand-50 px-2 py-0.5 rounded-full font-bold">R² ${Math.round(e.r2*100)}%</span>
+            </div>
+            <div class="text-[12px] text-ink-500">${e.createdAt} · ${e.n}건 기반</div>
+            <div class="text-[12px] text-ink-700 mt-2">🎯 최대 영향: <b class="text-brand-600">${top?.label || '—'}</b></div>
+          </div>`;
+        }).join('');
+    document.getElementById('savedEqList').innerHTML = eqHtml;
+  }
+
+  // 이력 클릭 시 해당 상태로 복원
+  function openUpload(id){
+    const uploads = loadList(UP_KEY);
+    const u = uploads.find(x => x.id === id);
+    if(!u) return;
+    parsedData = { columns: u.columns, rows: u.rows };
+    mapping = u.mapping;
+    analysisResult = u.analysis;
+    document.getElementById('fileName').textContent = u.fileName;
+    renderResult();
+    showStep('stepResult');
+  }
+  window.openUpload = openUpload;
+
   function showStep(id){
-    ['stepUpload','stepMapping','stepResult'].forEach(s => document.getElementById(s).classList.toggle('hidden', s !== id && s !== 'stepUpload'));
-    // 업로드 섹션은 결과 나와도 유지 (다른 파일 올리기 편하게)
-    if(id === 'stepResult'){
-      document.getElementById('stepUpload').classList.add('hidden');
-      document.getElementById('stepMapping').classList.add('hidden');
-    }
-    if(id === 'stepMapping'){
-      document.getElementById('stepUpload').classList.add('hidden');
-    }
+    ['stepUpload','stepMapping','stepResult'].forEach(s => document.getElementById(s).classList.add('hidden'));
+    document.getElementById('homeDash').classList.toggle('hidden', id !== 'stepUpload');
+    document.getElementById('stepUpload').classList.toggle('hidden', id !== 'stepUpload');
     document.getElementById(id).classList.remove('hidden');
     window.scrollTo({top:0, behavior:'smooth'});
   }
@@ -683,6 +800,7 @@
     document.getElementById('stepMapping').classList.add('hidden');
     document.getElementById('stepResult').classList.add('hidden');
     document.getElementById('stepUpload').classList.remove('hidden');
+    document.getElementById('homeDash').classList.remove('hidden');
     window.scrollTo({top:0, behavior:'smooth'});
   }
   window.resetFlow = resetFlow;
@@ -690,6 +808,9 @@
   window.loadSample = loadSample;
   window.downloadTemplate = downloadTemplate;
   window.handleFile = handleFile;
+
+  // 초기 렌더
+  renderHome();
 </script>
 </body>
 </html>
