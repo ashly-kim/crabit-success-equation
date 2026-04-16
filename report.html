@@ -9,224 +9,233 @@
 <title>리포트카드 · 우리학원 성공방정식</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="shared.js?v=1776381745187"></script>
+<script src="shared.js?v=1776381995471"></script>
 <script>__applyTheme();</script>
+<!-- PDF 내보내기 (html2pdf = jsPDF + html2canvas 번들) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
   html,body{background:#f6f7fb}
   .nav-item.active{background:#f5f3ff;color:#6d28d9;font-weight:600}
   .nav-item.active svg{color:#6d28d9}
   .ring-soft{box-shadow:inset 0 0 0 1px #eef0f5}
 
-  .top-tab{padding:12px 4px;font-weight:600;color:#6b7280;border-bottom:2px solid transparent;transition:.15s;cursor:pointer}
-  .top-tab.on{color:#1e48b8;border-color:#3a74ff}
+  /* 리스트 테이블 */
+  .rep-table{border-collapse:separate;border-spacing:0;width:100%;font-size:14px}
+  .rep-table th{background:#faf5ff;padding:14px 16px;text-align:left;font-weight:700;color:#6d28d9;font-size:12.5px;border-bottom:1.5px solid #ede9fe;white-space:nowrap}
+  .rep-table td{padding:16px;border-bottom:1px solid #f1f3f8;color:#1e293b;vertical-align:middle}
+  .rep-table tr:hover td{background:#faf5ff}
+  .rep-table tr:last-child td{border-bottom:none}
+  .rep-table .chev{color:#c4b5fd;transition:.15s}
+  .rep-table tr:hover .chev{color:#7c3aed;transform:translateX(2px)}
 
-  .modal{position:fixed;inset:0;background:rgba(17,24,39,.55);display:none;align-items:center;justify-content:center;z-index:50;padding:20px}
-  .modal.on{display:flex;animation:fade .2s}
+  /* 학생 리스트 그리드 카드 */
+  .stu-card{background:white;border:1px solid #ede9fe;border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;transition:.15s;cursor:pointer}
+  .stu-card:hover{background:#faf5ff;border-color:#c4b5fd;transform:translateY(-1px);box-shadow:0 6px 18px rgba(124,58,237,.08)}
+  .stu-avatar{width:40px;height:40px;border-radius:9999px;display:grid;place-items:center;color:white;font-weight:800;flex-shrink:0}
+
   @keyframes fade{from{opacity:0}to{opacity:1}}
-  .modal-box{animation:slideUp .3s cubic-bezier(.2,.8,.2,1)}
   @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+  @keyframes scaleIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
 
-  /* 사이드 드로어 */
-  .drawer{position:fixed;inset:0;z-index:50;display:none}
-  .drawer.on{display:block}
-  .drawer-bg{position:absolute;inset:0;background:rgba(17,24,39,.55);animation:fade .2s}
-  .drawer-panel{position:absolute;right:0;top:0;height:100%;width:100%;max-width:720px;background:white;box-shadow:-4px 0 24px rgba(0,0,0,.15);display:flex;flex-direction:column;transform:translateX(100%);transition:transform .35s cubic-bezier(.2,.8,.2,1)}
-  .drawer.on .drawer-panel{transform:translateX(0)}
+  /* 리포트 모달 (전체 화면 오버레이) */
+  .report-modal{position:fixed;inset:0;background:rgba(17,24,39,.72);backdrop-filter:blur(4px);z-index:50;display:none;align-items:flex-start;justify-content:center;overflow-y:auto;padding:32px 16px}
+  .report-modal.on{display:flex;animation:fade .2s}
+  .report-shell{position:relative;width:100%;max-width:880px;display:flex;flex-direction:column;gap:14px;animation:scaleIn .3s cubic-bezier(.2,.8,.2,1)}
+  .report-topbar{display:flex;justify-content:space-between;align-items:center;color:white;gap:12px;flex-wrap:wrap}
+  .report-topbar-right{display:flex;gap:8px;flex-wrap:wrap}
+  .topbar-btn{padding:10px 16px;border-radius:12px;font-weight:700;font-size:13.5px;cursor:pointer;transition:.15s;border:none;display:inline-flex;align-items:center;gap:6px}
+  .topbar-btn.primary{background:#fef3c7;color:#92400e}
+  .topbar-btn.primary:hover{background:#fde68a}
+  .topbar-btn.pdf{background:white;color:#6d28d9}
+  .topbar-btn.pdf:hover{background:#f5f3ff}
+  .topbar-btn.close{background:rgba(255,255,255,.15);color:white;width:44px;height:44px;padding:0;justify-content:center;border-radius:12px}
+  .topbar-btn.close:hover{background:rgba(255,255,255,.25)}
 
-  .tab-btn.active{background:white;color:#1e48b8;box-shadow:0 1px 3px rgba(0,0,0,.08)}
-  .tone-btn.on{background:#eef4ff;border-color:#3a74ff;color:#1e48b8;font-weight:600}
+  .report-nav{position:absolute;top:50%;transform:translateY(-50%);width:48px;height:48px;border-radius:9999px;background:white;color:#6d28d9;display:grid;place-items:center;cursor:pointer;border:none;box-shadow:0 6px 20px rgba(0,0,0,.15);transition:.15s;z-index:2}
+  .report-nav:hover{background:#f5f3ff;transform:translateY(-50%) scale(1.08)}
+  .report-nav.left{left:-60px}
+  .report-nav.right{right:-60px}
+  .report-nav:disabled{opacity:.3;cursor:not-allowed}
+  @media (max-width:900px){
+    .report-nav.left{left:4px}
+    .report-nav.right{right:4px}
+  }
 
-  .status-dot{width:10px;height:10px;border-radius:9999px;display:inline-block;margin-right:6px}
+  /* A4 리포트 페이지 (210×297mm @96dpi ≈ 794×1123) */
+  .a4-page{width:794px;max-width:100%;min-height:1123px;background:white;border-radius:8px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.25);margin:0 auto;position:relative;color:#1e293b;font-size:13.5px}
+  .a4-inner{padding:44px 50px 40px}
 
-  /* A4 리포트 페이지 (210×297mm @96dpi = 794×1123) */
-  .a4-stage{position:relative;display:flex;justify-content:center;align-items:flex-start}
-  .a4-page{width:794px;min-height:1123px;background:white;box-shadow:0 8px 30px rgba(17,24,39,.12),0 1px 3px rgba(17,24,39,.06);border-radius:6px;transform-origin:top center;font-size:14px;color:#1e293b;position:relative}
-  .a4-inner{padding:56px 60px 50px 60px;display:flex;flex-direction:column;height:100%;min-height:1123px}
-  .a4-page h1{font-size:26px;font-weight:800;letter-spacing:-.5px}
-  .a4-page h2{font-size:16px;font-weight:800;color:#1e293b;margin-bottom:10px;letter-spacing:-.3px;display:flex;align-items:center;gap:8px}
-  .a4-page h2::before{content:'';width:4px;height:18px;background:#3a74ff;border-radius:2px;display:inline-block}
-  .bar-row{display:flex;align-items:center;gap:10px;margin:7px 0}
-  .bar-row .bar-label{width:90px;font-weight:600;font-size:13px;color:#374151;flex-shrink:0}
-  .bar-row .bar-track{flex:1;height:14px;background:#f1f5f9;border-radius:7px;overflow:hidden;position:relative}
-  .bar-row .bar-fill{height:100%;background:linear-gradient(90deg,#3a74ff,#5a8eff);border-radius:7px}
-  .bar-row .bar-val{width:54px;text-align:right;font-weight:700;font-size:12px;color:#3a74ff;flex-shrink:0}
-  .spark{width:100%;height:46px}
-  .next-action-item{display:flex;gap:10px;padding:10px 0;border-bottom:1px dashed #e5e7eb}
-  .next-action-item:last-child{border-bottom:none}
-  .next-action-item .num{flex-shrink:0;width:24px;height:24px;border-radius:50%;background:#3a74ff;color:white;font-weight:800;font-size:12px;display:grid;place-items:center}
+  .a4-hero{background:linear-gradient(135deg,#f5f3ff 0%,#ede9fe 45%,#fce7f3 100%);padding:28px 50px 22px;position:relative;overflow:hidden}
+  .a4-hero::before{content:'';position:absolute;right:-20px;top:-30px;width:140px;height:140px;background:radial-gradient(circle,rgba(255,255,255,.6),transparent);border-radius:50%;filter:blur(10px)}
 
-  .send-status-icon{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px}
+  .metric-card{background:#faf5ff;border:1px solid #ede9fe;border-radius:14px;padding:14px 16px;text-align:center}
+  .metric-card.pink{background:#fdf2f8;border-color:#fce7f3}
+  .metric-card.white{background:white;border-color:#ede9fe;box-shadow:0 2px 8px rgba(124,58,237,.06)}
+  .metric-label{font-size:10.5px;font-weight:700;color:#9ca3af;letter-spacing:.5px;text-transform:uppercase}
+  .metric-value{font-size:28px;font-weight:800;color:#191f28;line-height:1.1;margin-top:4px;letter-spacing:-.5px}
+  .metric-sub{font-size:10.5px;color:#6b7280;margin-top:3px}
 
-  /* Sparkline + 툴팁 */
-  .spark-wrap{position:relative;height:64px;cursor:crosshair}
-  .spark-wrap svg{display:block;width:100%;height:100%;overflow:visible}
-  .spark-tip{position:absolute;display:none;background:#1e293b;color:white;font-size:11px;padding:6px 9px;border-radius:6px;white-space:nowrap;pointer-events:none;transform:translate(-50%,-130%);z-index:5;font-weight:600;line-height:1.35}
-  .spark-tip.on{display:block}
-  .spark-tip::after{content:"";position:absolute;left:50%;top:100%;transform:translateX(-50%);border:4px solid transparent;border-top-color:#1e293b}
-  .spark-marker{position:absolute;display:none;width:10px;height:10px;border-radius:9999px;background:white;border:2px solid #f04685;pointer-events:none;transform:translate(-50%,-50%);z-index:4;box-shadow:0 1px 4px rgba(0,0,0,.2)}
-  .spark-marker.on{display:block}
+  /* 리포트 내부 그래프 */
+  .viz-block{background:white;border:1px solid #ede9fe;border-radius:14px;padding:18px;margin-top:14px}
+  .viz-title{font-size:14.5px;font-weight:800;color:#191f28;margin-bottom:4px;display:flex;align-items:center;gap:6px}
+  .viz-sub{font-size:11.5px;color:#6b7280;margin-bottom:12px}
 
-  /* 미니 캘린더 */
-  .mini-cal{user-select:none}
-  .mini-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
-  .mini-cal-cell{aspect-ratio:1;display:grid;place-items:center;font-size:12px;border-radius:6px;color:#cbd5e1;background:transparent;cursor:not-allowed}
-  .mini-cal-cell.has{color:#1e293b;background:#f3f4f6;cursor:pointer;font-weight:600}
-  .mini-cal-cell.has:hover{background:#fee9ef}
-  .mini-cal-cell.in-range{background:#ffe9ef !important;color:#a62256}
-  .mini-cal-cell.range-end{background:#f04685 !important;color:white;font-weight:800}
-  .mini-cal-dow{font-size:10px;color:#9ca3af;text-align:center;padding:4px 0;font-weight:600}
+  /* 변수 비교 막대 */
+  .cmp-row{display:flex;align-items:center;gap:10px;margin:9px 0}
+  .cmp-label{width:110px;font-weight:700;font-size:12.5px;color:#374151;flex-shrink:0}
+  .cmp-track{flex:1;height:18px;background:#f5f5f5;border-radius:9px;position:relative;overflow:hidden}
+  .cmp-fill{height:100%;border-radius:9px;position:absolute;left:0;top:0;transition:width 1.2s cubic-bezier(.2,.8,.2,1)}
+  .cmp-fill.student{background:linear-gradient(90deg,#c4b5fd,#7c3aed);z-index:2}
+  .cmp-fill.avg{background:#e5e7eb;z-index:1}
+  .cmp-avg-marker{position:absolute;top:-2px;bottom:-2px;width:2px;background:#9ca3af;z-index:3}
+  .cmp-val{width:80px;text-align:right;font-weight:800;font-size:12.5px;color:#7c3aed;flex-shrink:0}
 
-  /* 정보 툴팁 (ⓘ 아이콘 hover) */
-  .info-tip{position:relative;display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:9999px;background:#e5e7eb;color:#6b7280;font-size:10px;font-weight:800;cursor:help;margin-left:4px;vertical-align:middle;user-select:none;font-family:serif;line-height:1}
-  .info-tip:hover{background:#3a74ff;color:white}
-  .info-tip::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:#1e293b;color:white;padding:10px 12px;border-radius:8px;font-size:11.5px;font-weight:500;width:260px;line-height:1.5;white-space:normal;text-align:left;display:none;z-index:100;pointer-events:none;box-shadow:0 4px 16px rgba(0,0,0,.25);font-family:inherit}
-  .info-tip::before{content:'';position:absolute;bottom:calc(100% + 3px);left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#1e293b;display:none;z-index:100}
-  .info-tip:hover::after,.info-tip:hover::before{display:block}
+  /* 성장 여력 바 */
+  .growth-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px dashed #ede9fe}
+  .growth-row:last-child{border-bottom:none}
+  .growth-label{font-weight:700;font-size:12.5px;color:#374151;min-width:110px}
+  .growth-arrow{flex:1;height:24px;position:relative;background:#faf5ff;border-radius:12px;overflow:hidden}
+  .growth-arrow-inner{position:absolute;left:6px;right:6px;top:50%;transform:translateY(-50%);display:flex;align-items:center;justify-content:space-between;font-size:11px;color:#6b7280;font-weight:700}
+  .growth-gain{font-weight:800;color:#6d28d9;font-size:12.5px;min-width:60px;text-align:right}
+
+  /* 시나리오 테이블 */
+  .scenario-table{width:100%;border-collapse:separate;border-spacing:0;font-size:12px}
+  .scenario-table th{background:#ede9fe;color:#6d28d9;padding:8px 10px;text-align:left;font-weight:800;font-size:11px}
+  .scenario-table td{padding:9px 10px;border-bottom:1px solid #f5f3ff}
+  .scenario-table tr:last-child td{border-bottom:none}
+
+  /* 토스트 */
+  .toast{position:fixed;bottom:32px;right:32px;max-width:360px;background:white;border:1px solid #ede9fe;border-radius:14px;padding:16px 18px;z-index:100;box-shadow:0 12px 32px rgba(17,24,39,.15);display:none;animation:slideUp .3s cubic-bezier(.2,.8,.2,1);gap:12px;align-items:flex-start}
+  .toast.on{display:flex}
+
+  /* 성장선 애니메이션 */
+  .gline-path{stroke-dasharray:800;stroke-dashoffset:800;animation:drawLine 1.6s cubic-bezier(.2,.8,.2,1) forwards}
+  .gline-dot{opacity:0;animation:popIn .35s cubic-bezier(.2,.8,.2,1) forwards}
+  @keyframes drawLine{to{stroke-dashoffset:0}}
+  @keyframes popIn{to{opacity:1;transform:scale(1)}}
+  .ring-grad{stroke-dasharray:283;stroke-dashoffset:283;animation:drawRing 1.6s ease forwards}
+  @keyframes drawRing{to{stroke-dashoffset:var(--ring-off, 140)}}
+
+  /* 상태 칩 */
+  .pill{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:9999px;font-size:11px;font-weight:700}
+  .pill.sent{background:#d1fae5;color:#065f46}
+  .pill.pending{background:#fef3c7;color:#92400e}
+  .pill.no-phone{background:#fee2e2;color:#991b1b}
+
+  .tab-chip{padding:8px 14px;border-radius:10px;font-weight:700;font-size:13px;color:#6b7280;cursor:pointer;transition:.15s}
+  .tab-chip.on{background:#f5f3ff;color:#6d28d9}
+
+  @media print{
+    .no-print{display:none !important}
+    body{background:white}
+  }
 </style>
 </head>
 <body class="font-sans text-ink-900 antialiased">
 <div class="flex min-h-screen">
   <div id="sidebar"></div>
-  <main class="flex-1 min-w-0">
+  <main class="flex-1 min-w-0 flex flex-col min-h-screen">
     <div id="topbar"></div>
-    <div class="px-8 py-8 max-w-[1280px] mx-auto space-y-8">
 
-      <!-- Hero + CTA -->
-      <section>
-        <div class="flex items-start justify-between gap-6 flex-wrap">
-          <div>
-            <div class="text-sm text-brand-600 font-semibold">리포트카드</div>
-            <h1 class="mt-2 text-[32px] leading-tight font-extrabold">
-              학생별 <span class="text-brand-600">예측 현황</span>과<br/>
-              리포트를 한 곳에서 관리하세요.
-            </h1>
-            <p class="mt-3 text-ink-500 text-[15px] max-w-2xl">
-              지금까지 쌓인 데이터 기준으로 학생별 예측 현황을 한눈에 확인하고, 학부모 상담에 필요한 리포트를 바로 생성·발송하세요.
-            </p>
-          </div>
-          <button onclick="openWizard()" class="px-6 py-4 rounded-2xl bg-brand-500 text-white font-bold text-base hover:bg-brand-600 shadow-soft flex items-center gap-2">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-            리포트카드 생성
-          </button>
-        </div>
-      </section>
+    <div class="flex-1 px-8 py-8 max-w-[1280px] mx-auto w-full space-y-6">
 
-      <!-- Top Tabs -->
-      <section>
-        <div class="flex items-center gap-8 border-b border-gray-200">
-          <div class="top-tab on" data-tab="now">📊 지금의 현황</div>
-          <div class="top-tab" data-tab="hist">📚 리포트 생성내역</div>
-        </div>
-      </section>
-
-      <!-- ============ TAB 1: 지금의 현황 ============ -->
-      <div class="top-pane" data-pane="now">
-
-        <!-- 요약 지표 -->
-        <section class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-          <div class="bg-white rounded-2xl p-5 shadow-card ring-soft">
-            <div class="text-xs text-ink-500 mb-1">전체 학생</div>
-            <div class="text-2xl font-extrabold">76<span class="text-base font-bold text-ink-500 ml-1">명</span></div>
-          </div>
-          <div class="bg-white rounded-2xl p-5 shadow-card ring-soft">
-            <div class="text-xs text-ink-500 mb-1">예측 가능</div>
-            <div class="text-2xl font-extrabold text-emerald-600">52<span class="text-base font-bold text-ink-500 ml-1">명</span></div>
-          </div>
-          <div class="bg-white rounded-2xl p-5 shadow-card ring-soft">
-            <div class="text-xs text-ink-500 mb-1">주의 필요</div>
-            <div class="text-2xl font-extrabold text-amber-600">16<span class="text-base font-bold text-ink-500 ml-1">명</span></div>
-          </div>
-          <div class="bg-white rounded-2xl p-5 shadow-card ring-soft">
-            <div class="text-xs text-ink-500 mb-1">데이터 부족</div>
-            <div class="text-2xl font-extrabold text-rose-600">8<span class="text-base font-bold text-ink-500 ml-1">명</span></div>
-          </div>
+      <!-- ============ 뷰 1: 리포트 생성 내역 리스트 ============ -->
+      <div id="viewList">
+        <section class="mb-6">
+          <div class="text-sm text-brand-600 font-semibold">📄 리포트카드</div>
+          <h1 class="mt-2 text-[30px] leading-tight font-extrabold">
+            지금까지 만든 <span class="text-brand-600">학생별 리포트</span>를<br/>
+            한 곳에서 확인하세요
+          </h1>
+          <p class="mt-3 text-ink-500 text-[15px]">
+            데이터 허브에서 엑셀을 업로드하고 분석을 돌린 내역이 여기 쌓여요. 행을 클릭하면 학생별 상세 리포트를 볼 수 있어요.
+          </p>
         </section>
 
-        <!-- 필터 -->
-        <section class="bg-white rounded-2xl p-4 shadow-card ring-soft mb-6">
-          <div class="flex items-center gap-2 flex-wrap">
-            <input placeholder="🔍 학생 이름으로 검색" class="px-4 py-2.5 rounded-xl border border-gray-200 text-sm flex-1 min-w-[220px]"/>
-            <select class="px-4 py-2.5 rounded-xl border border-gray-200 text-sm">
-              <option>전체 반</option><option>중3 수학반</option><option>중2 수학반</option><option>고1 수학반</option>
-            </select>
-            <select class="px-4 py-2.5 rounded-xl border border-gray-200 text-sm">
-              <option>전체 방정식</option><option>중3 수학반 · 성적 향상 v2</option><option>고1 영어반 · 모의고사 등급</option>
-            </select>
-            <select class="px-4 py-2.5 rounded-xl border border-gray-200 text-sm">
-              <option>전체 상태</option><option>🟢 예측 가능</option><option>🟡 주의 필요</option><option>🔴 데이터 부족</option>
-            </select>
-          </div>
+        <!-- 빈 상태 -->
+        <section id="emptyList" class="hidden bg-white rounded-3xl shadow-card ring-soft p-14 text-center">
+          <div class="text-5xl mb-4">📂</div>
+          <h2 class="text-[18px] font-extrabold mb-2">아직 생성된 리포트가 없어요</h2>
+          <p class="text-sm text-ink-500 mb-6">데이터 허브에서 엑셀을 업로드하고 '학생별 리포트 생성하기'를 눌러주세요.</p>
+          <a href="hub.html" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-brand-600 text-white font-bold hover:bg-brand-700">
+            데이터 허브로 이동 →
+          </a>
         </section>
 
-        <!-- 학생 리스트 -->
-        <section class="bg-white rounded-3xl shadow-card ring-soft overflow-hidden">
-          <table class="w-full text-sm">
+        <!-- 목록 -->
+        <section id="listWrap" class="bg-white rounded-3xl shadow-card ring-soft overflow-hidden">
+          <table class="rep-table">
             <thead>
-              <tr class="bg-gray-50 text-ink-500 text-[13px]">
-                <th class="px-5 py-3 text-left">학생</th>
-                <th class="px-5 py-3 text-left">신뢰도 · 적용 방정식</th>
-                <th class="px-5 py-3 text-left">데이터 수집 기간</th>
-                <th class="px-5 py-3 text-left">현재 예측</th>
-                <th class="px-5 py-3 text-left">추천 액션 (인사이트)</th>
-                <th class="px-5 py-3 text-center w-24">리포트</th>
+              <tr>
+                <th style="width:170px">생성일시</th>
+                <th>엑셀 파일</th>
+                <th>도출된 성장 공식</th>
+                <th style="width:100px;text-align:center">학생 수</th>
+                <th style="width:130px;text-align:center">알림톡 발송</th>
+                <th style="width:44px"></th>
               </tr>
             </thead>
-            <tbody id="studentTable"></tbody>
+            <tbody id="listBody"></tbody>
           </table>
-          <div class="px-5 py-4 flex items-center justify-between text-sm text-ink-500 border-t border-gray-100">
-            <div>총 <b class="text-ink-900">76</b>명 중 1~12번째</div>
-            <div class="flex gap-1">
-              <button class="w-8 h-8 rounded-lg border border-gray-200 hover:bg-gray-50">‹</button>
-              <button class="w-8 h-8 rounded-lg bg-brand-500 text-white">1</button>
-              <button class="w-8 h-8 rounded-lg hover:bg-gray-50">2</button>
-              <button class="w-8 h-8 rounded-lg hover:bg-gray-50">3</button>
-              <button class="w-8 h-8 rounded-lg hover:bg-gray-50">4</button>
-              <button class="w-8 h-8 rounded-lg hover:bg-gray-50">5</button>
-              <button class="w-8 h-8 rounded-lg hover:bg-gray-50">6</button>
-              <button class="w-8 h-8 rounded-lg hover:bg-gray-50">7</button>
-              <button class="w-8 h-8 rounded-lg border border-gray-200 hover:bg-gray-50">›</button>
+        </section>
+      </div>
+
+      <!-- ============ 뷰 2: 상세 (학생 리스트) ============ -->
+      <div id="viewDetail" class="hidden">
+
+        <section class="mb-4">
+          <button onclick="switchView('list')" class="text-sm text-ink-500 hover:text-brand-600 font-semibold inline-flex items-center gap-1">
+            ← 리포트 생성 내역으로 돌아가기
+          </button>
+        </section>
+
+        <!-- 상세 헤더 -->
+        <section class="rounded-3xl relative overflow-hidden shadow-card mb-6" style="background:linear-gradient(135deg,#f5f3ff 0%,#ede9fe 45%,#fce7f3 100%)">
+          <div class="absolute -left-10 -top-8 w-40 h-40 rounded-full bg-white/40 blur-2xl pointer-events-none"></div>
+          <div class="relative p-8">
+            <div class="text-xs font-bold text-brand-700 mb-2">리포트 상세</div>
+            <h1 class="text-[24px] font-extrabold leading-tight" id="detailTitle">—</h1>
+            <p class="mt-2 text-[13.5px] text-ink-700/80" id="detailSubtitle">—</p>
+
+            <div class="mt-5 bg-white/90 rounded-2xl p-5" style="backdrop-filter:blur(6px);box-shadow:0 6px 20px rgba(124,58,237,.1)">
+              <div class="text-[11px] font-bold text-brand-600 mb-1.5 tracking-wider">🧮 이 분석에서 찾은 성장 공식</div>
+              <div class="text-[16px] font-extrabold leading-relaxed text-ink-900" id="detailFormula">—</div>
+              <p class="text-[11.5px] text-[#9a3412] mt-3 flex items-start gap-1.5">
+                <span>💡</span>
+                <span><b>100% 정확한 예측이 아니에요.</b> 우리 학원 실제 데이터에서 발견된 '학생 성장 패턴'이므로 참고용으로 활용해주세요.</span>
+              </p>
             </div>
           </div>
         </section>
 
-      </div>
+        <!-- 학생 리스트 -->
+        <section class="bg-white rounded-3xl shadow-card ring-soft p-6">
+          <div class="flex items-center justify-between mb-4 flex-wrap gap-3">
+            <div class="flex items-center gap-3">
+              <h2 class="text-[18px] font-extrabold">학생별 리포트</h2>
+              <span class="text-xs text-ink-500">총 <b class="text-brand-700" id="detailCountN">0</b>명</span>
+            </div>
+            <input id="stuSearch" oninput="renderStudentList()" placeholder="🔍 이름 검색" class="px-4 py-2 rounded-xl border border-gray-200 text-sm focus:border-brand-500 focus:outline-none w-56"/>
+          </div>
 
-      <!-- ============ TAB 2: 리포트 생성내역 ============ -->
-      <div class="top-pane hidden" data-pane="hist">
-
-        <section class="bg-white rounded-3xl p-5 shadow-card ring-soft mb-6">
-          <div class="flex items-center gap-2 flex-wrap">
-            <input placeholder="🔍 학생/그룹/방정식으로 검색" class="px-4 py-2.5 rounded-xl border border-gray-200 text-sm flex-1 min-w-[240px]"/>
-            <select class="px-4 py-2.5 rounded-xl border border-gray-200 text-sm">
-              <option>전체 기간</option><option>최근 30일</option><option>최근 3개월</option>
-            </select>
-            <select class="px-4 py-2.5 rounded-xl border border-gray-200 text-sm">
-              <option>전체 방정식</option>
-              <option>중3 수학반 · 성적 향상</option>
-              <option>고1 영어반 · 모의고사 등급</option>
-            </select>
+          <div class="overflow-auto">
+            <table class="rep-table">
+              <thead>
+                <tr>
+                  <th style="width:50px">#</th>
+                  <th>학생</th>
+                  <th>반</th>
+                  <th style="text-align:right">현재 결과</th>
+                  <th style="text-align:right">예측 결과</th>
+                  <th style="text-align:right">성장 여력</th>
+                  <th style="text-align:center">알림톡</th>
+                  <th style="width:44px"></th>
+                </tr>
+              </thead>
+              <tbody id="stuBody"></tbody>
+            </table>
           </div>
         </section>
-
-        <section class="bg-white rounded-3xl shadow-card ring-soft overflow-hidden">
-          <table class="w-full text-sm">
-            <thead>
-              <tr class="bg-gray-50 text-ink-500 text-[13px]">
-                <th class="px-5 py-3 text-left">생성 일시</th>
-                <th class="px-5 py-3 text-left">방정식</th>
-                <th class="px-5 py-3 text-left">대상</th>
-                <th class="px-5 py-3 text-center">리포트 수</th>
-                <th class="px-5 py-3 text-left">분석 기간</th>
-                <th class="px-5 py-3 text-center w-20">상세</th>
-              </tr>
-            </thead>
-            <tbody id="historyTable"></tbody>
-          </table>
-          <div class="px-5 py-4 flex items-center justify-between text-sm text-ink-500 border-t border-gray-100">
-            <div>총 <b class="text-ink-900" id="historyCount">0</b>건</div>
-          </div>
-        </section>
-
       </div>
 
     </div>
@@ -234,1840 +243,601 @@
   </main>
 </div>
 
-<!-- ============ 리포트 생성 풀페이지 위저드 ============ -->
-<div id="wizard" class="hidden fixed inset-0 bg-[#f6f7fb] z-40 overflow-y-auto">
-  <div class="sticky top-0 bg-white/95 backdrop-blur border-b border-gray-100 z-10">
-    <div class="max-w-[1100px] mx-auto px-8 py-4 flex items-center justify-between gap-4 flex-wrap">
-      <div class="flex items-center gap-4">
-        <button onclick="closeWizard()" class="w-10 h-10 rounded-xl hover:bg-gray-100 grid place-items-center text-ink-500" title="나가기">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
+<!-- ============ 리포트 모달 (학생 개별 A4) ============ -->
+<div id="reportModal" class="report-modal" onclick="if(event.target===this) closeReportModal()">
+  <div class="report-shell">
+    <!-- 상단 바 -->
+    <div class="report-topbar no-print">
+      <div>
+        <div class="text-xs opacity-80" id="mdCounter">1 / 0</div>
+        <div class="text-base font-bold" id="mdName">—</div>
+      </div>
+      <div class="report-topbar-right">
+        <button class="topbar-btn primary" onclick="sendAlimtalk()">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3C6.5 3 2 6.6 2 11c0 2.7 1.7 5.1 4.3 6.5L5.5 21l3.8-2.3c.9.2 1.8.3 2.7.3 5.5 0 10-3.6 10-8S17.5 3 12 3z"/></svg>
+          알림톡 발송
         </button>
-        <div>
-          <div class="text-xs tracking-widest font-bold text-brand-600">리포트카드 생성</div>
-          <div class="text-[20px] font-extrabold" id="wizStepTitle">방정식 선택</div>
-        </div>
-      </div>
-      <div class="flex items-center gap-2" id="wizStepDots"></div>
-    </div>
-    <div class="h-1 bg-gray-100"><div id="wizProg" class="h-full bg-brand-500 transition-all" style="width:25%"></div></div>
-  </div>
-
-  <div class="max-w-[1100px] mx-auto px-8 py-12 pb-32">
-
-    <!-- STEP 1: 방정식 선택 -->
-    <div class="wiz-step" data-step="1">
-      <h2 class="text-[30px] font-extrabold mb-2">어떤 방정식으로 리포트를 만드시겠어요?</h2>
-      <p class="text-ink-500 text-[16px] mb-8">방정식을 선택하면 해당 그룹의 학생들이 다음 단계에서 자동으로 리포트 대상으로 잡혀요.</p>
-      <div class="space-y-4" id="wizEqList"></div>
-    </div>
-
-    <!-- STEP 2: 대상 학생 확인 -->
-    <div class="wiz-step hidden" data-step="2">
-      <h2 class="text-[30px] font-extrabold mb-2">대상 학생을 확인해주세요</h2>
-      <p class="text-ink-500 text-[16px] mb-8">선택한 방정식이 적용되는 학생 전원이 기본 선택돼 있어요. 제외하고 싶은 학생은 체크박스를 해제하세요.</p>
-      <div class="bg-white rounded-3xl shadow-card ring-soft overflow-hidden">
-        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-          <label class="flex items-center gap-3 cursor-pointer">
-            <input type="checkbox" id="wizSelectAll" checked class="w-5 h-5" onchange="toggleAllStudents(this.checked)"/>
-            <span class="font-semibold text-[15px]">전체 선택</span>
-          </label>
-          <div class="text-sm text-ink-500">선택됨 <b class="text-brand-600" id="wizSelectCount">0</b>명</div>
-        </div>
-        <div id="wizStudentList" class="divide-y divide-gray-100"></div>
-      </div>
-    </div>
-
-    <!-- STEP 3: 분석 기간 + 톤 -->
-    <div class="wiz-step hidden" data-step="3">
-      <h2 class="text-[30px] font-extrabold mb-2">분석 기간과 리포트 톤을 설정해주세요</h2>
-      <p class="text-ink-500 text-[16px] mb-8">기간·톤 설정에 따라 생성되는 리포트 내용이 달라집니다.</p>
-
-      <div class="bg-white rounded-3xl shadow-card ring-soft p-7 mb-6">
-        <h3 class="text-[18px] font-bold mb-4">분석 기간</h3>
-        <div class="space-y-3">
-          <label class="flex items-start gap-3 rounded-xl border-2 border-brand-500 bg-brand-50 p-4 cursor-pointer wiz-period-label" data-p="auto">
-            <input type="radio" name="wizPeriod" value="auto" checked class="w-5 h-5 mt-0.5" onchange="onPeriodChange('auto')"/>
-            <div class="flex-1">
-              <div class="font-bold text-[15px]">자동 (학생별 최대 가능 기간)</div>
-              <div class="text-sm text-ink-500 mt-1">학생마다 데이터 보유 기간이 달라도 각자 최대로 활용해 분석해요.</div>
-            </div>
-          </label>
-          <label class="flex items-start gap-3 rounded-xl border-2 border-gray-200 p-4 cursor-pointer hover:bg-gray-50 wiz-period-label" data-p="3m">
-            <input type="radio" name="wizPeriod" value="3m" class="w-5 h-5 mt-0.5" onchange="onPeriodChange('3m')"/>
-            <div class="flex-1">
-              <div class="font-bold text-[15px]">최근 3개월로 통일</div>
-              <div class="text-sm text-ink-500 mt-1">학생 간 비교가 쉬워요. 단, 3개월치 데이터가 없는 학생은 분석에서 제외됩니다.</div>
-            </div>
-          </label>
-          <label class="flex items-start gap-3 rounded-xl border-2 border-gray-200 p-4 cursor-pointer hover:bg-gray-50 wiz-period-label" data-p="6m">
-            <input type="radio" name="wizPeriod" value="6m" class="w-5 h-5 mt-0.5" onchange="onPeriodChange('6m')"/>
-            <div class="flex-1">
-              <div class="font-bold text-[15px]">최근 6개월로 통일</div>
-              <div class="text-sm text-ink-500 mt-1">중장기 추세 파악에 유리해요. 6개월 미만 학생은 제외됩니다.</div>
-            </div>
-          </label>
-        </div>
-
-        <div id="wizShortList" class="hidden mt-5 rounded-2xl bg-rose-50 border border-rose-200 p-5">
-          <div class="font-bold text-rose-700 mb-3">⚠️ <span id="wizShortCount">0</span>명은 해당 기간 데이터가 부족해 이번 리포트에서 제외돼요</div>
-          <div class="space-y-1.5 text-sm" id="wizShortNames"></div>
-          <button onclick="keepOnlyEligible()" class="mt-4 text-sm font-semibold text-rose-700 underline hover:text-rose-800">제외 학생 지금 빼기 →</button>
-        </div>
-      </div>
-
-      <div class="bg-white rounded-3xl shadow-card ring-soft p-7">
-        <h3 class="text-[18px] font-bold mb-1">개인 피드백 톤</h3>
-        <p class="text-sm text-ink-500 mb-5">학부모에게 그대로 전달되는 문구입니다. 톤마다 어떤 문장이 만들어지는지 미리 확인해보세요.</p>
-        <div class="grid md:grid-cols-3 gap-4" id="wizToneGrid"></div>
-      </div>
-    </div>
-
-    <!-- STEP 4: A4 풀페이지 미리보기 (좌우 화살표 + 페이지 표시) -->
-    <div class="wiz-step hidden" data-step="4">
-      <div class="flex items-end justify-between mb-5 flex-wrap gap-3">
-        <div>
-          <h2 class="text-[30px] font-extrabold mb-2">리포트 미리보기</h2>
-          <p class="text-ink-500 text-[16px]">A4 사이즈로 출력될 리포트를 좌우 화살표로 넘기며 모두 확인하세요.</p>
-        </div>
-        <div class="flex items-center gap-3">
-          <button onclick="navReport(-1)" class="w-11 h-11 rounded-full bg-white shadow-card grid place-items-center hover:bg-gray-50">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
-          </button>
-          <div class="text-sm font-semibold text-ink-700"><span id="reportPageIdx">1</span> / <span id="reportPageTotal">1</span></div>
-          <button onclick="navReport(1)" class="w-11 h-11 rounded-full bg-white shadow-card grid place-items-center hover:bg-gray-50">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-          </button>
-        </div>
-      </div>
-      <div class="a4-stage" id="reportStage"></div>
-    </div>
-
-  </div>
-
-  <div class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur border-t border-gray-100 z-20">
-    <div class="max-w-[1100px] mx-auto px-8 py-4 flex items-center justify-between gap-4">
-      <button onclick="wizPrev()" id="wizPrevBtn" class="px-5 py-3 rounded-xl border border-gray-200 font-semibold hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed">← 이전</button>
-      <div class="text-sm text-ink-500" id="wizStepLabel">1 / 4</div>
-      <button onclick="wizNext()" id="wizNextBtn" class="px-6 py-3 rounded-xl bg-brand-500 text-white font-bold hover:bg-brand-600">다음 →</button>
-    </div>
-  </div>
-</div>
-
-
-<!-- ============ 생성건 상세 풀페이지 ============ -->
-<div id="genDetail" class="hidden fixed inset-0 bg-[#f6f7fb] z-40 overflow-y-auto">
-  <div class="sticky top-0 bg-white/95 backdrop-blur border-b border-gray-100 z-10">
-    <div class="max-w-[1280px] mx-auto px-8 py-4 flex items-center justify-between gap-4">
-      <div class="flex items-center gap-4">
-        <button onclick="closeGenDetail()" class="w-10 h-10 rounded-xl hover:bg-gray-100 grid place-items-center text-ink-500" title="닫기">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+        <button class="topbar-btn pdf" onclick="downloadPdf()" id="pdfBtn">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+          PDF 저장
         </button>
-        <div>
-          <div class="text-xs tracking-widest font-bold text-brand-600">리포트 생성 상세</div>
-          <div class="text-[20px] font-extrabold" id="gdTitle">—</div>
-          <div class="text-xs text-ink-500 mt-0.5" id="gdMeta">—</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="max-w-[1280px] mx-auto px-8 py-8 pb-16">
-    <!-- 액션 툴바 -->
-    <div class="bg-white rounded-2xl shadow-card ring-soft p-4 mb-5 flex items-center justify-between gap-4 flex-wrap sticky top-[81px] z-[5]">
-      <label class="flex items-center gap-3 cursor-pointer">
-        <input type="checkbox" id="gdSelectAll" onchange="gdToggleAll(this.checked)"/>
-        <span class="font-semibold text-[15px]">전체 선택</span>
-        <span class="text-sm text-ink-500">선택됨 <b class="text-brand-600" id="gdSelCount">0</b>건</span>
-      </label>
-      <div class="flex gap-2 flex-wrap">
-        <button onclick="openKakaoSendModal()" class="px-4 py-2.5 text-sm rounded-xl bg-yellow-300 text-yellow-900 font-bold hover:bg-yellow-400 disabled:opacity-50" id="gdKakaoBtn">
-          💬 알림톡 자동 발송
-        </button>
-        <button onclick="openPdfZipModal()" class="px-4 py-2.5 text-sm rounded-xl bg-brand-500 text-white font-bold hover:bg-brand-600 disabled:opacity-50" id="gdPdfBtn">
-          📄 PDF 다운로드 (ZIP)
+        <button class="topbar-btn close" onclick="closeReportModal()" aria-label="닫기">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path d="M6 6l12 12M6 18L18 6"/></svg>
         </button>
       </div>
     </div>
 
-    <!-- 학생 리포트 테이블 -->
-    <div class="bg-white rounded-2xl shadow-card ring-soft overflow-hidden">
-      <table class="w-full text-sm">
-        <thead>
-          <tr class="bg-gray-50 text-ink-500 text-[13px]">
-            <th class="px-4 py-3 w-12"></th>
-            <th class="px-4 py-3 text-left">학생</th>
-            <th class="px-4 py-3 text-left">학부모 연락처</th>
-            <th class="px-4 py-3 text-left">알림톡 발송 일시</th>
-            <th class="px-4 py-3 text-center w-32">액션</th>
-          </tr>
-        </thead>
-        <tbody id="gdReportBody"></tbody>
-      </table>
-    </div>
+    <!-- 좌우 네비게이션 -->
+    <button class="report-nav left no-print" onclick="navReport(-1)" id="navPrev" aria-label="이전 학생">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <button class="report-nav right no-print" onclick="navReport(1)" id="navNext" aria-label="다음 학생">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+    </button>
 
-    <!-- 링크 복사 토스트 -->
-    <div id="copyToast" class="hidden fixed bottom-8 left-1/2 -translate-x-1/2 bg-ink-900 text-white px-5 py-3 rounded-xl shadow-lg text-sm font-semibold z-[60]">
-      🔗 리포트 링크가 복사되었어요
-    </div>
+    <!-- A4 리포트 본문 -->
+    <div id="reportPage" class="a4-page"></div>
   </div>
 </div>
 
-<!-- ============ 학생 상세 풀페이지 ============ -->
-<div id="studentDetail" class="hidden fixed inset-0 bg-[#f6f7fb] z-40 overflow-y-auto">
-  <div class="sticky top-0 bg-white/95 backdrop-blur border-b border-gray-100 z-10">
-    <div class="max-w-[1100px] mx-auto px-8 py-4 flex items-center justify-between gap-4">
-      <div class="flex items-center gap-4">
-        <button onclick="closeStudentDetail()" class="w-10 h-10 rounded-xl hover:bg-gray-100 grid place-items-center text-ink-500" title="닫기">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
-        </button>
-        <div>
-          <div class="text-xs tracking-widest font-bold text-brand-600">학생 상세 분석</div>
-          <div class="text-[20px] font-extrabold" id="sdTitle">—</div>
-        </div>
-      </div>
-      <button onclick="startStudentReport()" class="px-5 py-3 rounded-xl bg-brand-500 text-white font-bold hover:bg-brand-600 shadow-soft flex items-center gap-2">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-        리포트 생성하기
-      </button>
-    </div>
+<!-- 토스트 -->
+<div id="toast" class="toast">
+  <div class="w-9 h-9 rounded-full flex-shrink-0 grid place-items-center text-lg" id="toastIcon" style="background:#f5f3ff">🚧</div>
+  <div class="flex-1 pt-0.5">
+    <div class="text-[14px] font-bold text-ink-900 mb-1" id="toastTitle">—</div>
+    <div class="text-[12.5px] text-ink-500 leading-relaxed" id="toastBody">—</div>
   </div>
-
-  <div class="max-w-[1100px] mx-auto px-8 py-8 pb-16 space-y-6" id="sdBody"></div>
-</div>
-
-<!-- ============ 단일 리포트 풀페이지 뷰어 ============ -->
-<div id="reportViewer" class="hidden fixed inset-0 bg-[#0f1729]/85 z-50 overflow-y-auto">
-  <div class="sticky top-0 bg-white/95 backdrop-blur border-b border-gray-100">
-    <div class="max-w-[1100px] mx-auto px-6 py-3 flex items-center justify-between gap-3">
-      <button onclick="closeReportViewer()" class="w-10 h-10 rounded-xl hover:bg-gray-100 grid place-items-center text-ink-500">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
-      </button>
-      <div class="font-extrabold text-[16px]" id="rvTitle">리포트</div>
-      <div class="flex items-center gap-2" id="rvNav">
-        <button onclick="rvNav(-1)" class="w-9 h-9 rounded-full bg-gray-100 grid place-items-center hover:bg-gray-200"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
-        <div class="text-sm font-semibold text-ink-700"><span id="rvIdx">1</span> / <span id="rvTotal">1</span></div>
-        <button onclick="rvNav(1)" class="w-9 h-9 rounded-full bg-gray-100 grid place-items-center hover:bg-gray-200"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>
-      </div>
-    </div>
-  </div>
-  <div class="py-8">
-    <div class="a4-stage" id="rvStage"></div>
-  </div>
-</div>
-
-<!-- ============ 알림톡 발송 확인 모달 ============ -->
-<div class="modal" id="kakaoSendModal">
-  <div class="modal-box bg-white rounded-3xl w-full max-w-md p-7">
-    <div class="text-3xl mb-3">💬</div>
-    <h3 class="text-xl font-extrabold mb-2">알림톡을 발송할까요?</h3>
-    <p class="text-sm text-ink-700 leading-relaxed mb-1">선택한 <b class="text-brand-600" id="ksmCount">0</b>건의 리포트가 학부모 카카오톡으로 자동 발송됩니다.</p>
-    <p class="text-xs text-ink-500 leading-relaxed">학부모 전화번호 미등록 학생은 자동 제외됩니다.</p>
-    <div class="flex gap-2 mt-6">
-      <button onclick="closeModal('kakaoSendModal')" class="flex-1 py-3 rounded-xl border border-gray-200 font-semibold hover:bg-gray-50">취소</button>
-      <button onclick="confirmKakaoSend()" class="flex-1 py-3 rounded-xl bg-yellow-300 text-yellow-900 font-bold hover:bg-yellow-400">발송하기</button>
-    </div>
-  </div>
-</div>
-
-<!-- ============ 알림톡 결과 모달 ============ -->
-<div class="modal" id="kakaoResultModal">
-  <div class="modal-box bg-white rounded-3xl w-full max-w-md p-7">
-    <div class="text-3xl mb-3">📤</div>
-    <h3 class="text-xl font-extrabold mb-4">알림톡 발송 결과</h3>
-    <div class="grid grid-cols-2 gap-3 mb-5">
-      <div class="rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-center">
-        <div class="text-xs font-semibold text-emerald-700">성공</div>
-        <div class="text-3xl font-extrabold text-emerald-700 mt-1" id="krmSuccess">0</div>
-        <div class="text-xs text-emerald-700/70 mt-1">건</div>
-      </div>
-      <div class="rounded-xl bg-rose-50 border border-rose-200 p-4 text-center">
-        <div class="text-xs font-semibold text-rose-700">실패</div>
-        <div class="text-3xl font-extrabold text-rose-700 mt-1" id="krmFail">0</div>
-        <div class="text-xs text-rose-700/70 mt-1">건</div>
-      </div>
-    </div>
-    <div id="krmFailList" class="hidden mb-5 rounded-xl bg-rose-50/60 border border-rose-100 p-3 text-xs space-y-1.5 max-h-40 overflow-y-auto"></div>
-    <button onclick="closeKakaoResult()" class="w-full py-3 rounded-xl bg-brand-500 text-white font-bold hover:bg-brand-600">확인</button>
-  </div>
-</div>
-
-<!-- ============ PDF ZIP 다운로드 안내 모달 ============ -->
-<!-- ============ 낮은 신뢰도 리포트 생성 확인 모달 ============ -->
-<div class="modal" id="lowConfidenceModal">
-  <div class="modal-box bg-white rounded-3xl w-full max-w-md p-7">
-    <div class="text-3xl mb-3">⚠️</div>
-    <h3 class="text-xl font-extrabold mb-2">신뢰도가 낮아요</h3>
-    <p class="text-sm text-ink-700 leading-relaxed mb-1"><b id="lcmName">이</b> 학생의 현재 리포트 신뢰도는 <b class="text-rose-600"><span id="lcmConf">15</span>%</b>예요. 예측 범위가 넓어 참고용으로만 권장해요.</p>
-    <p class="text-xs text-ink-500 mt-2 leading-relaxed" id="lcmHint">—</p>
-    <div class="flex gap-2 mt-6">
-      <button onclick="closeModal('lowConfidenceModal')" class="flex-1 py-3 rounded-xl border border-gray-200 font-semibold hover:bg-gray-50">취소</button>
-      <button onclick="proceedStudentReport()" class="flex-1 py-3 rounded-xl bg-brand-500 text-white font-bold hover:bg-brand-600">그래도 만들기</button>
-    </div>
-  </div>
-</div>
-
-<div class="modal" id="pdfZipModal">
-  <div class="modal-box bg-white rounded-3xl w-full max-w-md p-7">
-    <div class="text-3xl mb-3">📦</div>
-    <h3 class="text-xl font-extrabold mb-2">ZIP 파일로 다운됩니다</h3>
-    <p class="text-sm text-ink-700 leading-relaxed mb-1">선택한 <b class="text-brand-600" id="pzmCount">0</b>건의 리포트가 각각 개별 PDF로 만들어져 <b>ZIP 파일 1개</b>로 압축됩니다.</p>
-    <p class="text-xs text-ink-500 mt-2 leading-relaxed">압축이 풀린 후 학생별 리포트를 개별 출력하거나 공유하실 수 있어요.</p>
-    <div class="flex gap-2 mt-6">
-      <button onclick="closeModal('pdfZipModal')" class="flex-1 py-3 rounded-xl border border-gray-200 font-semibold hover:bg-gray-50">취소</button>
-      <button onclick="confirmPdfZip()" class="flex-1 py-3 rounded-xl bg-brand-500 text-white font-bold hover:bg-brand-600">다운로드 받기</button>
-    </div>
-  </div>
+  <button onclick="hideToast()" class="text-ink-400 hover:text-ink-700 text-lg leading-none bg-transparent border-0 cursor-pointer">×</button>
 </div>
 
 <script>
   if(!__auth.requireAuth()) throw new Error('redirecting');
   document.getElementById('sidebar').outerHTML = __renderLayout('report');
   document.getElementById('topbar').outerHTML = __renderTopbar(['홈','리포트카드']);
-
-  // 공통 모달/드로어 헬퍼
-  function openModal(id){ document.getElementById(id).classList.add('on'); }
-  function closeModal(id){ document.getElementById(id).classList.remove('on'); }
-  window.openModal = openModal; window.closeModal = closeModal;
-  function openDrawer(id){ document.getElementById(id).classList.add('on'); document.body.style.overflow='hidden'; }
-  function closeDrawer(id){ document.getElementById(id).classList.remove('on'); document.body.style.overflow=''; }
-  window.openDrawer = openDrawer; window.closeDrawer = closeDrawer;
-
-  // ===== 방정식 목록 (허브와 공유할 예정이지만 여기선 하드코딩) =====
-  const equations = [
-    {id:'eq1', name:'중3 수학반 · 성적 향상', group:'중3 수학반', count:24, trust:78, version:2, color:'brand',
-     formula:'예상 성적 = 0.42 × 복습시간 + 0.28 × 숙제이행률 + 0.19 × 출결률 + 62',
-     y:'다음 시험 점수', yUnit:'점',
-     terms:[{name:'복습시간',beta:0.42,unit:'h/주'},{name:'숙제이행률',beta:0.28,unit:'%'},{name:'출결률',beta:0.19,unit:'%'}]},
-    {id:'eq2', name:'고1 영어반 · 모의고사 등급', group:'고1 영어반', count:22, trust:65, version:1, color:'accent',
-     formula:'모의고사 등급 = -0.008 × 단어암기 + (-0.005) × 리스닝 + 3.1',
-     y:'모의고사 등급', yUnit:'등급',
-     terms:[{name:'단어암기',beta:-0.008,unit:'개/일'},{name:'리스닝',beta:-0.005,unit:'분/일'}]},
-    {id:'eq3', name:'전체 · 재등록 예측', group:'전체 학생', count:76, trust:71, version:1, color:'ink',
-     formula:'재등록 확률 = 0.18 × 만족도 + 0.12 × 성적변화 + 0.35',
-     y:'재등록 확률', yUnit:'%',
-     terms:[{name:'만족도',beta:0.18,unit:'점'},{name:'성적변화',beta:0.12,unit:'점'}]}
-  ];
-
-  // ===== 학생 데이터 =====
-  const surnames = ['김','이','박','최','정','강','조','윤','한','오','서','신'];
-  const firstNames = ['민재','서연','하윤','지우','도윤','소율','지호','예진','준서','서윤','시우','지민','현우','유진','서준','하은','시은','재민','수현','혜원','광호','주아','한결','승우','예린','건우','수아','정민'];
-  const classes = ['중3 수학반','중2 수학반','고1 수학반','중3 영어반'];
-
-  function genStudent(i){
-    const sn = surnames[i%surnames.length];
-    const fn = firstNames[i%firstNames.length];
-    const cls = classes[i%classes.length];
-
-    // 상태 분포
-    const statusPool = ['green','green','green','green','green','yellow','yellow','red'];
-    const status = statusPool[i%statusPool.length];
-
-    const eq = cls.includes('수학') ? equations[0] : (cls.includes('영어') ? equations[1] : equations[2]);
-
-    // 데이터 기간
-    const months = status==='green' ? (12+Math.floor(Math.random()*12)) : (status==='yellow' ? (5+Math.floor(Math.random()*5)) : (1+Math.floor(Math.random()*3)));
-
-    // 예측 시뮬레이션
-    const cur = 60 + Math.floor(Math.random()*25);
-    const diff = status==='green' ? (Math.random()>0.2?'+':'-')+(Math.floor(Math.random()*5)+1) : (Math.random()>0.5?'+1':'-1');
-    const predLow = cur + (status==='green'?2:0);
-    const predHigh = cur + (status==='green'?7:3);
-
-    // 인사이트
-    let insight, insightColor;
-    if(status==='green'){
-      const suggestions = [
-        '복습 +1h → 다음 시험 +3.2점 예상',
-        '숙제이행률 현재 수준 유지 시 우상향',
-        '질문횟수 3회 이상이면 +2점 기대',
-        '이번 달 성장 페이스 우수'
-      ];
-      insight = suggestions[i%suggestions.length];
-      insightColor = 'text-emerald-700';
-    } else if(status==='yellow'){
-      const suggestions = [
-        '숙제이행률 +15%p 필요 · 상담 권장',
-        '최근 3주 출결 불안정 · 확인 필요',
-        '복습시간 하락 중 · 개입 필요',
-        '성적 정체 · 학습 패턴 재점검'
-      ];
-      insight = suggestions[i%suggestions.length];
-      insightColor = 'text-amber-700';
-    } else {
-      insight = '데이터 더 쌓여야 예측 가능';
-      insightColor = 'text-rose-600';
-    }
-
-    // 학부모 전화번호 등록 여부 (~85% 등록)
-    const phoneOK = Math.random() > 0.15;
-    const parentPhone = phoneOK ? `010-${String(1000+Math.floor(Math.random()*9000))}-${String(1000+Math.floor(Math.random()*9000))}` : null;
-    // 변수별 기여도 시뮬레이션 (0~100 정규화)
-    const contribution = {};
-    (cls.includes('수학') ? equations[0] : (cls.includes('영어') ? equations[1] : equations[2])).terms.forEach(t=>{
-      contribution[t.name] = 30 + Math.floor(Math.random()*60);
-    });
-    // 추세 (8주 sparkline)
-    const trend = Array.from({length:8}, ()=>40+Math.floor(Math.random()*55));
-    // Next Action 후보
-    const nextActionsPool = {
-      green:[
-        '현재 복습 패턴(주 5h↑) 유지 — 다음 시험까지 그대로 가도 우상향',
-        '질문 횟수를 주 3회 이상으로 늘리면 +2점 추가 기대',
-        '오답노트 작성 습관 추가 시 상위권 진입 가능'
-      ],
-      yellow:[
-        '숙제이행률을 +15%p 끌어올리는 게 1순위',
-        '출결률 회복을 위한 학부모 면담 1회 권장',
-        '주간 복습시간을 최소 3h로 회복 — 2주 안에 추세 반전 가능'
-      ],
-      red:[
-        '주간 복습 1h 부터라도 시작 — 패턴 형성이 우선',
-        '학부모 면담을 통해 학습 환경 점검 필요',
-        '데이터를 4주 이상 더 쌓은 후 재분석 권장'
-      ]
-    };
-    return {name:sn+fn, cls, status, eq, months, cur, diff, predLow, predHigh, insight, insightColor, phoneOK, parentPhone, contribution, trend, nextActions: nextActionsPool[status]};
-  }
-
-  const students = Array.from({length:12}, (_,i)=>genStudent(i));
-
-  // ===== 학생 리스트 렌더 =====
-  function renderStudentTable(){
-    const rows = students.map((s,i)=>{
-      // dailyData가 없어도 계산은 months 기반 추정치로 처리됨
-      const conf = calcStudentConfidence(s, s.eq);
-      const lv = confidenceLevel(conf);
-
-      let hintText = '';
-      if(lv === 'yellow' || lv === 'red'){
-        const target = lv === 'red' ? 35 : 70;
-        const w = weeksToReach(s, s.eq, target);
-        hintText = w ? `💡 ${w}주 더 쌓이면 ${target}%까지 ↑` : '';
-      }
-
-      const predContent = lv === 'red'
-        ? `<div class="text-sm text-ink-500">범위 넓음</div>
-           <div class="text-xs text-ink-400 mt-0.5">${Math.max(0,s.predLow-10)}~${s.predHigh+10}점</div>`
-        : `<div class="text-sm"><span class="font-bold">${s.cur}점</span> <span class="${s.diff.includes('+')?'text-emerald-600':'text-rose-500'} text-xs font-bold">${s.diff}</span></div>
-           <div class="text-xs text-ink-500 mt-0.5">다음 시험: ${s.predLow}~${s.predHigh}점</div>`;
-
-      return `
-      <tr class="border-t border-gray-100 hover:bg-gray-50 transition cursor-pointer" onclick="openStudentDetail(${i})">
-        <td class="px-5 py-4">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full bg-soft-navy text-brand-700 font-bold grid place-items-center">${s.name[0]}</div>
-            <div>
-              <div class="font-semibold text-[15px]">${s.name}</div>
-              <div class="text-xs text-ink-500 mt-0.5">${s.cls}</div>
-            </div>
-          </div>
-        </td>
-        <td class="px-5 py-4">
-          <div class="flex flex-col gap-1.5">
-            ${confidenceBadge(conf, true)}
-            <div class="text-xs text-ink-700 font-semibold">${s.eq.name}</div>
-            ${hintText ? `<div class="text-[11px] text-ink-500">${hintText}</div>` : ''}
-          </div>
-        </td>
-        <td class="px-5 py-4">
-          <div class="text-sm font-semibold">${s.months}개월</div>
-          <div class="text-xs text-ink-500">누적 데이터</div>
-        </td>
-        <td class="px-5 py-4">${predContent}</td>
-        <td class="px-5 py-4 max-w-[260px]">
-          <div class="text-sm ${s.insightColor}">${s.insight}</div>
-        </td>
-        <td class="px-5 py-4 text-center" onclick="event.stopPropagation();openStudentDetail(${i})">
-          <button class="w-10 h-10 rounded-xl hover:bg-brand-50 grid place-items-center text-ink-500 hover:text-brand-600 transition">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M7 3h10l3 4v14H4V7z"/><path d="M8 12h8M8 16h5"/></svg>
-          </button>
-        </td>
-      </tr>`;
-    }).join('');
-    document.getElementById('studentTable').innerHTML = rows;
-  }
-  renderStudentTable();
-
-  // ===== 생성 히스토리 모델 =====
-  // generation: {id, dateTime, eq, periodLabel, tone, students:[{...student, kakao:'pending'|'sent'|'fail'|'noPhone', pdf:false}]}
-  const generations = [];
-
-  // Seed: 샘플 1건 (시연용)
-  function seedGeneration(){
-    const eq = equations[0];
-    const sampleStudents = students.filter(s=>s.cls === eq.group).slice(0,5).map(s=>{
-      const kakao = !s.phoneOK ? 'noPhone' : (Math.random()>0.85 ? 'fail' : 'sent');
-      return {...s, kakao, kakaoAt: kakao === 'sent' ? '2026.04.10 14:35' : null, pdf: true};
-    });
-    generations.push({
-      id:'g_seed', dateTime:'2026.04.10 14:32', eq, periodLabel:'최근 3개월', tone:'warm',
-      students: sampleStudents
-    });
-  }
-  seedGeneration();
-
-  function fmtNow(){
-    const d = new Date();
-    const pad = n => String(n).padStart(2,'0');
-    return `${d.getFullYear()}.${pad(d.getMonth()+1)}.${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
-  }
-
-  function genTargetLabel(g){
-    if(g.students.length === 1) return g.students[0].name;
-    return `${g.eq.group} (${g.students.length}명)`;
-  }
-
-  function renderHistory(){
-    const tbody = document.getElementById('historyTable');
-    document.getElementById('historyCount').textContent = generations.length;
-    if(generations.length === 0){
-      tbody.innerHTML = `<tr><td colspan="6" class="px-5 py-16 text-center text-ink-500">아직 생성된 리포트가 없어요. 우측 상단의 <b class="text-brand-600">리포트카드 생성</b> 버튼으로 시작하세요.</td></tr>`;
-      return;
-    }
-    tbody.innerHTML = generations.slice().reverse().map(g=>`
-      <tr class="border-t border-gray-100 hover:bg-gray-50 cursor-pointer transition" onclick="openGenDetail('${g.id}')">
-        <td class="px-5 py-4 font-semibold text-[14px]">${g.dateTime}</td>
-        <td class="px-5 py-4 text-ink-700 text-sm">${g.eq.name}</td>
-        <td class="px-5 py-4 text-ink-700 text-sm font-semibold">${genTargetLabel(g)}</td>
-        <td class="px-5 py-4 text-center"><span class="text-[12px] font-bold bg-brand-50 text-brand-700 px-2.5 py-1 rounded-full">${g.students.length}건</span></td>
-        <td class="px-5 py-4 text-ink-500 text-sm">${g.periodLabel}</td>
-        <td class="px-5 py-4 text-center">
-          <span class="w-9 h-9 rounded-lg inline-grid place-items-center text-ink-500">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-          </span>
-        </td>
-      </tr>
-    `).join('');
-  }
-  renderHistory();
   document.getElementById('pageFooter').outerHTML = __renderFooter();
 
-  // Top tabs
-  document.querySelectorAll('.top-tab').forEach(t=>{
-    t.onclick = ()=>{
-      document.querySelectorAll('.top-tab').forEach(x=>x.classList.remove('on'));
-      t.classList.add('on');
-      document.querySelectorAll('.top-pane').forEach(p=>p.classList.toggle('hidden', p.dataset.pane !== t.dataset.tab));
-    };
-  });
-
-  // ===== 리포트 생성 풀페이지 위저드 =====
-  const WIZ_STEPS = 4;
-  let wizStep = 1;
-  let wizState = {eqIdx:0, students:new Set(), period:'auto', tone:'warm'};
-
-  const tones = [
-    {id:'warm', name:'감성형', desc:'따뜻하고 응원하는 어조 · 학부모 전달용', sample:'{name} 학생은 최근 복습 시간이 꾸준히 늘면서 성적도 함께 올라가고 있어요. 이 페이스를 유지한다면 다음 시험에서 70점대 진입도 충분히 기대됩니다.'},
-    {id:'casual', name:'친근형', desc:'편안한 대화체 · 학부모 전달용', sample:'{name} 학생, 요즘 복습 시간을 늘리더니 점수도 같이 오르고 있어요! 이대로면 다음 시험에서 70점도 가능할 것 같아요.'},
-    {id:'pro', name:'전문가형', desc:'데이터 기반 리포트 · 내부 인사이트용', sample:'{name} · 복습시간(β=0.42)이 가장 큰 기여 변수. 현 추세 유지 시 다음 시험 예측 68~74점, 모델 신뢰도 78%.'}
-  ];
-
-  function openWizard(opts){
-    opts = opts || {};
-    wizStep = 1;
-    wizState = {eqIdx: opts.eqIdx ?? 0, students:new Set(), period:'auto', tone:'warm', lockStudent: opts.lockStudent || null};
-    if(wizState.lockStudent) wizState.students.add(wizState.lockStudent.name);
-    document.getElementById('wizard').classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-    renderWizStep();
+  const UP_KEY = 'crabit_uploads_v1';
+  function loadList(key){ try{ return JSON.parse(localStorage.getItem(key) || '[]'); }catch(e){ return []; } }
+  function saveList(key, list){ localStorage.setItem(key, JSON.stringify(list)); }
+  function fmt(v, digits){
+    if(v == null || isNaN(v)) return '—';
+    if(Math.abs(v) >= 100) return Math.round(v).toLocaleString();
+    return Number(v).toFixed(digits ?? 1);
   }
-  function closeWizard(){
-    document.getElementById('wizard').classList.add('hidden');
-    document.body.style.overflow = '';
-  }
-  window.openWizard = openWizard; window.closeWizard = closeWizard;
-
-  // ===== 학생 상세 풀페이지 =====
-  let currentStudentIdx = null;
-
-  function applicableEquations(s){
-    return equations.filter(eq => eq.group === '전체 학생' || s.cls === eq.group);
+  function escapeHtml(s){
+    return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   }
 
-  // ===== 신뢰도 계산 =====
-  // 리포트 신뢰도 = 학원 모델 R² × 학생 데이터 충족도
-  const CONF_TIP = "리포트 신뢰도는 『학원 전체 방정식의 설명력(R²) × 이 학생의 데이터 충족도』로 계산돼요. 수집 기간·측정 횟수·변수 완결성이 높을수록 예측 범위가 좁아지고 신뢰도가 올라가요.";
+  // ===== 상태 =====
+  let uploads = [];
+  let activeUploadId = null;
+  let activeStudentIdx = 0;
 
-  function studentDataWeeks(s){ return Math.round((s.months || 0) * 4); }
-  function studentYCount(s){ return Math.max(1, Math.floor((s.months || 0) / 1.5)); }
-  function studentXCompleteness(s){
-    if(!s.dailyData) return 65; // 기본 추정
-    let total = 0, filled = 0;
-    Object.values(s.dailyData).forEach(arr => {
-      total += arr.length;
-      filled += arr.filter(v => v != null).length;
+  function getUpload(id){ return uploads.find(u => u.id === id); }
+  function activeUpload(){ return getUpload(activeUploadId); }
+
+  // 아바타 색상 (이름 해시)
+  function avatarStyle(name){
+    const hash = String(name || '').split('').reduce((a,c)=>a + c.charCodeAt(0), 0);
+    const palettes = [
+      ['#a78bfa','#7c3aed'],['#f9a8d4','#ec4899'],['#c4b5fd','#a78bfa'],
+      ['#fbcfe8','#f9a8d4'],['#ddd6fe','#c4b5fd'],['#fce7f3','#fbcfe8']
+    ];
+    const [c1, c2] = palettes[hash % palettes.length];
+    return `background:linear-gradient(135deg,${c1},${c2})`;
+  }
+  function initials(name){
+    const s = String(name || '').trim();
+    return s ? s.charAt(0) : '?';
+  }
+
+  function alimtalkPill(r){
+    if(!r.parentPhone) return '<span class="pill no-phone">번호 없음</span>';
+    if(r.sentAlimtalk) return '<span class="pill sent">✓ 발송됨</span>';
+    return '<span class="pill pending">미발송</span>';
+  }
+
+  // ===== 뷰 전환 =====
+  function switchView(view, uploadId){
+    if(view === 'list'){
+      document.getElementById('viewList').classList.remove('hidden');
+      document.getElementById('viewDetail').classList.add('hidden');
+      activeUploadId = null;
+      renderList();
+      // URL 정리
+      history.replaceState(null, '', 'report.html');
+    } else if(view === 'detail' && uploadId){
+      activeUploadId = uploadId;
+      document.getElementById('viewList').classList.add('hidden');
+      document.getElementById('viewDetail').classList.remove('hidden');
+      renderDetail();
+      // URL 업데이트
+      history.replaceState(null, '', `report.html?upload=${encodeURIComponent(uploadId)}`);
+    }
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+  window.switchView = switchView;
+
+  // ===== 리스트 뷰 =====
+  function formulaString(a){
+    if(!a) return '—';
+    const terms = a.xLabels.map((l, i) => {
+      const b = a.beta[i+1];
+      return `<span class="text-brand-700 font-extrabold">${Math.abs(b).toFixed(2)}</span> × ${escapeHtml(l)}`;
     });
-    return total ? Math.round(filled/total*100) : 65;
-  }
-  function calcSufficiency(dataWeeks, yCount, xCompletePct){
-    const w = Math.min(1, dataWeeks / 12);
-    const y = Math.min(1, yCount / 4);
-    const x = Math.min(1, xCompletePct / 100);
-    return (w + y + x) / 3;
-  }
-  function calcStudentConfidence(s, eq){
-    const suff = calcSufficiency(studentDataWeeks(s), studentYCount(s), studentXCompleteness(s));
-    return Math.round(eq.trust * suff);
-  }
-  function projectedConfidence(s, eq, addWeeks){
-    const futureWeeks = studentDataWeeks(s) + addWeeks;
-    const futureY = Math.min(4, studentYCount(s) + Math.floor(addWeeks / 6));
-    const futureX = Math.min(100, studentXCompleteness(s) + addWeeks * 2);
-    const suff = calcSufficiency(futureWeeks, futureY, futureX);
-    return Math.round(eq.trust * suff);
-  }
-  function weeksToReach(s, eq, targetPct){
-    for(let w = 1; w <= 52; w++){
-      if(projectedConfidence(s, eq, w) >= targetPct) return w;
-    }
-    return null;
-  }
-  function confidenceLevel(pct){
-    if(pct >= 60) return 'green';
-    if(pct >= 30) return 'yellow';
-    return 'red';
-  }
-  function confidenceBadge(pct, withIcon){
-    const lv = confidenceLevel(pct);
-    const styles = {
-      green: 'text-emerald-700 bg-emerald-50',
-      yellow: 'text-amber-700 bg-amber-50',
-      red: 'text-rose-700 bg-rose-50'
-    };
-    const dot = { green: 'bg-emerald-500', yellow: 'bg-amber-500', red: 'bg-rose-500' };
-    return `<span class="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full ${styles[lv]}">
-      <span class="w-2 h-2 rounded-full ${dot[lv]}"></span>
-      신뢰도 ${pct}%
-      ${withIcon ? `<span class="info-tip" data-tip="${CONF_TIP}">i</span>` : ''}
-    </span>`;
+    const intercept = a.beta[0];
+    const intSign = intercept >= 0 ? '+' : '−';
+    return `${escapeHtml(a.yLabel)} = ${terms.join(' + ')} ${intSign} ${Math.abs(intercept).toFixed(2)}`;
   }
 
-  // ===== 곡선 path (Catmull-Rom → Cubic Bezier) =====
-  function smoothPath(pts){
-    if(pts.length < 2) return '';
-    let d = `M${pts[0].x.toFixed(1)},${pts[0].y.toFixed(1)}`;
-    for(let i = 0; i < pts.length - 1; i++){
-      const p0 = pts[i-1] || pts[i];
-      const p1 = pts[i];
-      const p2 = pts[i+1];
-      const p3 = pts[i+2] || p2;
-      const cp1x = p1.x + (p2.x - p0.x) / 6;
-      const cp1y = p1.y + (p2.y - p0.y) / 6;
-      const cp2x = p2.x - (p3.x - p1.x) / 6;
-      const cp2y = p2.y - (p3.y - p1.y) / 6;
-      d += ` C${cp1x.toFixed(1)},${cp1y.toFixed(1)} ${cp2x.toFixed(1)},${cp2y.toFixed(1)} ${p2.x.toFixed(1)},${p2.y.toFixed(1)}`;
-    }
-    return d;
-  }
-
-  let __sparkSeq = 0;
-  function sparkChart(values, labels){
-    // values: number[], labels: string[] (each tooltip)
-    const id = 'sp_' + (++__sparkSeq);
-    const max = Math.max(...values, 1);
-    const min = Math.min(...values);
-    const range = Math.max(1, max - min);
-    const n = values.length;
-    const pts = values.map((v,i) => ({
-      x: n > 1 ? (i / (n - 1)) * 100 : 50,
-      y: 100 - ((v - min) / range) * 90 - 5
-    }));
-    const line = smoothPath(pts);
-    const area = line + ` L${pts[n-1].x.toFixed(1)},100 L${pts[0].x.toFixed(1)},100 Z`;
-    return `
-      <div class="spark-wrap" id="${id}" data-vals='${JSON.stringify(values)}' data-labels='${JSON.stringify(labels)}'>
-        <svg viewBox="0 0 100 100" preserveAspectRatio="none">
-          <defs>
-            <linearGradient id="grad-${id}" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#f04685" stop-opacity=".30"/>
-              <stop offset="100%" stop-color="#f04685" stop-opacity="0"/>
-            </linearGradient>
-          </defs>
-          <path d="${area}" fill="url(#grad-${id})"/>
-          <path d="${line}" fill="none" stroke="#f04685" stroke-width="1.8" vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <div class="spark-marker"></div>
-        <div class="spark-tip"></div>
-      </div>
-    `;
-  }
-
-  function bindSparkTooltips(root){
-    (root || document).querySelectorAll('.spark-wrap').forEach(wrap => {
-      if(wrap.__bound) return;
-      wrap.__bound = true;
-      const vals = JSON.parse(wrap.dataset.vals);
-      const labels = JSON.parse(wrap.dataset.labels);
-      const marker = wrap.querySelector('.spark-marker');
-      const tip = wrap.querySelector('.spark-tip');
-      const max = Math.max(...vals, 1);
-      const min = Math.min(...vals);
-      const range = Math.max(1, max - min);
-      const n = vals.length;
-      wrap.addEventListener('mousemove', e => {
-        const rect = wrap.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const ratio = Math.max(0, Math.min(1, x / rect.width));
-        const idx = Math.min(n-1, Math.max(0, Math.round(ratio * (n - 1))));
-        const xPct = n > 1 ? (idx / (n - 1)) * 100 : 50;
-        const yPct = 100 - ((vals[idx] - min) / range) * 90 - 5;
-        marker.style.left = xPct + '%';
-        marker.style.top = yPct + '%';
-        marker.classList.add('on');
-        tip.innerHTML = labels[idx];
-        tip.style.left = xPct + '%';
-        tip.style.top = yPct + '%';
-        tip.classList.add('on');
-      });
-      wrap.addEventListener('mouseleave', () => {
-        marker.classList.remove('on');
-        tip.classList.remove('on');
-      });
-    });
-  }
-
-  // ===== 학생 일별 데이터 (84일) =====
-  const TODAY_FAKE = new Date(2026, 3, 14); // 2026.04.14
-  function ensureDailyData(s){
-    if(s.dailyData) return;
-    const days = 84;
-    const dates = [];
-    for(let i = days - 1; i >= 0; i--){
-      const d = new Date(TODAY_FAKE);
-      d.setDate(d.getDate() - i);
-      dates.push(d);
-    }
-    s.dailyDates = dates;
-    s.dailyData = {};
-    s.classAvg = {};
-    s.eq.terms.forEach(t => {
-      const center = 35 + Math.floor(Math.random() * 30);
-      s.classAvg[t.name] = center;
-      s.dailyData[t.name] = dates.map((_, i) => {
-        const olderMissing = i < days * 0.5 ? 0.45 : 0.18;
-        if(Math.random() < olderMissing) return null;
-        const wave = Math.sin(i / 10) * 12 + (s.contribution[t.name] - 50) * 0.4;
-        return Math.max(0, Math.round(center + wave + (Math.random() * 18 - 9)));
-      });
-    });
-  }
-
-  function fmtMD(d){
-    return `${d.getMonth()+1}/${d.getDate()}`;
-  }
-  function fmtYMD(d){
-    return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
-  }
-  function sameDate(a, b){ return a.toDateString() === b.toDateString(); }
-
-  // ===== 미니 캘린더 (기간 선택) =====
-  let sdCalMonth = null; // {y, m}
-  let sdPeriod = null;   // {start, end}
-  let sdPickStart = null;
-
-  function pickCalDate(y, m, d){
-    const date = new Date(y, m, d);
-    if(!sdPickStart){
-      sdPickStart = date;
-      sdPeriod = null;
-    } else if(date < sdPickStart){
-      // 새 시작점
-      sdPickStart = date;
-      sdPeriod = null;
-    } else {
-      sdPeriod = {start: sdPickStart, end: date};
-      sdPickStart = null;
-    }
-    refreshDataSection();
-  }
-  function navCalMonth(dir){
-    if(!sdCalMonth) return;
-    let y = sdCalMonth.y, m = sdCalMonth.m + dir;
-    if(m < 0){ m = 11; y--; }
-    if(m > 11){ m = 0; y++; }
-    sdCalMonth = {y, m};
-    refreshDataSection();
-  }
-  function resetCalRange(){
-    sdPeriod = null; sdPickStart = null;
-    refreshDataSection();
-  }
-  window.pickCalDate = pickCalDate;
-  window.navCalMonth = navCalMonth;
-  window.resetCalRange = resetCalRange;
-
-  function renderCalendar(){
-    const s = students[currentStudentIdx];
-    const availSet = new Set(s.dailyDates.filter((_, i) =>
-      s.eq.terms.some(t => s.dailyData[t.name][i] != null)
-    ).map(d => d.toDateString()));
-
-    if(!sdCalMonth) sdCalMonth = {y: TODAY_FAKE.getFullYear(), m: TODAY_FAKE.getMonth()};
-    const {y, m} = sdCalMonth;
-    const first = new Date(y, m, 1);
-    const last = new Date(y, m+1, 0);
-    const startDow = first.getDay();
-    const days = last.getDate();
-
-    let cells = '';
-    for(let i = 0; i < startDow; i++) cells += '<div class="mini-cal-cell"></div>';
-    for(let d = 1; d <= days; d++){
-      const date = new Date(y, m, d);
-      const has = availSet.has(date.toDateString());
-      let cls = 'mini-cal-cell';
-      if(has) cls += ' has';
-      if(sdPeriod && date >= sdPeriod.start && date <= sdPeriod.end){
-        cls += ' in-range';
-        if(sameDate(date, sdPeriod.start) || sameDate(date, sdPeriod.end)) cls += ' range-end';
-      } else if(sdPickStart && sameDate(date, sdPickStart)){
-        cls += ' in-range range-end';
-      }
-      cells += `<div class="${cls}" ${has?`onclick="pickCalDate(${y},${m},${d})"`:''}>${d}</div>`;
-    }
-
-    const periodText = sdPeriod
-      ? `<span class="text-accent-700 font-bold">${fmtYMD(sdPeriod.start)} ~ ${fmtYMD(sdPeriod.end)}</span>`
-      : sdPickStart
-        ? `<span class="text-ink-500">시작: ${fmtYMD(sdPickStart)} · 끝 날짜를 클릭하세요</span>`
-        : `<span class="text-ink-500">전체 기간 (최근 12주)</span>`;
-
-    return `
-      <div class="mini-cal bg-white rounded-xl border border-gray-200 p-4">
-        <div class="flex items-center justify-between mb-3">
-          <button onclick="navCalMonth(-1)" class="w-8 h-8 rounded-lg hover:bg-gray-100 grid place-items-center text-ink-500">‹</button>
-          <div class="font-bold text-sm">${y}년 ${m+1}월</div>
-          <button onclick="navCalMonth(1)" class="w-8 h-8 rounded-lg hover:bg-gray-100 grid place-items-center text-ink-500">›</button>
-        </div>
-        <div class="mini-cal-grid">
-          ${['일','월','화','수','목','금','토'].map(d=>`<div class="mini-cal-dow">${d}</div>`).join('')}
-          ${cells}
-        </div>
-        <div class="mt-3 flex items-center justify-between text-[11px]">
-          <div>📅 ${periodText}</div>
-          ${(sdPeriod || sdPickStart) ? '<button onclick="resetCalRange()" class="text-accent-600 font-semibold underline">초기화</button>' : ''}
-        </div>
-        <div class="mt-2 text-[10px] text-ink-500">회색 칸 = 데이터가 입력된 날짜만 선택 가능</div>
-      </div>
-    `;
-  }
-
-  // 선택된 기간(또는 전체)으로 변수별 데이터 가공해서 변수 카드 렌더
-  function renderVarCards(){
-    const s = students[currentStudentIdx];
-    const start = sdPeriod ? sdPeriod.start : s.dailyDates[0];
-    const end = sdPeriod ? sdPeriod.end : s.dailyDates[s.dailyDates.length-1];
-    // 인덱스 범위
-    const idxRange = s.dailyDates.map((d,i)=>({d,i})).filter(x=>x.d>=start && x.d<=end);
-    if(idxRange.length === 0){
-      return '<div class="text-ink-500 text-sm">선택한 기간에 데이터가 없어요.</div>';
-    }
-    return s.eq.terms.map(t => {
-      const dataInRange = idxRange.map(x => ({val: s.dailyData[t.name][x.i], d: x.d}));
-      // 주 단위 버킷 (최대 12개)
-      const totalDays = dataInRange.length;
-      const bucketSize = Math.max(1, Math.ceil(totalDays / 12));
-      const buckets = [];
-      for(let i = 0; i < dataInRange.length; i += bucketSize){
-        const slice = dataInRange.slice(i, i + bucketSize);
-        const nonNull = slice.filter(x => x.val != null);
-        const avg = nonNull.length ? Math.round(nonNull.reduce((a,b)=>a+b.val,0)/nonNull.length) : 0;
-        buckets.push({avg, start: slice[0].d, end: slice[slice.length-1].d, hasData: nonNull.length > 0});
-      }
-      const values = buckets.map(b => b.avg);
-      const labels = buckets.map(b =>
-        b.hasData
-          ? `<b>${fmtMD(b.start)}${bucketSize>1?' ~ '+fmtMD(b.end):''}</b><br/>${b.avg} ${t.unit}`
-          : `<b>${fmtMD(b.start)}${bucketSize>1?' ~ '+fmtMD(b.end):''}</b><br/><span style="opacity:.7">데이터 없음 (0 처리)</span>`
-      );
-      // 학생 평균 / 반 평균 비교
-      const allVals = dataInRange.map(x=>x.val).filter(v=>v!=null);
-      const studentAvg = allVals.length ? Math.round(allVals.reduce((a,b)=>a+b,0)/allVals.length) : 0;
-      const classAvg = s.classAvg[t.name];
-      const diffPct = classAvg ? Math.round(((studentAvg - classAvg) / classAvg) * 100) : 0;
-      const compareLabel = studentAvg === 0
-        ? '<span class="text-ink-500">데이터 없음</span>'
-        : (diffPct >= 0
-          ? `<span class="text-accent-700 font-bold">반 평균 대비 +${diffPct}% 상위</span>`
-          : `<span class="text-rose-600 font-bold">반 평균 대비 ${diffPct}% 하위</span>`);
-      return `
-        <div class="bg-white rounded-2xl shadow-card ring-soft p-5">
-          <div class="flex items-baseline gap-2 mb-1">
-            <div class="text-base font-extrabold text-ink-900">${t.name}</div>
-            <div class="text-xs text-ink-500">· ${t.unit}</div>
-            <span class="text-[10px] font-bold text-brand-600 bg-brand-50 px-2 py-0.5 rounded-full ml-auto">β ${t.beta}</span>
-          </div>
-          <div class="flex items-end justify-between mt-2 mb-2">
-            <div>
-              <div class="text-2xl font-extrabold text-ink-900">${studentAvg}</div>
-              <div class="text-[11px] text-ink-500 mt-0.5">기간 평균</div>
-            </div>
-            <div class="text-right">
-              <div class="text-[11px] text-ink-500">반 평균</div>
-              <div class="text-sm font-bold text-ink-700">${classAvg}</div>
-            </div>
-          </div>
-          <div class="text-[12px] mb-2">${compareLabel}</div>
-          ${sparkChart(values, labels)}
-          <div class="flex justify-between text-[10px] text-ink-500 mt-2">
-            <span>${fmtMD(buckets[0].start)}</span>
-            <span>${fmtMD(buckets[buckets.length-1].end)}</span>
-          </div>
-        </div>
-      `;
-    }).join('');
-  }
-
-  function refreshDataSection(){
-    const calEl = document.getElementById('sdCalendar');
-    const varEl = document.getElementById('sdVarCards');
-    if(calEl) calEl.innerHTML = renderCalendar();
-    if(varEl){
-      varEl.innerHTML = renderVarCards();
-      bindSparkTooltips(varEl);
-    }
-  }
-  window.refreshDataSection = refreshDataSection;
-
-  function openStudentDetail(idx){
-    currentStudentIdx = idx;
-    sdPeriod = null; sdPickStart = null; sdCalMonth = null;
-    const s = students[idx];
-    ensureDailyData(s);
-    document.getElementById('sdTitle').textContent = `${s.name} 학생`;
-    const apEq = applicableEquations(s);
-
-    // ===== 인사이트 (구체적 수치 + 액션) =====
-    const insights = [];
-    const yUnit = s.eq.yUnit || '';
-    s.eq.terms.forEach(t => {
-      const allVals = s.dailyData[t.name].filter(v => v != null);
-      const studentAvg = allVals.length ? Math.round(allVals.reduce((a,b)=>a+b,0)/allVals.length) : 0;
-      const cAvg = s.classAvg[t.name];
-      const diffPct = cAvg ? Math.round(((studentAvg - cAvg) / cAvg) * 100) : 0;
-      const betaImpact = (studentAvg * t.beta).toFixed(1);
-      const betaGap = ((cAvg - studentAvg) * t.beta).toFixed(1);
-      if(diffPct >= 15){
-        insights.push({
-          txt: `<b>${t.name}</b>이 ${studentAvg}${t.unit}로 반 평균 ${cAvg} 대비 <b class="text-accent-700">+${diffPct}%</b>. β ${t.beta} 효과로 ${s.eq.y}에 약 <b>+${Math.abs(betaImpact)}${yUnit}</b> 기여 중이에요.`,
-          tone: 'good',
-          actions: [{label:'학부모에게 칭찬 한마디 보내기', kind:'kakao'}]
-        });
-      } else if(diffPct <= -15){
-        insights.push({
-          txt: `<b>${t.name}</b>이 ${studentAvg}${t.unit}로 반 평균 ${cAvg} 대비 <b class="text-rose-600">${diffPct}%</b>. 반 평균까지 회복하면 ${s.eq.y} <b>+${Math.abs(betaGap)}${yUnit}</b> 기대돼요.`,
-          tone: 'bad',
-          actions: [{label:'1:1 상담 일정 잡기', kind:'meet'}, {label:'데이터 입력 확인', kind:'data'}]
-        });
-      }
-    });
-    const recentMissing = s.eq.terms.filter(t => {
-      const recent14 = s.dailyData[t.name].slice(-14);
-      const nullCount = recent14.filter(v => v == null).length;
-      return nullCount >= 7;
-    });
-    if(recentMissing.length){
-      insights.push({
-        txt: `최근 2주간 <b>${recentMissing.map(t=>t.name).join(', ')}</b> 입력 누락이 50% 이상이에요. 정확한 예측을 위해 입력을 채워주세요.`,
-        tone: 'warn',
-        actions: [{label:'데이터 허브에서 입력하기', kind:'data'}]
-      });
-    }
-    if(s.status === 'green' && insights.length < 3){
-      insights.push({
-        txt: `현재 패턴 유지 시 다음 시험 <b>${s.predLow}~${s.predHigh}${yUnit}</b>로 우상향 예측이에요. 지금이 학부모 공유하기 좋은 타이밍.`,
-        tone: 'good', actions: [{label:'지금 리포트 생성하기', kind:'report'}]
-      });
-    }
-    if(s.status === 'yellow' && insights.length < 3){
-      insights.push({
-        txt: `주의 구간. <b>${s.eq.terms[0].name}</b> 1~2단계만 회복하면 추세 반전이 충분히 가능합니다.`,
-        tone: 'warn', actions: [{label:'1:1 상담 일정 잡기', kind:'meet'}]
-      });
-    }
-    if(s.status === 'red' && insights.length < 3){
-      insights.push({
-        txt: `데이터 보유 ${s.months}개월로 부족해요. 4주 이상 추가 누적 후 재분석을 권장합니다.`,
-        tone: 'bad', actions: [{label:'데이터 허브로 이동', kind:'data'}]
-      });
-    }
-    while(insights.length < 2){
-      insights.push({txt:'전체 변수 균형 양호. 현 패턴 유지 시 안정적입니다.', tone:'neutral', actions:[]});
-    }
-
-    const insightHtml = insights.slice(0,4).map(i=>{
-      const dotCls = i.tone==='good'?'bg-accent-300':
-                     i.tone==='warn'?'bg-amber-400':
-                     i.tone==='bad'?'bg-rose-400':'bg-gray-300';
-      const ico = i.tone==='good'?'💡':i.tone==='warn'?'⚠️':i.tone==='bad'?'🚨':'💡';
-      const actionHtml = i.actions && i.actions.length ? `
-        <div class="flex gap-2 mt-3 flex-wrap">
-          ${i.actions.map(a => `<button onclick="insightAction('${a.kind}')" class="px-3 py-1.5 rounded-lg bg-soft-pink hover:bg-accent-100 text-accent-700 text-[12px] font-bold border border-accent-100 transition">${a.label} →</button>`).join('')}
-        </div>` : '';
-      return `
-        <div class="flex gap-3 p-4 border-b border-gray-100 last:border-b-0">
-          <div class="w-7 h-7 rounded-full ${dotCls} text-white grid place-items-center text-[13px] flex-shrink-0">${ico}</div>
-          <div class="flex-1">
-            <div class="text-[14px] text-ink-700 leading-relaxed pt-0.5">${i.txt}</div>
-            ${actionHtml}
-          </div>
-        </div>`;
-    }).join('');
-
-    // ===== 적용 가능 방정식 (간단 + 산식 토글) =====
-    const eqHtml = apEq.map(eq=>`
-      <div class="rounded-xl border-2 ${eq.id===s.eq.id?'border-brand-500 bg-brand-50':'border-gray-200 bg-white'} p-4">
-        <div class="flex items-center gap-2 mb-2">
-          <span class="text-[10px] font-bold text-brand-600 bg-white px-2 py-0.5 rounded-full">v${eq.version}</span>
-          <span class="text-[11px] text-ink-500">신뢰도 ${eq.trust}%</span>
-          ${eq.id===s.eq.id?'<span class="text-[10px] font-bold bg-brand-500 text-white px-2 py-0.5 rounded-full ml-auto">현재 적용</span>':''}
-        </div>
-        <div class="font-extrabold text-[15px] text-ink-900">${eq.name}</div>
-        <div class="text-[11px] text-ink-500 mt-1">예측 대상: <b class="text-ink-700">${eq.y}</b> · 변수 ${eq.terms.length}개</div>
-        <button onclick="toggleEqFormula(this)" class="mt-3 text-[11px] text-brand-600 font-semibold hover:underline flex items-center gap-1">
-          <span>산식 보기</span>
-          <svg class="w-3 h-3 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
-        </button>
-        <div class="hidden eq-formula mt-2 rounded-lg bg-white/70 border border-gray-200 p-3 text-[12px] font-bold text-ink-700 leading-relaxed">${eq.formula}</div>
-      </div>`).join('');
-
-    // Next Action
-    const nextHtml = s.nextActions.map((a,i)=>`
-      <div class="flex gap-3 p-3 border-b border-gray-100 last:border-b-0">
-        <div class="w-7 h-7 rounded-full bg-brand-500 text-white font-extrabold text-xs grid place-items-center flex-shrink-0">${i+1}</div>
-        <div class="text-[14px] text-ink-700 leading-relaxed pt-1">${a}</div>
-      </div>`).join('');
-
-    const sdConf = calcStudentConfidence(s, s.eq);
-    const statusBadge = confidenceBadge(sdConf, true);
-
-    document.getElementById('sdBody').innerHTML = `
-      <!-- 프로필 카드 (통일된 회색 배경 + 검정 텍스트) -->
-      <section class="bg-white rounded-3xl shadow-card ring-soft p-7" id="sdProfileCard">
-        <div class="flex items-start justify-between gap-4 flex-wrap mb-5">
-          <div class="flex items-center gap-5">
-            <div class="w-16 h-16 rounded-full bg-soft-pink text-accent-600 font-extrabold grid place-items-center text-2xl flex-shrink-0">${s.name[0]}</div>
-            <div>
-              <div class="flex items-center gap-3 flex-wrap">
-                <div class="text-[24px] font-extrabold text-ink-900">${s.name}</div>
-                ${statusBadge}
-              </div>
-              <div class="text-sm text-ink-500 mt-1">데이터 보유 ${s.months}개월 · 마지막 입력 2주 전</div>
-            </div>
-          </div>
-          <button onclick="toggleSdEdit()" id="sdEditBtn" class="px-4 py-2 rounded-lg border border-gray-200 text-sm font-semibold hover:bg-gray-50 flex items-center gap-1.5">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4v16h16v-7"/><path d="M18 2l4 4-10 10H8v-4z"/></svg>
-            정보 수정
-          </button>
-        </div>
-
-        <!-- 편집 가능 정보 (회색 배경 + 검정 텍스트, Pretendard 통일) -->
-        <div class="grid md:grid-cols-3 gap-3">
-          <div class="rounded-xl bg-gray-50 border border-gray-100 p-4">
-            <div class="text-[11px] font-semibold text-ink-500 tracking-wider">반</div>
-            <div class="text-[15px] font-bold text-ink-900 mt-1.5 sd-view">${s.cls}</div>
-            <select id="sdEditCls" class="hidden sd-edit w-full mt-1 px-3 py-2 rounded-lg border border-gray-200 text-[15px] font-bold text-ink-900 bg-white">
-              ${classes.map(c=>`<option ${c===s.cls?'selected':''}>${c}</option>`).join('')}
-            </select>
-          </div>
-          <div class="rounded-xl bg-gray-50 border border-gray-100 p-4">
-            <div class="text-[11px] font-semibold text-ink-500 tracking-wider">학부모 연락처</div>
-            <div class="text-[15px] font-bold mt-1.5 sd-view">
-              ${s.parentPhone
-                ? `<span class="text-ink-900">${s.parentPhone}</span>`
-                : `<span class="text-rose-600">📵 미등록</span>`}
-            </div>
-            <input type="tel" id="sdEditPhone" placeholder="010-1234-5678" value="${s.parentPhone||''}" class="hidden sd-edit w-full mt-1 px-3 py-2 rounded-lg border border-gray-200 text-[15px] font-bold text-ink-900"/>
-          </div>
-          <div class="rounded-xl bg-gray-50 border border-gray-100 p-4">
-            <div class="text-[11px] font-semibold text-ink-500 tracking-wider">데이터 보유</div>
-            <div class="text-[15px] font-bold text-ink-900 mt-1.5">${s.months}개월 · 마지막 2주 전</div>
-          </div>
-        </div>
-
-        <div id="sdEditActions" class="hidden mt-4 flex justify-end gap-2">
-          <button onclick="cancelSdEdit()" class="px-4 py-2 rounded-lg border border-gray-200 text-sm font-semibold hover:bg-gray-50">취소</button>
-          <button onclick="saveSdEdit()" class="px-5 py-2 rounded-lg bg-brand-500 text-white text-sm font-bold hover:bg-brand-600">저장</button>
-        </div>
-
-        <!-- 핵심 수치 -->
-        <div class="grid grid-cols-3 gap-3 mt-4 text-sm">
-          <div class="rounded-lg bg-gray-50 border border-gray-100 p-3">
-            <div class="text-[11px] font-semibold text-ink-500">현재 ${s.eq.y||'예측'}</div>
-            <div class="font-extrabold text-[18px] mt-0.5 text-ink-900">${s.status==='red'?'—':s.cur+(s.eq.yUnit||'')}</div>
-          </div>
-          <div class="rounded-lg bg-soft-pink border border-accent-100 p-3">
-            <div class="text-[11px] font-semibold text-accent-700">다음 시험 예측</div>
-            <div class="font-extrabold text-[18px] mt-0.5 text-ink-900">${s.status==='red'?'—':s.predLow+'~'+s.predHigh+(s.eq.yUnit||'')}</div>
-          </div>
-          <div class="rounded-lg bg-gray-50 border border-gray-100 p-3">
-            <div class="text-[11px] font-semibold text-ink-500">변화 추이 (직전 대비)</div>
-            <div class="font-extrabold text-[18px] mt-0.5 ${s.diff?.includes?.('+')?'text-emerald-600':'text-rose-500'}">${s.status==='red'?'—':s.diff}</div>
-          </div>
-        </div>
-      </section>
-
-      <!-- 적용 가능 방정식 -->
-      <section>
-        <h3 class="text-lg font-extrabold mb-3">이 학생에게 적용 가능한 방정식 <span class="text-sm font-semibold text-ink-500 ml-1">${apEq.length}개</span></h3>
-        <div class="grid md:grid-cols-${Math.min(apEq.length,2)} gap-3">${eqHtml}</div>
-      </section>
-
-      <!-- 수집된 데이터 (캘린더 + 변수 카드) -->
-      <section>
-        <div class="flex items-end justify-between mb-3 flex-wrap gap-2">
-          <h3 class="text-lg font-extrabold">수집된 데이터</h3>
-          <span class="text-sm text-ink-500">달력에서 기간을 선택하면 그 기간 데이터로 다시 계산됩니다</span>
-        </div>
-        <div class="grid md:grid-cols-3 gap-4">
-          <div class="md:col-span-1">
-            <div id="sdCalendar"></div>
-          </div>
-          <div class="md:col-span-2">
-            <div id="sdVarCards" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
-          </div>
-        </div>
-      </section>
-
-      <!-- 인사이트 -->
-      <section class="bg-white rounded-3xl shadow-card ring-soft p-2">
-        <h3 class="text-lg font-extrabold px-5 pt-5 pb-3">원장님이 주목할 인사이트</h3>
-        ${insightHtml}
-      </section>
-
-      <!-- 다음 액션 -->
-      <section class="bg-white rounded-3xl shadow-card ring-soft p-2">
-        <h3 class="text-lg font-extrabold px-5 pt-5 pb-3">추천 다음 액션</h3>
-        ${nextHtml}
-      </section>
-    `;
-
-    refreshDataSection();
-    document.getElementById('studentDetail').classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-  }
-
-  function toggleEqFormula(btn){
-    const formula = btn.parentElement.querySelector('.eq-formula');
-    const arrow = btn.querySelector('svg');
-    const label = btn.querySelector('span');
-    if(formula.classList.contains('hidden')){
-      formula.classList.remove('hidden');
-      label.textContent = '산식 접기';
-      arrow.style.transform = 'rotate(180deg)';
-    } else {
-      formula.classList.add('hidden');
-      label.textContent = '산식 보기';
-      arrow.style.transform = '';
-    }
-  }
-  function insightAction(kind){
-    if(kind === 'report'){ startStudentReport(); return; }
-    const map = {
-      kakao: '학부모 알림톡 발송 (시연용)',
-      meet: '1:1 상담 일정 잡기 (시연용)',
-      data: '데이터 허브로 이동 (시연용)'
-    };
-    alert(map[kind] || '액션');
-  }
-  window.toggleEqFormula = toggleEqFormula;
-  window.insightAction = insightAction;
-
-  // ===== 학생 정보 인라인 편집 =====
-  function toggleSdEdit(){
-    const card = document.getElementById('sdProfileCard');
-    card.querySelectorAll('.sd-view').forEach(el => el.classList.add('hidden'));
-    card.querySelectorAll('.sd-edit').forEach(el => el.classList.remove('hidden'));
-    document.getElementById('sdEditActions').classList.remove('hidden');
-    document.getElementById('sdEditBtn').classList.add('hidden');
-  }
-  function cancelSdEdit(){
-    const s = students[currentStudentIdx];
-    document.getElementById('sdEditCls').value = s.cls;
-    document.getElementById('sdEditPhone').value = s.parentPhone || '';
-    closeSdEdit();
-  }
-  function closeSdEdit(){
-    const card = document.getElementById('sdProfileCard');
-    card.querySelectorAll('.sd-view').forEach(el => el.classList.remove('hidden'));
-    card.querySelectorAll('.sd-edit').forEach(el => el.classList.add('hidden'));
-    document.getElementById('sdEditActions').classList.add('hidden');
-    document.getElementById('sdEditBtn').classList.remove('hidden');
-  }
-  function saveSdEdit(){
-    const s = students[currentStudentIdx];
-    const newCls = document.getElementById('sdEditCls').value;
-    const newPhone = document.getElementById('sdEditPhone').value.trim();
-    s.cls = newCls;
-    s.parentPhone = newPhone || null;
-    s.phoneOK = !!s.parentPhone;
-    // 학생이 속한 반에 따라 적용 방정식 재매핑
-    const newEq = newCls.includes('수학') ? equations[0] : (newCls.includes('영어') ? equations[1] : equations[2]);
-    if(s.eq.id !== newEq.id){
-      s.eq = newEq;
-      s.dailyData = null; // 새 방정식 변수 기준으로 재생성 트리거
-    }
-    openStudentDetail(currentStudentIdx); // 재렌더
-    renderStudentTable();                   // 리스트에도 반영
-  }
-  window.toggleSdEdit = toggleSdEdit;
-  window.cancelSdEdit = cancelSdEdit;
-  window.saveSdEdit = saveSdEdit;
-  function closeStudentDetail(){
-    document.getElementById('studentDetail').classList.add('hidden');
-    document.body.style.overflow = '';
-    currentStudentIdx = null;
-  }
-  function startStudentReport(){
-    if(currentStudentIdx == null) return;
-    const s = students[currentStudentIdx];
-    const conf = calcStudentConfidence(s, s.eq);
-    if(confidenceLevel(conf) === 'red'){
-      // 신뢰도 낮음 — 한번 더 확인
-      document.getElementById('lcmName').textContent = s.name;
-      document.getElementById('lcmConf').textContent = conf;
-      const w = weeksToReach(s, s.eq, 40);
-      document.getElementById('lcmHint').textContent = w
-        ? `${w}주 더 데이터가 쌓이면 신뢰도 ${projectedConfidence(s, s.eq, w)}%까지 올라가요.`
-        : '데이터를 더 쌓으면 신뢰도가 올라갑니다.';
-      openModal('lowConfidenceModal');
+  function renderList(){
+    uploads = loadList(UP_KEY).filter(u => u.reports && u.reports.length > 0);
+    const body = document.getElementById('listBody');
+    const empty = document.getElementById('emptyList');
+    const wrap = document.getElementById('listWrap');
+    if(uploads.length === 0){
+      empty.classList.remove('hidden');
+      wrap.classList.add('hidden');
       return;
     }
-    proceedStudentReport();
-  }
-  function proceedStudentReport(){
-    if(currentStudentIdx == null) return;
-    const s = students[currentStudentIdx];
-    const apEq = applicableEquations(s);
-    const eqIdx = equations.findIndex(e=>e.id === apEq[0].id);
-    closeModal('lowConfidenceModal');
-    document.getElementById('studentDetail').classList.add('hidden');
-    openWizard({eqIdx: Math.max(0, eqIdx), lockStudent: s});
-  }
-  window.proceedStudentReport = proceedStudentReport;
-  window.openStudentDetail = openStudentDetail;
-  window.closeStudentDetail = closeStudentDetail;
-  window.startStudentReport = startStudentReport;
+    empty.classList.add('hidden');
+    wrap.classList.remove('hidden');
 
-  function activeStepSequence(){
-    return wizState.lockStudent ? [1,3,4] : [1,2,3,4];
-  }
-  function renderWizStep(){
-    const seq = activeStepSequence();
-    const pos = seq.indexOf(wizStep) + 1;
-    const total = seq.length;
-    document.querySelectorAll('.wiz-step').forEach(s=>s.classList.toggle('hidden', +s.dataset.step !== wizStep));
-    document.getElementById('wizProg').style.width = (pos/total*100)+'%';
-    document.getElementById('wizStepLabel').textContent = `${pos} / ${total}`;
-    document.getElementById('wizPrevBtn').disabled = wizStep === seq[0];
-    const titlesAll = {1:'방정식 선택',2:'대상 학생 확인',3:'분석 기간 · 톤 설정',4:'리포트 미리보기'};
-    document.getElementById('wizStepTitle').textContent = `${pos}. ${titlesAll[wizStep]}`;
-    const isLast = wizStep === seq[seq.length-1];
-    const isPreviewNext = wizStep === 3;
-    document.getElementById('wizNextBtn').textContent = isLast ? '리포트 생성하기 ✓' : (isPreviewNext ? '미리보기 →' : '다음 →');
-    document.getElementById('wizStepDots').innerHTML = seq.map((stepNum, i)=>{
-      const n = i+1;
-      const isCur = stepNum === wizStep;
-      const isPast = seq.indexOf(wizStep) > i;
-      return `<span class="w-8 h-8 rounded-full grid place-items-center text-xs font-bold ${isPast?'bg-brand-500 text-white':isCur?'bg-brand-500 text-white ring-4 ring-brand-100':'bg-gray-200 text-ink-500'}">${n}</span>`;
-    }).join('');
-    if(wizStep === 1) renderWizStep1();
-    if(wizStep === 2) renderWizStep2();
-    if(wizStep === 3) renderWizStep3();
-    if(wizStep === 4) renderWizStep4();
-  }
-
-  function renderWizStep1(){
-    const lockS = wizState.lockStudent;
-    const allowed = lockS ? new Set(applicableEquations(lockS).map(e=>e.id)) : null;
-    const visibleEq = lockS ? equations.filter(e=>allowed.has(e.id)) : equations;
-
-    // ensure eqIdx is one of the visible
-    if(lockS && !allowed.has(equations[wizState.eqIdx]?.id)){
-      wizState.eqIdx = equations.findIndex(e=>e.id === visibleEq[0].id);
-    }
-
-    const banner = lockS
-      ? `<div class="mb-4 rounded-2xl bg-soft-navy border border-brand-100 p-4 flex items-center gap-3">
-          <div class="w-10 h-10 rounded-full bg-white text-brand-700 font-bold grid place-items-center">${lockS.name[0]}</div>
-          <div class="flex-1">
-            <div class="font-extrabold text-[15px]">${lockS.name} 학생 전용 리포트</div>
-            <div class="text-xs text-ink-500 mt-0.5">이 학생에게 적용 가능한 ${visibleEq.length}개 방정식 중에서 선택해주세요.</div>
-          </div>
-        </div>` : '';
-
-    document.getElementById('wizEqList').innerHTML = banner + equations.map((eq,i)=>{
-      if(lockS && !allowed.has(eq.id)) return ''; // 학생 모드면 적용 불가 방정식 숨김
-      const on = i === wizState.eqIdx;
+    body.innerHTML = uploads.map(u => {
+      const sent = u.reports.filter(r => r.sentAlimtalk).length;
+      const total = u.reports.length;
+      const sentPct = total ? Math.round(sent / total * 100) : 0;
       return `
-      <label class="block cursor-pointer">
-        <input type="radio" name="wizEq" value="${i}" ${on?'checked':''} class="sr-only" onchange="selectWizEq(${i})"/>
-        <div class="rounded-2xl border-2 ${on?'border-brand-500 bg-brand-50':'border-gray-200 bg-white hover:border-brand-300'} p-6 transition">
-          <div class="flex items-start justify-between gap-4 flex-wrap">
-            <div>
-              <div class="flex items-center gap-2 mb-2">
-                <span class="text-xs font-bold text-brand-600 bg-white px-2 py-0.5 rounded-full">v${eq.version}</span>
-                <span class="text-xs text-ink-500">적용 학생 ${eq.count}명 · 신뢰도 ${eq.trust}%</span>
-              </div>
-              <div class="text-[20px] font-extrabold">${eq.name}</div>
+        <tr class="cursor-pointer" onclick="switchView('detail','${u.id}')">
+          <td><div class="text-[13px] font-semibold text-ink-900">${u.uploadedAt}</div></td>
+          <td><div class="font-bold text-ink-900 truncate max-w-[240px]">📊 ${escapeHtml(u.fileName)}</div><div class="text-[11.5px] text-ink-500 mt-0.5">${u.rowCount}행 · ${u.colCount}컬럼</div></td>
+          <td><div class="text-[12.5px] leading-relaxed" style="max-width:420px">${formulaString(u.analysis)}</div><div class="text-[11px] text-ink-500 mt-1">신뢰도 R² <b class="text-brand-700">${Math.round((u.analysis?.r2 || 0)*100)}%</b></div></td>
+          <td style="text-align:center"><div class="text-[18px] font-extrabold text-ink-900">${total}<span class="text-[12px] font-bold text-ink-500 ml-0.5">명</span></div></td>
+          <td style="text-align:center">
+            <div class="text-[13px] font-bold text-ink-900">${sent}<span class="text-[11px] font-semibold text-ink-500">/${total}</span></div>
+            <div class="mt-1.5 h-1.5 rounded-full bg-gray-100 overflow-hidden"><div class="h-full rounded-full" style="width:${sentPct}%;background:linear-gradient(90deg,#c4b5fd,#7c3aed)"></div></div>
+          </td>
+          <td style="text-align:right"><svg class="chev w-5 h-5 inline-block" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></td>
+        </tr>`;
+    }).join('');
+  }
+
+  // ===== 상세 뷰 =====
+  function renderDetail(){
+    const u = activeUpload();
+    if(!u){ switchView('list'); return; }
+
+    document.getElementById('detailTitle').innerHTML =
+      `📊 <span class="truncate">${escapeHtml(u.fileName)}</span>`;
+    document.getElementById('detailSubtitle').textContent =
+      `${u.uploadedAt} 업로드 · ${u.rowCount}행 · 학생 ${u.reports.length}명 · 신뢰도 R² ${Math.round((u.analysis?.r2 || 0)*100)}%`;
+    document.getElementById('detailFormula').innerHTML = formulaString(u.analysis);
+    document.getElementById('detailCountN').textContent = u.reports.length;
+
+    renderStudentList();
+  }
+
+  function renderStudentList(){
+    const u = activeUpload();
+    if(!u) return;
+    const q = (document.getElementById('stuSearch')?.value || '').trim().toLowerCase();
+    const filtered = u.reports
+      .map((r, i) => ({r, i}))
+      .filter(x => !q || x.r.studentName.toLowerCase().includes(q));
+
+    const body = document.getElementById('stuBody');
+    body.innerHTML = filtered.map(({r, i}) => {
+      const growth = (r.yPredicted ?? 0) - (r.yActual ?? 0);
+      const growthCls = growth >= 0.5 ? 'text-brand-700' : growth <= -0.5 ? 'text-rose-600' : 'text-ink-500';
+      const growthSign = growth >= 0 ? '+' : '';
+      return `
+        <tr class="cursor-pointer" onclick="openReportModal(${i})">
+          <td class="text-ink-500 text-[12.5px]">${i + 1}</td>
+          <td>
+            <div class="flex items-center gap-2.5">
+              <div class="stu-avatar" style="${avatarStyle(r.studentName);width:34px;height:34px;font-size:13px">${escapeHtml(initials(r.studentName))}</div>
+              <div class="font-bold text-ink-900">${escapeHtml(r.studentName)}</div>
             </div>
-          </div>
-          <div class="mt-4 rounded-xl bg-white/70 ring-1 ring-gray-100 p-4 text-[15px] font-bold leading-relaxed">${eq.formula}</div>
-        </div>
-      </label>`;
-    }).join('');
+          </td>
+          <td class="text-[12.5px] text-ink-500">${escapeHtml(r.className || '—')}</td>
+          <td style="text-align:right" class="font-semibold">${fmt(r.yActual, 1)}</td>
+          <td style="text-align:right" class="font-extrabold text-brand-700">${fmt(r.yPredicted, 1)}</td>
+          <td style="text-align:right" class="font-extrabold ${growthCls}">${growthSign}${fmt(growth, 1)}</td>
+          <td style="text-align:center">${alimtalkPill(r)}</td>
+          <td style="text-align:right"><svg class="chev w-5 h-5 inline-block" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></td>
+        </tr>`;
+    }).join('') || `<tr><td colspan="8" class="text-center py-10 text-ink-500">검색 결과가 없어요.</td></tr>`;
   }
-  function selectWizEq(i){
-    wizState.eqIdx = i;
-    if(!wizState.lockStudent) wizState.students = new Set();
-    renderWizStep1();
+  window.renderStudentList = renderStudentList;
+
+  // ===== 리포트 모달 =====
+  function openReportModal(idx){
+    const u = activeUpload();
+    if(!u || !u.reports[idx]) return;
+    activeStudentIdx = idx;
+    renderReportPage();
+    document.getElementById('reportModal').classList.add('on');
+    document.body.style.overflow = 'hidden';
   }
-  window.selectWizEq = selectWizEq;
+  window.openReportModal = openReportModal;
 
-  function eligibleStudents(){
-    if(wizState.lockStudent) return [wizState.lockStudent];
-    const eq = equations[wizState.eqIdx];
-    return students.filter(s => eq.group === '전체 학생' || s.cls === eq.group);
+  function closeReportModal(){
+    document.getElementById('reportModal').classList.remove('on');
+    document.body.style.overflow = '';
   }
-
-  function renderWizStep2(){
-    const list = eligibleStudents();
-    const eq = equations[wizState.eqIdx];
-    // 초기: 🟢/🟡만 기본 체크, 🔴은 체크 해제
-    if(wizState.students.size === 0){
-      list.forEach(s => {
-        const conf = calcStudentConfidence(s, eq);
-        if(confidenceLevel(conf) !== 'red') wizState.students.add(s.name);
-      });
-    }
-    const allChecked = list.every(s=>wizState.students.has(s.name));
-    document.getElementById('wizSelectAll').checked = allChecked;
-    document.getElementById('wizStudentList').innerHTML = list.map(s=>{
-      const checked = wizState.students.has(s.name);
-      const conf = calcStudentConfidence(s, eq);
-      const lv = confidenceLevel(conf);
-      const warnText = lv === 'red' ? '· 범위 넓음 (참고용)' : lv === 'yellow' ? '· 참고용' : '';
-      const phoneChip = s.phoneOK
-        ? ''
-        : '<span class="text-[11px] font-bold text-rose-700 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-full ml-2">📵 학부모 번호 미등록 · 알림톡 발송 불가</span>';
-      return `
-      <label class="flex items-center gap-4 px-6 py-4 cursor-pointer hover:bg-gray-50">
-        <input type="checkbox" ${checked?'checked':''} class="w-5 h-5" onchange="toggleStudent('${s.name}', this.checked)"/>
-        <div class="w-10 h-10 rounded-full bg-soft-navy text-brand-700 font-bold grid place-items-center">${s.name[0]}</div>
-        <div class="flex-1">
-          <div class="flex items-center flex-wrap gap-2">
-            <span class="font-semibold text-[15px]">${s.name}</span>
-            ${confidenceBadge(conf, true)}
-            ${phoneChip}
-          </div>
-          <div class="text-xs text-ink-500 mt-0.5">${s.cls} · 데이터 ${s.months}개월 ${warnText}</div>
-        </div>
-      </label>`;
-    }).join('');
-    updateSelectCount();
-  }
-  function toggleStudent(name, checked){
-    if(checked) wizState.students.add(name); else wizState.students.delete(name);
-    updateSelectCount();
-    const list = eligibleStudents();
-    document.getElementById('wizSelectAll').checked = list.every(s=>wizState.students.has(s.name));
-  }
-  function toggleAllStudents(checked){
-    const list = eligibleStudents();
-    if(checked) list.forEach(s=>wizState.students.add(s.name)); else wizState.students.clear();
-    renderWizStep2();
-  }
-  function updateSelectCount(){
-    const el = document.getElementById('wizSelectCount');
-    if(el) el.textContent = wizState.students.size;
-  }
-  window.toggleStudent = toggleStudent;
-  window.toggleAllStudents = toggleAllStudents;
-
-  function onPeriodChange(p){
-    wizState.period = p;
-    document.querySelectorAll('.wiz-period-label').forEach(el=>{
-      if(el.dataset.p === p){ el.classList.remove('border-gray-200'); el.classList.add('border-brand-500','bg-brand-50'); }
-      else{ el.classList.remove('border-brand-500','bg-brand-50'); el.classList.add('border-gray-200'); }
-    });
-    updateShortList();
-  }
-  window.onPeriodChange = onPeriodChange;
-
-  function updateShortList(){
-    const el = document.getElementById('wizShortList');
-    if(wizState.period === 'auto'){ el.classList.add('hidden'); return; }
-    const need = wizState.period === '3m' ? 3 : 6;
-    const sel = eligibleStudents().filter(s=>wizState.students.has(s.name));
-    const short = sel.filter(s=>s.months < need);
-    if(short.length === 0){ el.classList.add('hidden'); return; }
-    el.classList.remove('hidden');
-    document.getElementById('wizShortCount').textContent = short.length;
-    document.getElementById('wizShortNames').innerHTML = short.map(s=>`
-      <div class="flex items-center justify-between">
-        <div><b>${s.name}</b> <span class="text-ink-500">· ${s.cls}</span></div>
-        <div class="text-ink-500">보유 ${s.months}개월 / 필요 ${need}개월</div>
-      </div>
-    `).join('');
-  }
-  function keepOnlyEligible(){
-    const need = wizState.period === '3m' ? 3 : 6;
-    eligibleStudents().forEach(s=>{ if(s.months < need) wizState.students.delete(s.name); });
-    updateShortList();
-  }
-  window.keepOnlyEligible = keepOnlyEligible;
-
-  function renderWizStep3(){
-    document.getElementById('wizToneGrid').innerHTML = tones.map(t=>{
-      const on = t.id === wizState.tone;
-      return `
-      <label class="block cursor-pointer h-full">
-        <input type="radio" name="wizTone" value="${t.id}" ${on?'checked':''} class="sr-only" onchange="selectWizTone('${t.id}')"/>
-        <div class="h-full rounded-2xl border-2 ${on?'border-brand-500 bg-brand-50':'border-gray-200 bg-white hover:border-brand-300'} p-5 transition flex flex-col">
-          <div class="font-bold text-[17px]">${t.name}</div>
-          <div class="text-xs text-ink-500 mb-3">${t.desc}</div>
-          <div class="rounded-xl bg-white/70 ring-1 ring-gray-100 p-4 text-[13px] leading-relaxed flex-1">${t.sample.replace('{name}','김민재')}</div>
-        </div>
-      </label>`;
-    }).join('');
-    updateShortList();
-  }
-  function selectWizTone(id){ wizState.tone = id; renderWizStep3(); }
-  window.selectWizTone = selectWizTone;
-
-  // ===== A4 리포트 페이지 렌더 (재사용 컴포넌트) =====
-  function renderReportPage(s, eq, periodLabel, tone){
-    const trendMax = Math.max(...s.trend);
-    const trendMin = Math.min(...s.trend);
-    const trendPath = s.trend.map((v,i)=>{
-      const x = (i/(s.trend.length-1))*100;
-      const y = 100 - ((v - trendMin)/Math.max(1,trendMax-trendMin))*100;
-      return `${i===0?'M':'L'}${x.toFixed(1)},${y.toFixed(1)}`;
-    }).join(' ');
-    const trendArea = trendPath + ` L100,100 L0,100 Z`;
-    const yLabel = eq.y || '예측 결과';
-    const yUnit = eq.yUnit || '';
-    const curLabel = s.status==='red' ? '—' : `${s.cur}${yUnit}`;
-    // 신뢰도 기반 예측 구간 조정
-    const conf = calcStudentConfidence(s, eq);
-    const lv = confidenceLevel(conf);
-    const widen = lv === 'red' ? 10 : lv === 'yellow' ? 4 : 0;
-    const predLabel = s.status==='red' && conf < 15
-      ? '데이터 부족'
-      : `${Math.max(0,s.predLow-widen)}~${s.predHigh+widen}${yUnit}`;
-    const diffSign = s.diff?.includes?.('+') ? '+' : '';
-    const feedback = tone.sample.replace('{name}', s.name);
-    const today = '2026.04.14';
-    // 신뢰도 배너
-    const targetPct = lv === 'red' ? 40 : 70;
-    const weeksMore = lv === 'green' ? null : weeksToReach(s, eq, targetPct);
-    const confBanner = lv === 'green' ? '' : `
-      <div class="rounded-xl ${lv==='yellow'?'bg-amber-50 border border-amber-200':'bg-gray-50 border border-gray-200'} p-3 mb-5 flex items-start gap-3">
-        <div class="text-lg">${lv==='yellow'?'⚠️':'💭'}</div>
-        <div class="flex-1">
-          <div class="text-[12px] font-bold ${lv==='yellow'?'text-amber-800':'text-ink-700'}">
-            이 리포트 신뢰도 ${conf}% · ${lv==='yellow'?'참고용':'추정 범위가 넓음'}
-          </div>
-          ${weeksMore ? `<div class="text-[11px] text-ink-600 mt-0.5">${weeksMore}주 더 데이터가 쌓이면 신뢰도 ${projectedConfidence(s,eq,weeksMore)}%까지 올라갑니다.</div>` : ''}
-        </div>
-      </div>`;
-    return `
-    <div class="a4-page">
-      <div class="a4-inner">
-        <!-- 헤더 -->
-        <div class="flex items-start justify-between border-b-2 border-brand-500 pb-4 mb-5">
-          <div>
-            <div class="text-[11px] font-bold text-brand-600 tracking-widest">PERSONAL REPORT</div>
-            <div class="text-[24px] font-extrabold mt-1">${s.name} 학생 학습 리포트</div>
-            <div class="text-[12px] text-ink-500 mt-1">${s.cls} · 분석 기간: ${periodLabel} · 발행일 ${today}</div>
-          </div>
-          <div class="text-right">
-            <div class="text-[11px] text-ink-500">발행</div>
-            <div class="font-extrabold text-brand-600 text-[15px] mt-0.5">크래빗 영어학원</div>
-            <div class="text-[10px] text-ink-500 mt-0.5">우리학원 성공방정식</div>
-          </div>
-        </div>
-
-        ${confBanner}
-
-        <!-- 적용 방정식 + 신뢰도 -->
-        <div class="rounded-xl bg-soft-navy p-4 mb-5">
-          <div class="text-[11px] font-bold text-brand-600 mb-1">적용 성공방정식 · v${eq.version} · 모델 설명력(R²) ${eq.trust}%</div>
-          <div class="text-[14px] font-extrabold text-ink-900 leading-snug">${eq.formula}</div>
-        </div>
-
-        <!-- 핵심 예측 -->
-        <h2>핵심 예측</h2>
-        <div class="grid grid-cols-3 gap-3 mb-5">
-          <div class="rounded-xl bg-gray-50 p-4">
-            <div class="text-[11px] text-ink-500">현재 ${yLabel}</div>
-            <div class="text-[24px] font-extrabold text-ink-900 mt-1">${curLabel}</div>
-            <div class="text-[11px] text-ink-500 mt-1">최근 분석 시점 기준</div>
-          </div>
-          <div class="rounded-xl bg-brand-50 p-4 border border-brand-100">
-            <div class="text-[11px] text-brand-600 font-bold">다음 시험 예측</div>
-            <div class="text-[24px] font-extrabold text-brand-700 mt-1">${predLabel}</div>
-            <div class="text-[11px] text-brand-600 mt-1">현 패턴 유지 가정</div>
-          </div>
-          <div class="rounded-xl bg-gray-50 p-4">
-            <div class="text-[11px] text-ink-500">변화 추이</div>
-            <div class="text-[24px] font-extrabold ${s.diff?.includes?.('+')?'text-emerald-600':'text-rose-500'} mt-1">${s.status==='red'?'—':diffSign+s.diff}</div>
-            <div class="text-[11px] text-ink-500 mt-1">직전 대비</div>
-          </div>
-        </div>
-
-        <!-- 변수 기여도 -->
-        <h2>${yLabel}에 영향을 준 변수</h2>
-        <div class="rounded-xl border border-gray-100 p-4 mb-5">
-          ${eq.terms.map(t=>{
-            const c = s.contribution[t.name] ?? 50;
-            return `<div class="bar-row">
-              <div class="bar-label">${t.name}</div>
-              <div class="bar-track"><div class="bar-fill" style="width:${c}%"></div></div>
-              <div class="bar-val">β ${t.beta}</div>
-            </div>`;
-          }).join('')}
-          <div class="text-[11px] text-ink-500 mt-3">β값이 클수록 ${yLabel}에 미치는 영향이 큽니다. 막대 길이는 이 학생의 해당 변수 활동 수준입니다.</div>
-        </div>
-
-        <!-- 학습 추이 -->
-        <h2>최근 ${s.trend.length}주 학습 추이</h2>
-        <div class="rounded-xl border border-gray-100 p-4 mb-5">
-          <svg class="spark" viewBox="0 0 100 100" preserveAspectRatio="none">
-            <path d="${trendArea}" fill="rgba(58,116,255,.12)"/>
-            <path d="${trendPath}" fill="none" stroke="#3a74ff" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
-          </svg>
-          <div class="flex justify-between text-[10px] text-ink-500 mt-1.5"><span>${s.trend.length}주 전</span><span>현재</span></div>
-        </div>
-
-        <!-- 핵심 인사이트 -->
-        <h2>핵심 인사이트</h2>
-        <div class="rounded-xl bg-soft-lemon/60 border border-amber-100 p-4 mb-5">
-          <div class="text-[14px] font-semibold ${s.insightColor} leading-relaxed">💡 ${s.insight}</div>
-        </div>
-
-        <!-- Next Action -->
-        <h2>추천 다음 액션</h2>
-        <div class="rounded-xl border border-gray-100 p-2 mb-5">
-          ${s.nextActions.map((a,i)=>`<div class="next-action-item">
-            <div class="num">${i+1}</div>
-            <div class="text-[13px] leading-relaxed text-ink-700 pt-0.5">${a}</div>
-          </div>`).join('')}
-        </div>
-
-        <!-- 개인 피드백 -->
-        <h2>개인 피드백</h2>
-        <div class="rounded-xl bg-brand-50 border border-brand-100 p-5 mb-5">
-          <div class="text-[14px] leading-relaxed text-ink-900">${feedback}</div>
-          <div class="text-[10px] text-ink-500 mt-2">— ${s.cls} 담당</div>
-        </div>
-
-        <!-- 푸터 -->
-        <div class="mt-auto pt-5 border-t border-gray-100 flex items-center justify-between text-[10px] text-ink-500">
-          <div>본 리포트는 크래빗 영어학원의 우리학원 성공방정식(v${eq.version})으로 자동 생성되었습니다.</div>
-          <div>page 1</div>
-        </div>
-      </div>
-    </div>`;
-  }
-
-  // ===== Step 4: A4 캐러셀 =====
-  let reportPageIdx = 0;
-  let reportPages = []; // [{s, eq, periodLabel, tone}]
-
-  function buildReportPages(){
-    const eq = equations[wizState.eqIdx];
-    const tone = tones.find(t=>t.id === wizState.tone);
-    const need = wizState.period === '3m' ? 3 : wizState.period === '6m' ? 6 : 0;
-    const sel = eligibleStudents().filter(s=>wizState.students.has(s.name));
-    const final = need ? sel.filter(s=>s.months >= need) : sel;
-    return final.map(s=>{
-      const periodLabel = need ? `최근 ${need}개월` : `최근 ${s.months}개월 (자동)`;
-      return {s, eq, periodLabel, tone};
-    });
-  }
-
-  function renderWizStep4(){
-    reportPages = buildReportPages();
-    reportPageIdx = 0;
-    if(reportPages.length === 0){
-      document.getElementById('reportStage').innerHTML = '<div class="bg-white rounded-2xl p-10 text-center text-ink-500 w-full">조건에 맞는 학생이 없어요. 이전 단계로 돌아가 설정을 바꿔주세요.</div>';
-      document.getElementById('reportPageTotal').textContent = '0';
-      document.getElementById('reportPageIdx').textContent = '0';
-      return;
-    }
-    document.getElementById('reportPageTotal').textContent = reportPages.length;
-    drawCurrentReportPage();
-  }
-
-  function drawCurrentReportPage(){
-    const stage = document.getElementById('reportStage');
-    const p = reportPages[reportPageIdx];
-    stage.innerHTML = renderReportPage(p.s, p.eq, p.periodLabel, p.tone);
-    document.getElementById('reportPageIdx').textContent = reportPageIdx + 1;
-    requestAnimationFrame(()=>fitA4(stage));
-  }
+  window.closeReportModal = closeReportModal;
 
   function navReport(dir){
-    if(reportPages.length === 0) return;
-    reportPageIdx = (reportPageIdx + dir + reportPages.length) % reportPages.length;
-    drawCurrentReportPage();
+    const u = activeUpload();
+    if(!u) return;
+    const next = activeStudentIdx + dir;
+    if(next < 0 || next >= u.reports.length) return;
+    activeStudentIdx = next;
+    renderReportPage();
   }
   window.navReport = navReport;
 
-  // A4 페이지를 컨테이너에 맞게 transform scale
-  function fitA4(stage){
-    const page = stage.querySelector('.a4-page');
-    if(!page) return;
-    const parent = stage.getBoundingClientRect();
-    const availW = parent.width - 16;
-    const scale = Math.min(1, availW / 794);
-    page.style.transform = `scale(${scale})`;
-    // 컨테이너 높이 조정 (스케일된 높이로)
-    stage.style.height = (1123 * scale + 20) + 'px';
-  }
-  window.addEventListener('resize', ()=>{
-    const wizStage = document.getElementById('reportStage');
-    if(wizStage && !document.getElementById('wizard').classList.contains('hidden') && wizStep === 4) fitA4(wizStage);
-    const rvStage = document.getElementById('rvStage');
-    if(rvStage && !document.getElementById('reportViewer').classList.contains('hidden')) fitA4(rvStage);
-  });
+  // A4 리포트 본문 렌더링
+  function renderReportPage(){
+    const u = activeUpload();
+    if(!u) return;
+    const r = u.reports[activeStudentIdx];
+    if(!r) return;
+    const a = u.analysis;
+    const ys = u.yStats || { min:0, max:100, avg:(r.yActual||0) };
 
-  function wizNext(){
-    const seq = activeStepSequence();
-    const i = seq.indexOf(wizStep);
-    if(i < seq.length - 1){ wizStep = seq[i+1]; renderWizStep(); document.getElementById('wizard').scrollTo({top:0}); }
-    else commitGeneration();
-  }
-  function wizPrev(){
-    const seq = activeStepSequence();
-    const i = seq.indexOf(wizStep);
-    if(i > 0){ wizStep = seq[i-1]; renderWizStep(); document.getElementById('wizard').scrollTo({top:0}); }
-  }
-  window.wizNext = wizNext; window.wizPrev = wizPrev;
+    // 상단바 업데이트
+    document.getElementById('mdCounter').textContent = `${activeStudentIdx + 1} / ${u.reports.length}`;
+    document.getElementById('mdName').textContent = r.studentName;
 
-  // ===== 리포트 생성 확정 =====
-  function commitGeneration(){
-    if(reportPages.length === 0){ alert('조건에 맞는 학생이 없어 리포트를 만들 수 없어요.'); return; }
-    const eq = reportPages[0].eq;
-    const periodLabel = reportPages[0].periodLabel.includes('자동') ? '자동 (학생별 최대)' : reportPages[0].periodLabel;
-    const tone = reportPages[0].tone;
-    const g = {
-      id: 'g_' + Date.now(),
-      dateTime: fmtNow(),
-      eq, periodLabel, tone,
-      students: reportPages.map(p => ({...p.s, kakao: p.s.phoneOK ? 'pending' : 'noPhone', kakaoAt:null, pdf:false}))
-    };
-    generations.push(g);
-    renderHistory(); // 백그라운드 갱신
-    closeWizard();
-    setTimeout(()=>openGenDetail(g.id), 150);
-  }
+    // 네비게이션 disabled 상태
+    document.getElementById('navPrev').disabled = activeStudentIdx === 0;
+    document.getElementById('navNext').disabled = activeStudentIdx === u.reports.length - 1;
 
-  // ===== 생성건 상세 풀페이지 =====
-  let currentGen = null;
-  let gdSelected = new Set();
+    // 성장 여력 (정렬된 시나리오)
+    const scSorted = [...r.scenarios].sort((a,b) => Math.abs(b.gain) - Math.abs(a.gain));
+    const topScenario = scSorted[0];
 
-  function openGenDetail(id){
-    const g = generations.find(x=>x.id === id);
-    if(!g) return;
-    currentGen = g;
-    gdSelected = new Set();
-    document.getElementById('gdTitle').textContent = `${g.eq.name} · ${g.students.length}건`;
-    document.getElementById('gdMeta').textContent = `${g.dateTime} · 분석 기간 ${g.periodLabel} · 톤 ${tones.find(t=>t.id===g.tone).name}`;
-    renderGdList();
-    document.getElementById('genDetail').classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-  }
-  function closeGenDetail(){
-    document.getElementById('genDetail').classList.add('hidden');
-    document.body.style.overflow = '';
-    currentGen = null;
-  }
-  window.openGenDetail = openGenDetail; window.closeGenDetail = closeGenDetail;
+    // 오늘 날짜
+    const today = new Date();
+    const ty = today.getFullYear(), tm = String(today.getMonth()+1).padStart(2,'0'), td = String(today.getDate()).padStart(2,'0');
+    const dateStr = `${ty}.${tm}.${td}`;
 
-  function statusIcons(s){
-    let out = '<div class="flex items-center gap-1.5">';
-    // 알림톡
-    if(s.kakao === 'sent'){
-      out += `<span class="send-status-icon bg-yellow-100" title="알림톡 발송됨"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="#3a1d1d"><path d="M12 4C6.48 4 2 7.58 2 12c0 2.72 1.7 5.12 4.29 6.56-.18.66-.66 2.38-.76 2.75-.12.46.17.46.36.33.15-.1 2.4-1.63 3.35-2.28.91.13 1.82.19 2.76.19 5.52 0 10-3.58 10-8S17.52 4 12 4z"/></svg></span>`;
-    } else if(s.kakao === 'fail'){
-      out += `<span class="send-status-icon bg-rose-100 text-rose-600" title="알림톡 발송 실패"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/></svg></span>`;
-    } else if(s.kakao === 'noPhone'){
-      out += `<span class="send-status-icon bg-gray-100 text-ink-500" title="학부모 전화번호 미등록">📵</span>`;
-    }
-    if(s.pdf){
-      out += `<span class="send-status-icon bg-brand-50 text-brand-600" title="PDF 다운로드됨"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg></span>`;
-    }
-    out += '</div>';
-    return out;
-  }
+    // 현재 대비 예측 gain
+    const gain = (r.yPredicted ?? 0) - (r.yActual ?? 0);
+    const gainSign = gain >= 0 ? '+' : '';
+    const gainCls = gain >= 0 ? '#6d28d9' : '#be123c';
 
-  function renderGdList(){
-    const g = currentGen;
-    document.getElementById('gdReportBody').innerHTML = g.students.map((s,i)=>{
-      const checked = gdSelected.has(i);
-      const phoneCell = s.parentPhone
-        ? `<span class="font-mono">${s.parentPhone}</span>`
-        : `<span class="inline-flex items-center gap-1 text-rose-700 bg-rose-50 border border-rose-200 px-2 py-1 rounded-md text-xs font-bold">📵 미등록</span>`;
-      let kakaoCell;
-      if(s.kakao === 'sent'){
-        kakaoCell = `<div class="flex items-center gap-2"><span class="send-status-icon bg-yellow-100" title="발송 완료"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="#3a1d1d"><path d="M12 4C6.48 4 2 7.58 2 12c0 2.72 1.7 5.12 4.29 6.56-.18.66-.66 2.38-.76 2.75-.12.46.17.46.36.33.15-.1 2.4-1.63 3.35-2.28.91.13 1.82.19 2.76.19 5.52 0 10-3.58 10-8S17.52 4 12 4z"/></svg></span><span class="text-ink-700">${s.kakaoAt}</span></div>`;
-      } else if(s.kakao === 'fail'){
-        kakaoCell = `<span class="inline-flex items-center gap-1 text-rose-700 text-xs font-bold">⚠️ 발송 실패 · 재시도 필요</span>`;
-      } else if(s.kakao === 'noPhone'){
-        kakaoCell = `<span class="text-ink-300">—</span>`;
-      } else {
-        kakaoCell = `<span class="text-ink-500 text-xs">발송 전</span>`;
-      }
-      const disabledAttr = s.kakao === 'noPhone' ? 'disabled title="학부모 번호 미등록"' : '';
-      return `
-      <tr class="border-t border-gray-100 hover:bg-gray-50 transition">
-        <td class="px-4 py-4 text-center">
-          <input type="checkbox" ${checked?'checked':''} ${disabledAttr} onchange="gdToggle(${i}, this.checked)"/>
-        </td>
-        <td class="px-4 py-4">
+    // 예측 Y가 yStats 범위에서 어디 위치?
+    const yRange = (ys.max - ys.min) || 1;
+    const actualPct = Math.max(0, Math.min(100, ((r.yActual - ys.min) / yRange) * 100));
+    const predPct = Math.max(0, Math.min(100, ((r.yPredicted - ys.min) / yRange) * 100));
+
+    // 스캐터 (현재 X vs Y) - 가장 영향 큰 X 변수 사용
+    const topIdx = a.betaStd.map((b,i)=>({a:Math.abs(b),i})).sort((a,b)=>b.a-a.a)[0].i;
+    const allPoints = u.reports.map(rr => ({
+      x: rr.xValues[topIdx],
+      y: rr.yActual,
+      isMe: rr === r
+    })).filter(p => p.x != null && p.y != null);
+    const xs = allPoints.map(p=>p.x), ysvg = allPoints.map(p=>p.y);
+    const xMin = Math.min(...xs), xMax = Math.max(...xs);
+    const ysMin = Math.min(...ysvg), ysMax = Math.max(...ysvg);
+    const xPad = (xMax-xMin)*0.1 || 1;
+    const yPad = (ysMax-ysMin)*0.15 || 1;
+    const x0 = xMin-xPad, x1 = xMax+xPad;
+    const y0 = ysMin-yPad, y1 = ysMax+yPad;
+    const PL=50, PR=470, PT=16, PB=180;
+    const sx = v => PL + (v-x0)/(x1-x0)*(PR-PL);
+    const sy = v => PB - (v-y0)/(y1-y0)*(PB-PT);
+
+    // 단순 회귀선 (top X vs Y)
+    const n = allPoints.length;
+    const mx = allPoints.reduce((a,p)=>a+p.x,0)/n;
+    const my = allPoints.reduce((a,p)=>a+p.y,0)/n;
+    let sxx=0, sxy=0;
+    allPoints.forEach(p => { sxx += (p.x-mx)**2; sxy += (p.x-mx)*(p.y-my); });
+    const slope = sxy / (sxx || 1);
+    const intr = my - slope*mx;
+
+    // 가정 실천 팁 (top scenario 기반)
+    const homeTips = generateHomeTips(topScenario);
+
+    // 학생 이니셜과 그라데이션
+    const avatar = avatarStyle(r.studentName);
+
+    // 리포트 HTML (A4 한 페이지)
+    document.getElementById('reportPage').innerHTML = `
+      <!-- 히어로 헤더 -->
+      <div class="a4-hero">
+        <div class="flex items-start justify-between gap-4">
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full bg-soft-navy text-brand-700 font-bold grid place-items-center">${s.name[0]}</div>
+            <div class="stu-avatar" style="${avatar};width:58px;height:58px;font-size:26px">${escapeHtml(initials(r.studentName))}</div>
             <div>
-              <div class="font-extrabold text-[15px]">${s.name}</div>
-              <div class="text-[11px] text-ink-500 mt-0.5">${s.cls}</div>
+              <div class="text-[11px] font-bold text-brand-700 tracking-wider">📘 성장 리포트카드</div>
+              <div class="text-[26px] font-extrabold text-ink-900 leading-tight mt-0.5">${escapeHtml(r.studentName)}</div>
+              <div class="text-[12px] text-ink-500 mt-0.5">${escapeHtml(r.className || '반 미지정')} · 발행일 ${dateStr}</div>
             </div>
           </div>
-        </td>
-        <td class="px-4 py-4 text-[13px]">${phoneCell}</td>
-        <td class="px-4 py-4 text-[13px]">${kakaoCell}</td>
-        <td class="px-4 py-4">
-          <div class="flex items-center justify-center gap-1.5">
-            <button onclick="copyReportLink(${i})" title="공유 링크 복사" class="w-9 h-9 rounded-lg border border-gray-200 hover:bg-brand-50 hover:border-brand-300 hover:text-brand-600 grid place-items-center text-ink-500 transition">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.07 0l3-3a5 5 0 00-7.07-7.07l-1.5 1.5"/><path d="M14 11a5 5 0 00-7.07 0l-3 3a5 5 0 007.07 7.07l1.5-1.5"/></svg>
-            </button>
-            <button onclick="openReportViewer(${i})" title="리포트 크게 열어보기" class="w-9 h-9 rounded-lg border border-gray-200 hover:bg-brand-50 hover:border-brand-300 hover:text-brand-600 grid place-items-center text-ink-500 transition">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 3h6v6"/><path d="M9 21H3v-6"/><path d="M21 3l-7 7"/><path d="M3 21l7-7"/></svg>
-            </button>
+          <div class="text-right">
+            <div class="text-[10px] text-ink-500 font-bold">발행</div>
+            <div class="text-[12.5px] font-extrabold text-ink-900">크래빗 영어학원</div>
           </div>
-        </td>
-      </tr>`;
-    }).join('');
-    updateGdSelCount();
-  }
+        </div>
+      </div>
 
-  // 공유 링크 복사
-  function copyReportLink(i){
-    const s = currentGen.students[i];
-    const link = `https://crabit.school/r/${currentGen.id}/${encodeURIComponent(s.name)}-${Math.random().toString(36).slice(2,8)}`;
-    const fallback = ()=>{
-      const ta = document.createElement('textarea');
-      ta.value = link; document.body.appendChild(ta); ta.select();
-      try{ document.execCommand('copy'); }catch(e){}
-      document.body.removeChild(ta);
-    };
-    if(navigator.clipboard?.writeText){
-      navigator.clipboard.writeText(link).catch(fallback);
-    } else { fallback(); }
-    const t = document.getElementById('copyToast');
-    t.classList.remove('hidden');
-    clearTimeout(window.__toastT);
-    window.__toastT = setTimeout(()=>t.classList.add('hidden'), 1800);
-  }
-  window.copyReportLink = copyReportLink;
+      <div class="a4-inner">
 
-  function gdToggle(idx, checked){
-    if(checked) gdSelected.add(idx); else gdSelected.delete(idx);
-    updateGdSelCount();
-    document.getElementById('gdSelectAll').checked = gdSelected.size === currentGen.students.length;
-  }
-  function gdToggleAll(checked){
-    gdSelected = new Set();
-    if(checked) currentGen.students.forEach((_,i)=>gdSelected.add(i));
-    renderGdList();
-  }
-  function updateGdSelCount(){
-    document.getElementById('gdSelCount').textContent = gdSelected.size;
-  }
-  window.gdToggle = gdToggle; window.gdToggleAll = gdToggleAll;
+        <!-- 한 줄 요약 -->
+        <div class="mb-4">
+          <h2 class="text-[15.5px] font-extrabold text-ink-900 leading-snug">
+            ${escapeHtml(r.studentName)} 학생의 성장 가능성을 <span style="color:#6d28d9">${escapeHtml(a.yLabel)}</span> 기준으로 정리했어요
+          </h2>
+          <p class="text-[11.5px] text-ink-500 mt-1.5 leading-relaxed">
+            우리 학원 <b>${a.n}명</b>의 실제 데이터에서 찾은 <b>학생 성장 패턴</b>을 이 학생에게 적용한 결과예요. 100% 정확한 예측이 아닌 참고용 인사이트입니다.
+          </p>
+        </div>
 
-  // ===== 단일 리포트 뷰어 =====
-  let rvList = []; let rvIdx = 0;
-  function openReportViewer(startIdx){
-    rvList = currentGen.students.map(s => ({s, eq: currentGen.eq, periodLabel: currentGen.periodLabel, tone: tones.find(t=>t.id===currentGen.tone)}));
-    rvIdx = startIdx;
-    document.getElementById('rvTotal').textContent = rvList.length;
-    drawRv();
-    document.getElementById('reportViewer').classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-  }
-  function closeReportViewer(){
-    document.getElementById('reportViewer').classList.add('hidden');
-    document.body.style.overflow = currentGen ? 'hidden' : '';
-  }
-  function drawRv(){
-    const p = rvList[rvIdx];
-    document.getElementById('rvTitle').textContent = `${p.s.name} 학생 학습 리포트`;
-    document.getElementById('rvIdx').textContent = rvIdx + 1;
-    const stage = document.getElementById('rvStage');
-    stage.innerHTML = renderReportPage(p.s, p.eq, p.periodLabel, p.tone);
-    requestAnimationFrame(()=>fitA4(stage));
-  }
-  function rvNav(dir){
-    rvIdx = (rvIdx + dir + rvList.length) % rvList.length;
-    drawRv();
-  }
-  window.openReportViewer = openReportViewer;
-  window.closeReportViewer = closeReportViewer;
-  window.rvNav = rvNav;
+        <!-- 핵심 지표 카드 3개 -->
+        <div class="grid grid-cols-3 gap-3 mb-4">
+          <div class="metric-card">
+            <div class="metric-label">현재 ${escapeHtml(a.yLabel)}</div>
+            <div class="metric-value">${fmt(r.yActual, 1)}</div>
+            <div class="metric-sub">학급 평균 ${fmt(ys.avg, 1)}</div>
+          </div>
+          <div class="metric-card pink">
+            <div class="metric-label">공식 기반 예측</div>
+            <div class="metric-value" style="color:#be185d">${fmt(r.yPredicted, 1)}</div>
+            <div class="metric-sub">성장 패턴 적용값</div>
+          </div>
+          <div class="metric-card white">
+            <div class="metric-label">성장 여력 (Top)</div>
+            <div class="metric-value" style="color:#6d28d9">${topScenario.gain >= 0 ? '+' : ''}${fmt(topScenario.gain, 1)}</div>
+            <div class="metric-sub">${escapeHtml(topScenario.label)}를 최고치로</div>
+          </div>
+        </div>
 
-  // ===== 알림톡 발송 =====
-  function openKakaoSendModal(){
-    if(gdSelected.size === 0){ alert('발송할 리포트를 먼저 선택해주세요.'); return; }
-    // 전화번호 미등록 자동 제외 안내
-    const eligible = [...gdSelected].filter(i => currentGen.students[i].kakao !== 'noPhone' && currentGen.students[i].phoneOK);
-    document.getElementById('ksmCount').textContent = eligible.length;
-    openModal('kakaoSendModal');
-  }
-  function confirmKakaoSend(){
-    closeModal('kakaoSendModal');
-    let success = 0, fail = 0;
-    const failNames = [];
-    [...gdSelected].forEach(i=>{
-      const s = currentGen.students[i];
-      if(!s.phoneOK || s.kakao === 'noPhone') return; // 자동 제외
-      // 95% 성공 시뮬레이션
-      if(Math.random() > 0.05){ s.kakao = 'sent'; s.kakaoAt = fmtNow(); success++; }
-      else { s.kakao = 'fail'; fail++; failNames.push(s.name); }
+        <!-- 우리 학원 성공 공식 -->
+        <div class="viz-block" style="background:linear-gradient(135deg,#faf5ff,#fdf2f8)">
+          <div class="viz-title">🧮 우리 학원 학생 성장 공식</div>
+          <div class="text-[13px] font-extrabold text-ink-900 leading-relaxed" style="font-family:Pretendard Variable">${formulaString(a)}</div>
+          <div class="text-[10.5px] text-ink-500 mt-2">이 공식은 <b>${a.n}명</b>의 실제 데이터로 도출됐어요. 신뢰도 R² = <b class="text-brand-700">${Math.round(a.r2*100)}%</b></div>
+        </div>
+
+        <!-- 회귀 스캐터 + 학급 비교 -->
+        <div class="grid grid-cols-5 gap-3 mt-4">
+          <!-- 스캐터 3/5 -->
+          <div class="viz-block col-span-3" style="margin-top:0">
+            <div class="viz-title">📊 학급 안에서 ${escapeHtml(r.studentName)} 학생의 위치</div>
+            <div class="viz-sub">${escapeHtml(a.xLabels[topIdx])} ↔ ${escapeHtml(a.yLabel)} · 가장 영향 큰 변수 기준</div>
+            <svg viewBox="0 0 500 220" class="w-full" style="background:linear-gradient(135deg,#faf5ff,#fdf2f8);border-radius:10px">
+              ${[0,1,2,3,4].map(i => {
+                const yv = y0 + (y1-y0)*i/4;
+                return `<line x1="${PL}" y1="${sy(yv)}" x2="${PR}" y2="${sy(yv)}" stroke="#f1f5f9"/>`;
+              }).join('')}
+              <line x1="${PL}" y1="${PB}" x2="${PR}" y2="${PB}" stroke="#e5e7eb"/>
+              <line x1="${PL}" y1="${PT}" x2="${PL}" y2="${PB}" stroke="#e5e7eb"/>
+              ${[0,1,2,3,4].map(i => {
+                const yv = y0 + (y1-y0)*i/4;
+                return `<text x="${PL-6}" y="${sy(yv)+3}" text-anchor="end" font-size="9" fill="#9ca3af">${Math.round(yv)}</text>`;
+              }).join('')}
+              ${[0,1,2,3,4,5].map(i => {
+                const xv = x0 + (x1-x0)*i/5;
+                return `<text x="${sx(xv)}" y="${PB+14}" text-anchor="middle" font-size="9" fill="#9ca3af">${Math.round(xv*10)/10}</text>`;
+              }).join('')}
+              <text x="${(PL+PR)/2}" y="${PB+30}" text-anchor="middle" font-size="10" fill="#6b7280" font-weight="700">${escapeHtml(a.xLabels[topIdx])}</text>
+              <text x="14" y="${(PT+PB)/2}" text-anchor="middle" font-size="10" fill="#6b7280" font-weight="700" transform="rotate(-90, 14, ${(PT+PB)/2})">${escapeHtml(a.yLabel)}</text>
+              <line class="gline-path" x1="${sx(x0)}" y1="${sy(slope*x0+intr)}" x2="${sx(x1)}" y2="${sy(slope*x1+intr)}" stroke="#c4b5fd" stroke-width="2.5" stroke-linecap="round"/>
+              ${allPoints.map((p, i) => p.isMe ? '' : `<circle class="gline-dot" style="animation-delay:${i*15}ms;transform:scale(0);transform-origin:${sx(p.x)}px ${sy(p.y)}px" cx="${sx(p.x)}" cy="${sy(p.y)}" r="3.5" fill="#c4b5fd" opacity="0.65"/>`).join('')}
+              ${allPoints.filter(p=>p.isMe).map(p => `
+                <circle cx="${sx(p.x)}" cy="${sy(p.y)}" r="12" fill="#7c3aed" opacity="0.15"/>
+                <circle cx="${sx(p.x)}" cy="${sy(p.y)}" r="7" fill="#7c3aed" stroke="white" stroke-width="2.5"/>
+                <text x="${sx(p.x)}" y="${sy(p.y) - 14}" text-anchor="middle" font-size="10" font-weight="800" fill="#6d28d9">나</text>
+              `).join('')}
+            </svg>
+            <div class="flex items-center gap-3 text-[10.5px] text-ink-500 mt-2">
+              <span class="inline-flex items-center gap-1"><span class="w-2 h-2 rounded-full" style="background:#7c3aed"></span>${escapeHtml(r.studentName)}</span>
+              <span class="inline-flex items-center gap-1"><span class="w-2 h-2 rounded-full" style="background:#c4b5fd;opacity:.65"></span>학급 친구들</span>
+              <span class="inline-flex items-center gap-1"><span class="w-5 h-[2px]" style="background:#c4b5fd"></span>학원 성장 패턴</span>
+            </div>
+          </div>
+
+          <!-- 변수별 비교 2/5 -->
+          <div class="viz-block col-span-2" style="margin-top:0">
+            <div class="viz-title">👣 나 vs 학급 평균</div>
+            <div class="viz-sub">변수별 현재 위치</div>
+            ${r.scenarios.map(sc => {
+              const maxV = Math.max(sc.classMax, sc.current, sc.classAvg) || 1;
+              const stuPct = (sc.current / maxV) * 100;
+              const avgPct = (sc.classAvg / maxV) * 100;
+              const aboveAvg = sc.current >= sc.classAvg;
+              return `
+                <div style="margin:10px 0">
+                  <div class="flex items-center justify-between mb-1">
+                    <span class="text-[11px] font-bold text-ink-700">${escapeHtml(sc.label)}</span>
+                    <span class="text-[10.5px] font-extrabold" style="color:${aboveAvg ? '#6d28d9' : '#9ca3af'}">${fmt(sc.current, 1)}</span>
+                  </div>
+                  <div style="position:relative;height:14px;background:#f5f5f5;border-radius:7px;overflow:visible">
+                    <div style="position:absolute;left:0;top:0;bottom:0;width:${stuPct}%;background:linear-gradient(90deg,#c4b5fd,#7c3aed);border-radius:7px;transition:width 1s"></div>
+                    <div style="position:absolute;left:${avgPct}%;top:-2px;bottom:-2px;width:2px;background:#6b7280"></div>
+                  </div>
+                  <div class="text-[9.5px] text-ink-500 mt-0.5">학급 평균 ${fmt(sc.classAvg, 1)}</div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+
+        <!-- 성장 시나리오 -->
+        <div class="viz-block">
+          <div class="viz-title">🎯 ${escapeHtml(r.studentName)} 학생의 성장 여력 (What-If 시나리오)</div>
+          <div class="viz-sub">각 변수를 '학급 최고 수준'까지 끌어올렸을 때 예상 변화량</div>
+          <table class="scenario-table">
+            <thead>
+              <tr>
+                <th>변수</th>
+                <th style="text-align:right">현재</th>
+                <th style="text-align:right">학급 최고</th>
+                <th style="text-align:right">계수(β)</th>
+                <th style="text-align:right">예상 변화</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${scSorted.map(sc => {
+                const cls = sc.gain >= 0.2 ? 'text-brand-700' : sc.gain <= -0.2 ? 'text-rose-600' : 'text-ink-500';
+                const sign = sc.gain >= 0 ? '+' : '';
+                return `
+                  <tr>
+                    <td class="font-bold text-ink-900">${escapeHtml(sc.label)}</td>
+                    <td style="text-align:right">${fmt(sc.current, 1)}</td>
+                    <td style="text-align:right">${fmt(sc.classMax, 1)}</td>
+                    <td style="text-align:right" class="font-mono text-[11px] text-ink-500">${sc.coef.toFixed(2)}</td>
+                    <td style="text-align:right" class="font-extrabold ${cls}">${sign}${fmt(sc.gain, 1)}</td>
+                  </tr>`;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 가정 실천 팁 -->
+        <div class="viz-block" style="background:linear-gradient(135deg,#fdf2f8,#faf5ff);border-color:#fce7f3">
+          <div class="viz-title">🏡 가정에서 이렇게 도와주세요</div>
+          <div class="viz-sub">영향도 가장 큰 변수 기반 학부모 실천 가이드</div>
+          <ul style="margin:0;padding:0;list-style:none">
+            ${homeTips.map((t, i) => `
+              <li style="display:flex;gap:10px;padding:8px 0;border-bottom:${i === homeTips.length-1 ? 'none' : '1px dashed #fce7f3'}">
+                <div style="flex-shrink:0;width:22px;height:22px;border-radius:50%;background:#be185d;color:white;font-weight:800;font-size:11px;display:grid;place-items:center">${i+1}</div>
+                <div class="text-[12.5px] text-ink-700 leading-relaxed"><b class="text-ink-900">${escapeHtml(t.title)}</b> — ${escapeHtml(t.body)}</div>
+              </li>
+            `).join('')}
+          </ul>
+        </div>
+
+        <!-- 푸터 -->
+        <div style="margin-top:auto;padding-top:16px;border-top:1px dashed #e5e7eb">
+          <div class="flex items-center justify-between text-[10px] text-ink-500">
+            <div>발행: 크래빗 영어학원 · ${dateStr}</div>
+            <div>우리학원 성공방정식 by <b class="text-brand-700">Crabit</b></div>
+          </div>
+          <div class="text-[9.5px] text-ink-400 mt-1.5">※ 본 리포트는 학원 실제 데이터 기반 성장 패턴을 참고용으로 제공합니다. 100% 정확한 예측은 아니며, 학생의 노력·환경에 따라 달라질 수 있어요.</div>
+        </div>
+
+      </div>
+    `;
+
+    // 애니메이션 재생: transform 적용
+    requestAnimationFrame(() => {
+      document.querySelectorAll('#reportPage .gline-dot').forEach((el, i) => {
+        setTimeout(() => { el.style.transform = 'scale(1)'; }, i * 15);
+      });
     });
-    document.getElementById('krmSuccess').textContent = success;
-    document.getElementById('krmFail').textContent = fail;
-    const failBox = document.getElementById('krmFailList');
-    if(fail > 0){
-      failBox.classList.remove('hidden');
-      failBox.innerHTML = failNames.map(n=>`<div class="flex items-center justify-between text-rose-700"><span><b>${n}</b> 학생</span><span class="text-rose-500">발송 실패 · 재시도 권장</span></div>`).join('');
-    } else {
-      failBox.classList.add('hidden');
-    }
-    openModal('kakaoResultModal');
   }
-  function closeKakaoResult(){
-    closeModal('kakaoResultModal');
-    renderGdList();
-  }
-  window.openKakaoSendModal = openKakaoSendModal;
-  window.confirmKakaoSend = confirmKakaoSend;
-  window.closeKakaoResult = closeKakaoResult;
 
-  // ===== PDF ZIP 다운로드 =====
-  function openPdfZipModal(){
-    if(gdSelected.size === 0){ alert('다운로드할 리포트를 먼저 선택해주세요.'); return; }
-    document.getElementById('pzmCount').textContent = gdSelected.size;
-    openModal('pdfZipModal');
+  function generateHomeTips(topScenario){
+    const label = topScenario.label;
+    const tips = [];
+    // 키워드 기반 맞춤 팁
+    if(/복습|예습/.test(label)){
+      tips.push({title:'주 단위 루틴 만들기', body:`"일·수·금 30분 ${label} 고정 시간"처럼 요일을 정해주세요. 시간이 짧아도 고정되면 효과가 훨씬 커요.`});
+      tips.push({title:'체크리스트 함께 확인', body:`수업 자료를 ${label} 전에 펼쳐 확인하는 걸 부모님이 물어봐주세요. "오늘은 어디 봤어?"로 가볍게.`});
+      tips.push({title:'환경 정돈', body:'스마트폰·TV가 없는 공간에서 하도록 도와주세요. 시간보다 집중 밀도가 점수에 더 큰 영향을 줘요.'});
+    } else if(/숙제|과제/.test(label)){
+      tips.push({title:'숙제 완료 사인', body:'매일 숙제 완료 여부를 부모님이 확인하고 사인해주세요. 아이가 "지켰다"는 성취감을 느껴요.'});
+      tips.push({title:'시간 타이머 활용', body:'25분 집중 + 5분 쉬는 포모도로 방식을 도입해보세요. 막연함이 줄어들어 완주율이 올라가요.'});
+      tips.push({title:'난이도 관찰', body:'너무 어려운 문제에서 막히면 학원 선생님과 상의해주세요. 의욕이 꺾이기 전에 조정이 필요해요.'});
+    } else if(/출결|출석/.test(label)){
+      tips.push({title:'등원 일정 일관성', body:'같은 시간에 출발하는 루틴을 만들어주세요. 생체 리듬이 고정되면 결석률이 크게 줄어요.'});
+      tips.push({title:'컨디션 관리', body:'잠자리 시간을 10시 이전으로 고정해주세요. 수면 부족은 출석보다 집중도를 더 떨어뜨려요.'});
+      tips.push({title:'결석 시 보강', body:'부득이하게 빠지면 당일 학원에 연락해 보강 계획을 함께 잡아주세요.'});
+    } else if(/질문|발표/.test(label)){
+      tips.push({title:'질문 노트 만들기', body:'수업 중 떠오른 궁금증을 적어두고 다음 수업에 꼭 질문하도록 독려해주세요.'});
+      tips.push({title:'가정에서도 "왜?" 질문', body:'공부한 내용을 부모님께 설명해달라고 해주세요. 설명하면서 이해가 2배로 깊어져요.'});
+      tips.push({title:'실수 환영 분위기', body:'틀린 답을 혼내지 않고 격려해주세요. 질문·발표가 줄어드는 가장 큰 원인은 "틀림"에 대한 부담감이에요.'});
+    } else if(/집중|자습/.test(label)){
+      tips.push({title:'작은 단위로 쪼개기', body:'1시간 통째로가 아니라 "20분 × 3번"으로 나눠주세요. 부담이 줄면 실천율이 올라가요.'});
+      tips.push({title:'물·간식 미리 준비', body:'일어서는 핑계를 줄여주세요. 집중 흐름이 깨지지 않아요.'});
+      tips.push({title:'성취 시각화', body:'한 단원 끝날 때마다 스티커 붙이기 같은 시각적 성취를 주세요. 동기가 유지돼요.'});
+    } else {
+      tips.push({title:`${label} 루틴 만들기`, body:`매일 같은 시간에 ${label}을 챙기는 작은 루틴이 6주 후 큰 차이를 만들어요.`});
+      tips.push({title:'주간 리뷰', body:`일요일 저녁 10분, 이번 주 ${label}이 어땠는지 아이와 대화해주세요. 개선 포인트가 자연스럽게 보여요.`});
+      tips.push({title:'칭찬 구체화', body:'"잘했네"보다 "이번 주에 ${label}이 늘었구나"라고 구체적으로 알아봐주세요.'.replace('${label}', label)});
+    }
+    return tips.slice(0, 3);
   }
-  function confirmPdfZip(){
-    closeModal('pdfZipModal');
-    [...gdSelected].forEach(i=>{ currentGen.students[i].pdf = true; });
-    renderGdList();
-    setTimeout(()=>alert(`${gdSelected.size}개 PDF가 ZIP으로 다운로드되었습니다. (시연용)`), 100);
+
+  // ===== 알림톡 발송 (준비중 토스트) =====
+  function sendAlimtalk(){
+    showToast('🚧', '알림톡 발송은 준비 중이에요', '솔라피 API 연동 후 4월 말 정식 오픈 예정이에요. 지금은 PDF로 저장해서 직접 보내주세요.');
   }
-  window.openPdfZipModal = openPdfZipModal;
-  window.confirmPdfZip = confirmPdfZip;
+  window.sendAlimtalk = sendAlimtalk;
+
+  // ===== PDF 다운로드 =====
+  async function downloadPdf(){
+    const u = activeUpload();
+    if(!u) return;
+    const r = u.reports[activeStudentIdx];
+    if(!r) return;
+    const btn = document.getElementById('pdfBtn');
+    const orig = btn.innerHTML;
+    btn.innerHTML = '<span>⏳</span> 생성 중…';
+    btn.disabled = true;
+
+    const page = document.getElementById('reportPage');
+    const opt = {
+      margin: 0,
+      filename: `${r.studentName}_성장리포트_${u.uploadedAt.replace(/[^0-9]/g,'').slice(0,8)}.pdf`,
+      image: { type: 'jpeg', quality: 0.95 },
+      html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+    try{
+      await html2pdf().set(opt).from(page).save();
+      showToast('✅', 'PDF 저장 완료', `${r.studentName} 학생의 리포트가 PDF로 저장됐어요.`);
+    } catch(e){
+      showToast('⚠️', 'PDF 생성 실패', '다시 시도해주세요.');
+      console.error(e);
+    } finally {
+      btn.innerHTML = orig;
+      btn.disabled = false;
+    }
+  }
+  window.downloadPdf = downloadPdf;
+
+  // ===== 토스트 =====
+  let _toastT;
+  function showToast(icon, title, body){
+    document.getElementById('toastIcon').textContent = icon;
+    document.getElementById('toastTitle').textContent = title;
+    document.getElementById('toastBody').textContent = body;
+    const el = document.getElementById('toast');
+    el.classList.add('on');
+    clearTimeout(_toastT);
+    _toastT = setTimeout(hideToast, 4200);
+  }
+  function hideToast(){ document.getElementById('toast').classList.remove('on'); }
+  window.hideToast = hideToast;
+
+  // ===== 키보드 네비게이션 =====
+  document.addEventListener('keydown', e => {
+    const modalOn = document.getElementById('reportModal').classList.contains('on');
+    if(!modalOn) return;
+    if(e.key === 'ArrowLeft') navReport(-1);
+    else if(e.key === 'ArrowRight') navReport(1);
+    else if(e.key === 'Escape') closeReportModal();
+  });
+
+  // ===== 초기 진입 =====
+  function init(){
+    uploads = loadList(UP_KEY).filter(u => u.reports && u.reports.length > 0);
+    const params = new URLSearchParams(location.search);
+    const up = params.get('upload');
+    if(up && getUpload(up)){
+      switchView('detail', up);
+    } else {
+      switchView('list');
+    }
+  }
+  init();
 </script>
 </body>
 </html>
