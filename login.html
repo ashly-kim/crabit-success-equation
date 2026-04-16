@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta http-equiv="Cache-Control" content="no-cache, max-age=0, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+<title>로그인 · 우리학원 성공방정식</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="shared.js?v=1776357449491"></script>
+<script>__applyTheme();</script>
+<style>
+  html,body{background:#f6f7fb;min-height:100vh}
+  .kakao-btn{background:#FEE500;color:#3c1e1e}
+  .kakao-btn:hover{background:#fdd835}
+</style>
+</head>
+<body class="font-sans text-ink-900 antialiased">
+
+<div class="min-h-screen flex flex-col">
+  <main class="flex-1 flex items-center justify-center px-6 py-12">
+    <div class="w-full max-w-md">
+
+      <a href="index.html" class="flex items-center justify-center gap-2 mb-8">
+        <div class="w-11 h-11 rounded-xl bg-brand-500 grid place-items-center text-white font-extrabold text-lg">우</div>
+        <div class="text-left">
+          <div class="text-[18px] font-extrabold leading-tight">우리학원 성공방정식</div>
+          <div class="text-[11px] text-ink-500">by CRABIT</div>
+        </div>
+      </a>
+
+      <div class="bg-white rounded-3xl shadow-card ring-soft p-8">
+        <h1 class="text-[24px] font-extrabold mb-1.5">다시 오신 걸 환영해요</h1>
+        <p class="text-sm text-ink-500 mb-7">가입하신 휴대폰 번호로 로그인해주세요.</p>
+
+        <!-- 카카오 -->
+        <button onclick="loginKakao()" class="kakao-btn w-full py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 mb-4">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4C6.48 4 2 7.58 2 12c0 2.72 1.7 5.12 4.29 6.56-.18.66-.66 2.38-.76 2.75-.12.46.17.46.36.33.15-.1 2.4-1.63 3.35-2.28.91.13 1.82.19 2.76.19 5.52 0 10-3.58 10-8S17.52 4 12 4z"/></svg>
+          카카오로 로그인
+        </button>
+
+        <div class="flex items-center gap-3 my-5">
+          <div class="flex-1 h-px bg-gray-200"></div>
+          <div class="text-xs text-ink-500">또는</div>
+          <div class="flex-1 h-px bg-gray-200"></div>
+        </div>
+
+        <form onsubmit="doLogin(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-ink-500 mb-1.5">휴대폰 번호 (아이디)</label>
+            <input id="loginPhone" type="tel" inputmode="numeric" placeholder="010-1234-5678" maxlength="13"
+              class="w-full px-4 py-3 rounded-xl border border-gray-200 text-[15px] font-semibold focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100"
+              oninput="this.value = __formatPhone(this.value)"/>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-ink-500 mb-1.5">비밀번호</label>
+            <input id="loginPw" type="password" placeholder="비밀번호"
+              class="w-full px-4 py-3 rounded-xl border border-gray-200 text-[15px] focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100"/>
+          </div>
+          <div id="loginErr" class="hidden text-sm text-rose-600 font-semibold">—</div>
+          <button class="w-full py-3.5 rounded-xl bg-brand-500 text-white font-bold hover:bg-brand-600">
+            로그인
+          </button>
+        </form>
+
+        <div class="flex items-center justify-between mt-6 text-sm">
+          <a href="signup.html" class="text-brand-600 font-semibold hover:underline">회원가입</a>
+          <a href="#" onclick="alert('비밀번호 찾기는 준비 중이에요')" class="text-ink-500 hover:text-ink-900">비밀번호 찾기</a>
+        </div>
+
+        <!-- 데모 계정 안내 (프로토타입 전용) -->
+        <div class="mt-6 rounded-xl bg-soft-navy border border-brand-100 p-4 text-[11.5px] text-ink-700 leading-relaxed">
+          <div class="font-bold text-brand-700 mb-1">🔐 시연용 샘플 계정</div>
+          <div><b>010-1234-5678</b> · 비밀번호: <code class="bg-white px-1.5 py-0.5 rounded">test1234!</code></div>
+          <div><b>010-9876-5432</b> · 비밀번호: <code class="bg-white px-1.5 py-0.5 rounded">crabit@1</code></div>
+        </div>
+      </div>
+
+      <div class="text-center mt-6 text-xs text-ink-500">
+        계정이 없으신가요? <a href="signup.html" class="font-semibold text-brand-600 hover:underline">회원가입</a>
+      </div>
+    </div>
+  </main>
+
+  <div id="footer"></div>
+</div>
+
+<script>
+  document.getElementById('footer').outerHTML = __renderFooter();
+
+  // 이미 로그인돼 있으면 홈으로
+  if(__auth.getSession()) location.href = 'index.html';
+
+  function doLogin(e){
+    e.preventDefault();
+    const phone = document.getElementById('loginPhone').value.replace(/\D/g, '');
+    const pw = document.getElementById('loginPw').value;
+    const err = document.getElementById('loginErr');
+    if(phone.length !== 11){ err.textContent = '휴대폰 번호를 정확히 입력해주세요.'; err.classList.remove('hidden'); return; }
+    if(!pw){ err.textContent = '비밀번호를 입력해주세요.'; err.classList.remove('hidden'); return; }
+    const r = __auth.login(phone, pw);
+    if(!r.ok){ err.textContent = r.error; err.classList.remove('hidden'); return; }
+    location.href = 'index.html';
+  }
+  function loginKakao(){
+    __auth.kakaoLogin();
+    location.href = 'index.html';
+  }
+</script>
+</body>
+</html>
