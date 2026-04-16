@@ -9,7 +9,7 @@
 <title>리포트카드 · 우리학원 성공방정식</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="shared.js?v=1776357037976"></script>
+<script src="shared.js?v=1776357070550"></script>
 <script>__applyTheme();</script>
 <style>
   html,body{background:#f6f7fb}
@@ -758,6 +758,64 @@
 
   function applicableEquations(s){
     return equations.filter(eq => eq.group === '전체 학생' || s.cls === eq.group);
+  }
+
+  // ===== 신뢰도 계산 =====
+  // 리포트 신뢰도 = 학원 모델 R² × 학생 데이터 충족도
+  const CONF_TIP = "리포트 신뢰도는 \u0022학원 전체 방정식의 설명력(R²) × 이 학생의 데이터 충족도\u0022로 계산돼요. 수집 기간·측정 횟수·변수 완결성이 높을수록 예측 범위가 좁아지고 신뢰도가 올라가요.";
+
+  function studentDataWeeks(s){ return Math.round((s.months || 0) * 4); }
+  function studentYCount(s){ return Math.max(1, Math.floor((s.months || 0) / 1.5)); }
+  function studentXCompleteness(s){
+    if(!s.dailyData) return 65; // 기본 추정
+    let total = 0, filled = 0;
+    Object.values(s.dailyData).forEach(arr => {
+      total += arr.length;
+      filled += arr.filter(v => v != null).length;
+    });
+    return total ? Math.round(filled/total*100) : 65;
+  }
+  function calcSufficiency(dataWeeks, yCount, xCompletePct){
+    const w = Math.min(1, dataWeeks / 12);
+    const y = Math.min(1, yCount / 4);
+    const x = Math.min(1, xCompletePct / 100);
+    return (w + y + x) / 3;
+  }
+  function calcStudentConfidence(s, eq){
+    const suff = calcSufficiency(studentDataWeeks(s), studentYCount(s), studentXCompleteness(s));
+    return Math.round(eq.trust * suff);
+  }
+  function projectedConfidence(s, eq, addWeeks){
+    const futureWeeks = studentDataWeeks(s) + addWeeks;
+    const futureY = Math.min(4, studentYCount(s) + Math.floor(addWeeks / 6));
+    const futureX = Math.min(100, studentXCompleteness(s) + addWeeks * 2);
+    const suff = calcSufficiency(futureWeeks, futureY, futureX);
+    return Math.round(eq.trust * suff);
+  }
+  function weeksToReach(s, eq, targetPct){
+    for(let w = 1; w <= 52; w++){
+      if(projectedConfidence(s, eq, w) >= targetPct) return w;
+    }
+    return null;
+  }
+  function confidenceLevel(pct){
+    if(pct >= 60) return 'green';
+    if(pct >= 30) return 'yellow';
+    return 'red';
+  }
+  function confidenceBadge(pct, withIcon){
+    const lv = confidenceLevel(pct);
+    const styles = {
+      green: 'text-emerald-700 bg-emerald-50',
+      yellow: 'text-amber-700 bg-amber-50',
+      red: 'text-rose-700 bg-rose-50'
+    };
+    const dot = { green: 'bg-emerald-500', yellow: 'bg-amber-500', red: 'bg-rose-500' };
+    return `<span class="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full ${styles[lv]}">
+      <span class="w-2 h-2 rounded-full ${dot[lv]}"></span>
+      신뢰도 ${pct}%
+      ${withIcon ? `<span class="info-tip" data-tip="${CONF_TIP}">i</span>` : ''}
+    </span>`;
   }
 
   // ===== 곡선 path (Catmull-Rom → Cubic Bezier) =====
