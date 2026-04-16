@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="shared.js?v=1776380710619"></script>
+<script src="shared.js?v=1776380961946"></script>
 <script>__applyTheme();</script>
 <style>
   html,body{background:#f6f7fb}
@@ -232,213 +232,159 @@
         </div>
       </section>
 
-      <!-- Two-column: 진행 현황 + 다음 할 일 -->
-      <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-        <!-- Progress -->
-        <div class="lg:col-span-2 bg-white rounded-3xl p-7 shadow-card ring-soft">
-          <div class="flex items-center justify-between mb-5">
-            <h3 class="text-lg font-bold">이번 달 진행 현황</h3>
-            <span class="text-xs text-ink-500">2026년 4월</span>
-          </div>
-
-          <div class="space-y-5">
-            <!-- item -->
-            <div>
-              <div class="flex items-center justify-between text-sm mb-2">
-                <span class="font-semibold">데이터 입력</span>
-                <span class="text-ink-500">18 / 24명</span>
-              </div>
-              <div class="h-2 rounded-full bg-gray-100 overflow-hidden">
-                <div class="h-2 bg-brand-500" style="width:75%"></div>
-              </div>
-            </div>
-            <div>
-              <div class="flex items-center justify-between text-sm mb-2">
-                <span class="font-semibold">방정식 갱신</span>
-                <span class="text-ink-500">v2 사용 중</span>
-              </div>
-              <div class="h-2 rounded-full bg-gray-100 overflow-hidden">
-                <div class="h-2 bg-emerald-500" style="width:100%"></div>
-              </div>
-            </div>
-            <div>
-              <div class="flex items-center justify-between text-sm mb-2">
-                <span class="font-semibold">리포트카드 발송</span>
-                <span class="text-ink-500">0 / 18건</span>
-              </div>
-              <div class="h-2 rounded-full bg-gray-100 overflow-hidden">
-                <div class="h-2 bg-amber-400" style="width:5%"></div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Equation trend placeholder -->
-          <div class="mt-7 rounded-2xl bg-gray-50 p-5">
-            <div class="flex items-center justify-between mb-3">
-              <div class="text-sm font-semibold">우리 학원 방정식 변화</div>
-              <div class="text-xs text-ink-500">v1 → v2</div>
-            </div>
-            <svg viewBox="0 0 400 80" class="w-full h-20">
-              <polyline fill="none" stroke="#3a74ff" stroke-width="2.5" points="0,60 50,55 100,48 150,50 200,40 250,35 300,28 350,22 400,18"/>
-              <polyline fill="none" stroke="#9ca3af" stroke-width="2" stroke-dasharray="4 4" points="0,65 50,62 100,60 150,58 200,55 250,52 300,48 350,45 400,42"/>
-            </svg>
-            <div class="mt-2 flex gap-4 text-xs text-ink-500">
-              <span class="flex items-center gap-1"><span class="w-3 h-1.5 rounded-sm bg-brand-500"></span>예측 성적</span>
-              <span class="flex items-center gap-1"><span class="w-3 h-1.5 rounded-sm bg-gray-400"></span>이전 방정식</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Next actions -->
-        <div class="bg-white rounded-3xl p-7 shadow-card ring-soft">
-          <div class="flex items-center justify-between mb-5">
-            <h3 class="text-lg font-bold">다음 할 일</h3>
-            <a class="text-sm text-brand-600 font-semibold" href="#">전체</a>
-          </div>
-          <ul class="space-y-3">
-            <li class="flex items-start gap-3 p-3 rounded-xl hover:bg-gray-50">
-              <div class="w-9 h-9 rounded-xl bg-soft-blush grid place-items-center">📝</div>
-              <div class="flex-1">
-                <div class="text-sm font-semibold">이번 주 숙제이행률 입력</div>
-                <div class="text-xs text-ink-500 mt-0.5">금요일 오후 6시 · 주 1회</div>
-              </div>
-              <span class="text-[11px] text-amber-600 bg-amber-50 px-2 py-1 rounded-full font-semibold">D-2</span>
-            </li>
-            <li class="flex items-start gap-3 p-3 rounded-xl hover:bg-gray-50">
-              <div class="w-9 h-9 rounded-xl bg-soft-mint grid place-items-center">💌</div>
-              <div class="flex-1">
-                <div class="text-sm font-semibold">리포트카드 v3 발행 대기</div>
-                <div class="text-xs text-ink-500 mt-0.5">18명 · 알림톡 발송 준비</div>
-              </div>
-              <button class="text-xs text-brand-600 font-semibold">열기</button>
-            </li>
-            <li class="flex items-start gap-3 p-3 rounded-xl hover:bg-gray-50">
-              <div class="w-9 h-9 rounded-xl bg-soft-lemon grid place-items-center">📊</div>
-              <div class="flex-1">
-                <div class="text-sm font-semibold">4월 방정식 업데이트</div>
-                <div class="text-xs text-ink-500 mt-0.5">새 데이터 반영 · 3분 소요</div>
-              </div>
-              <button class="text-xs text-brand-600 font-semibold">실행</button>
-            </li>
-            <li class="flex items-start gap-3 p-3 rounded-xl hover:bg-gray-50">
-              <div class="w-9 h-9 rounded-xl bg-soft-lilac grid place-items-center">📞</div>
-              <div class="flex-1">
-                <div class="text-sm font-semibold">학부모 번호 미등록 8명</div>
-                <div class="text-xs text-ink-500 mt-0.5">알림톡 발송 전 번호 등록 필요</div>
-              </div>
-              <a href="report.html" class="text-xs text-brand-600 font-semibold">확인</a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <!-- Recent reports -->
-      <section class="bg-white rounded-3xl p-7 shadow-card ring-soft">
-        <div class="flex items-center justify-between mb-5">
+      <!-- 긍정적 변화 예측 TOP 3 -->
+      <section>
+        <div class="flex items-end justify-between mb-5 flex-wrap gap-3">
           <div>
-            <h3 class="text-lg font-bold">최근 리포트카드</h3>
-            <p class="text-sm text-ink-500 mt-1">최근 생성된 학생별 리포트를 확인하고 학부모에게 발송하세요</p>
+            <h3 class="text-[20px] font-extrabold leading-snug">
+              <span class="text-brand-600">긍정적 변화</span>가 가장 크게 예측되는 학생 TOP 3
+            </h3>
+            <p class="text-sm text-ink-500 mt-1.5">현재 성공방정식으로 계산한 6주 뒤 예측 기준 · 학부모 상담 우선순위로 활용하세요</p>
           </div>
-          <div class="flex gap-2">
-            <button class="px-3 py-2 text-sm rounded-lg border border-gray-200 hover:bg-gray-50">전체 발송</button>
-            <button class="px-3 py-2 text-sm rounded-lg bg-brand-500 text-white hover:bg-brand-600">+ 새 리포트</button>
-          </div>
+          <a href="report.html" class="text-sm text-brand-600 font-semibold hover:text-brand-700">전체 학생 보기 →</a>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          <!-- report item template -->
-          <div class="rounded-2xl border border-gray-100 p-5 hover:shadow-soft transition">
-            <div class="flex items-center justify-between">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <!-- Student 1 -->
+          <div class="bg-white rounded-3xl p-6 shadow-card ring-soft">
+            <div class="flex items-center justify-between mb-4">
               <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full bg-soft-navy text-navy-700 font-bold grid place-items-center">김</div>
+                <div class="w-11 h-11 rounded-full flex items-center justify-center font-extrabold text-white shadow-soft" style="background:linear-gradient(135deg,#a78bfa,#7c3aed)">김</div>
                 <div>
-                  <div class="font-semibold">김민재 학생</div>
-                  <div class="text-xs text-ink-500">중3 · 수학반</div>
+                  <div class="font-extrabold text-[15px]">김민재 학생</div>
+                  <div class="text-[11px] text-ink-500">중3 · 수학반</div>
                 </div>
               </div>
-              <span class="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-1 rounded-full">v3</span>
+              <span class="text-[11px] font-extrabold text-brand-700 bg-brand-50 px-2.5 py-1 rounded-full">+12점 ↑</span>
             </div>
-            <div class="mt-4 grid grid-cols-3 gap-2 text-center">
-              <div class="rounded-lg bg-gray-50 py-2">
-                <div class="text-[11px] text-ink-500">현재</div>
-                <div class="font-bold">72점</div>
-              </div>
-              <div class="rounded-lg bg-gray-50 py-2">
-                <div class="text-[11px] text-ink-500">전월비</div>
-                <div class="font-bold text-emerald-600">+4</div>
-              </div>
-              <div class="rounded-lg bg-gray-50 py-2">
-                <div class="text-[11px] text-ink-500">6주 예상</div>
-                <div class="font-bold">78~82</div>
-              </div>
+
+            <!-- 미니 회귀분석 스캐터 -->
+            <div class="rounded-xl p-2" style="background:linear-gradient(135deg,#faf5ff,#fdf2f8)">
+              <svg viewBox="0 0 220 120" class="w-full h-auto" preserveAspectRatio="xMidYMid meet">
+                <line x1="20" y1="100" x2="210" y2="100" stroke="#e5e7eb" stroke-width="1"/>
+                <line x1="20" y1="10" x2="20" y2="100" stroke="#e5e7eb" stroke-width="1"/>
+                <path d="M20 88 Q115 55 210 22" fill="none" stroke="#c4b5fd" stroke-width="10" stroke-opacity="0.35"/>
+                <line x1="20" y1="88" x2="210" y2="22" stroke="#7c3aed" stroke-width="2"/>
+                <circle cx="45" cy="85" r="2.5" fill="#d1d5db"/>
+                <circle cx="62" cy="78" r="2.5" fill="#d1d5db"/>
+                <circle cx="78" cy="82" r="2.5" fill="#d1d5db"/>
+                <circle cx="92" cy="70" r="2.5" fill="#d1d5db"/>
+                <circle cx="110" cy="64" r="2.5" fill="#d1d5db"/>
+                <circle cx="125" cy="58" r="2.5" fill="#d1d5db"/>
+                <circle cx="140" cy="52" r="2.5" fill="#d1d5db"/>
+                <circle cx="158" cy="48" r="2.5" fill="#d1d5db"/>
+                <circle cx="175" cy="38" r="2.5" fill="#d1d5db"/>
+                <circle cx="190" cy="32" r="2.5" fill="#d1d5db"/>
+                <!-- 현재 위치 -->
+                <circle cx="95" cy="72" r="6" fill="#7c3aed" stroke="white" stroke-width="2"/>
+                <!-- 예측 위치 -->
+                <circle cx="165" cy="38" r="6" fill="none" stroke="#ec4899" stroke-width="2" stroke-dasharray="3 2"/>
+                <!-- 화살표 -->
+                <line x1="95" y1="72" x2="160" y2="42" stroke="#ec4899" stroke-width="1.5" stroke-dasharray="2 2"/>
+                <text x="20" y="115" fill="#9ca3af" font-size="9">숙제이행률 →</text>
+                <text x="12" y="14" fill="#9ca3af" font-size="9">점수 ↑</text>
+              </svg>
             </div>
-            <div class="mt-4 flex gap-2">
-              <button class="flex-1 py-2 text-sm rounded-lg bg-gray-50 hover:bg-gray-100">미리보기</button>
-              <button class="flex-1 py-2 text-sm rounded-lg bg-brand-500 text-white hover:bg-brand-600">알림톡 발송</button>
+
+            <div class="mt-4 text-[13px] text-ink-700 leading-relaxed">
+              <span class="inline-block px-2 py-0.5 rounded-md text-[11px] font-bold bg-brand-50 text-brand-700 mr-1">숙제이행률</span>
+              을 <b class="text-brand-700">65% → 85%</b>로 끌어올리면<br/>
+              <b>72점 → 84점</b> (+12) 예상돼요.
             </div>
+
+            <button onclick="location.href='report.html'" class="mt-4 w-full py-2.5 rounded-xl bg-brand-50 text-brand-700 text-sm font-bold hover:bg-brand-100 transition">자세히 보기 →</button>
           </div>
 
-          <div class="rounded-2xl border border-gray-100 p-5 hover:shadow-soft transition">
-            <div class="flex items-center justify-between">
+          <!-- Student 2 -->
+          <div class="bg-white rounded-3xl p-6 shadow-card ring-soft">
+            <div class="flex items-center justify-between mb-4">
               <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full bg-soft-pink text-pink-700 font-bold grid place-items-center">박</div>
+                <div class="w-11 h-11 rounded-full flex items-center justify-center font-extrabold text-white shadow-soft" style="background:linear-gradient(135deg,#f9a8d4,#ec4899)">박</div>
                 <div>
-                  <div class="font-semibold">박서연 학생</div>
-                  <div class="text-xs text-ink-500">중3 · 수학반</div>
+                  <div class="font-extrabold text-[15px]">박서연 학생</div>
+                  <div class="text-[11px] text-ink-500">중3 · 수학반</div>
                 </div>
               </div>
-              <span class="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-1 rounded-full">v3</span>
+              <span class="text-[11px] font-extrabold text-brand-700 bg-brand-50 px-2.5 py-1 rounded-full">+9점 ↑</span>
             </div>
-            <div class="mt-4 grid grid-cols-3 gap-2 text-center">
-              <div class="rounded-lg bg-gray-50 py-2">
-                <div class="text-[11px] text-ink-500">현재</div>
-                <div class="font-bold">85점</div>
-              </div>
-              <div class="rounded-lg bg-gray-50 py-2">
-                <div class="text-[11px] text-ink-500">전월비</div>
-                <div class="font-bold text-emerald-600">+2</div>
-              </div>
-              <div class="rounded-lg bg-gray-50 py-2">
-                <div class="text-[11px] text-ink-500">6주 예상</div>
-                <div class="font-bold">88~91</div>
-              </div>
+
+            <div class="rounded-xl p-2" style="background:linear-gradient(135deg,#faf5ff,#fdf2f8)">
+              <svg viewBox="0 0 220 120" class="w-full h-auto" preserveAspectRatio="xMidYMid meet">
+                <line x1="20" y1="100" x2="210" y2="100" stroke="#e5e7eb" stroke-width="1"/>
+                <line x1="20" y1="10" x2="20" y2="100" stroke="#e5e7eb" stroke-width="1"/>
+                <path d="M20 85 Q115 52 210 25" fill="none" stroke="#c4b5fd" stroke-width="10" stroke-opacity="0.35"/>
+                <line x1="20" y1="85" x2="210" y2="25" stroke="#7c3aed" stroke-width="2"/>
+                <circle cx="38" cy="82" r="2.5" fill="#d1d5db"/>
+                <circle cx="55" cy="75" r="2.5" fill="#d1d5db"/>
+                <circle cx="72" cy="72" r="2.5" fill="#d1d5db"/>
+                <circle cx="88" cy="62" r="2.5" fill="#d1d5db"/>
+                <circle cx="105" cy="58" r="2.5" fill="#d1d5db"/>
+                <circle cx="122" cy="55" r="2.5" fill="#d1d5db"/>
+                <circle cx="138" cy="48" r="2.5" fill="#d1d5db"/>
+                <circle cx="155" cy="42" r="2.5" fill="#d1d5db"/>
+                <circle cx="175" cy="36" r="2.5" fill="#d1d5db"/>
+                <circle cx="192" cy="28" r="2.5" fill="#d1d5db"/>
+                <circle cx="130" cy="52" r="6" fill="#7c3aed" stroke="white" stroke-width="2"/>
+                <circle cx="190" cy="30" r="6" fill="none" stroke="#ec4899" stroke-width="2" stroke-dasharray="3 2"/>
+                <line x1="130" y1="52" x2="185" y2="32" stroke="#ec4899" stroke-width="1.5" stroke-dasharray="2 2"/>
+                <text x="20" y="115" fill="#9ca3af" font-size="9">복습시간 →</text>
+                <text x="12" y="14" fill="#9ca3af" font-size="9">점수 ↑</text>
+              </svg>
             </div>
-            <div class="mt-4 flex gap-2">
-              <button class="flex-1 py-2 text-sm rounded-lg bg-gray-50 hover:bg-gray-100">미리보기</button>
-              <button class="flex-1 py-2 text-sm rounded-lg bg-brand-500 text-white hover:bg-brand-600">알림톡 발송</button>
+
+            <div class="mt-4 text-[13px] text-ink-700 leading-relaxed">
+              <span class="inline-block px-2 py-0.5 rounded-md text-[11px] font-bold bg-brand-50 text-brand-700 mr-1">복습시간</span>
+              을 <b class="text-brand-700">3시간 → 6시간/주</b>로 늘리면<br/>
+              <b>78점 → 87점</b> (+9) 예상돼요.
             </div>
+
+            <button onclick="location.href='report.html'" class="mt-4 w-full py-2.5 rounded-xl bg-brand-50 text-brand-700 text-sm font-bold hover:bg-brand-100 transition">자세히 보기 →</button>
           </div>
 
-          <div class="rounded-2xl border border-gray-100 p-5 hover:shadow-soft transition">
-            <div class="flex items-center justify-between">
+          <!-- Student 3 -->
+          <div class="bg-white rounded-3xl p-6 shadow-card ring-soft">
+            <div class="flex items-center justify-between mb-4">
               <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full bg-soft-lemon text-amber-700 font-bold grid place-items-center">이</div>
+                <div class="w-11 h-11 rounded-full flex items-center justify-center font-extrabold text-white shadow-soft" style="background:linear-gradient(135deg,#c4b5fd,#a78bfa)">최</div>
                 <div>
-                  <div class="font-semibold">이도윤 학생</div>
-                  <div class="text-xs text-ink-500">중3 · 수학반</div>
+                  <div class="font-extrabold text-[15px]">최지우 학생</div>
+                  <div class="text-[11px] text-ink-500">중2 · 수학반</div>
                 </div>
               </div>
-              <span class="text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-1 rounded-full">초안</span>
+              <span class="text-[11px] font-extrabold text-brand-700 bg-brand-50 px-2.5 py-1 rounded-full">+8점 ↑</span>
             </div>
-            <div class="mt-4 grid grid-cols-3 gap-2 text-center">
-              <div class="rounded-lg bg-gray-50 py-2">
-                <div class="text-[11px] text-ink-500">현재</div>
-                <div class="font-bold">64점</div>
-              </div>
-              <div class="rounded-lg bg-gray-50 py-2">
-                <div class="text-[11px] text-ink-500">전월비</div>
-                <div class="font-bold text-rose-500">-1</div>
-              </div>
-              <div class="rounded-lg bg-gray-50 py-2">
-                <div class="text-[11px] text-ink-500">6주 예상</div>
-                <div class="font-bold">-</div>
-              </div>
+
+            <div class="rounded-xl p-2" style="background:linear-gradient(135deg,#faf5ff,#fdf2f8)">
+              <svg viewBox="0 0 220 120" class="w-full h-auto" preserveAspectRatio="xMidYMid meet">
+                <line x1="20" y1="100" x2="210" y2="100" stroke="#e5e7eb" stroke-width="1"/>
+                <line x1="20" y1="10" x2="20" y2="100" stroke="#e5e7eb" stroke-width="1"/>
+                <path d="M20 90 Q115 60 210 28" fill="none" stroke="#c4b5fd" stroke-width="10" stroke-opacity="0.35"/>
+                <line x1="20" y1="90" x2="210" y2="28" stroke="#7c3aed" stroke-width="2"/>
+                <circle cx="42" cy="88" r="2.5" fill="#d1d5db"/>
+                <circle cx="58" cy="80" r="2.5" fill="#d1d5db"/>
+                <circle cx="74" cy="75" r="2.5" fill="#d1d5db"/>
+                <circle cx="90" cy="68" r="2.5" fill="#d1d5db"/>
+                <circle cx="108" cy="62" r="2.5" fill="#d1d5db"/>
+                <circle cx="125" cy="56" r="2.5" fill="#d1d5db"/>
+                <circle cx="142" cy="50" r="2.5" fill="#d1d5db"/>
+                <circle cx="158" cy="42" r="2.5" fill="#d1d5db"/>
+                <circle cx="178" cy="38" r="2.5" fill="#d1d5db"/>
+                <circle cx="192" cy="32" r="2.5" fill="#d1d5db"/>
+                <circle cx="110" cy="68" r="6" fill="#7c3aed" stroke="white" stroke-width="2"/>
+                <circle cx="175" cy="38" r="6" fill="none" stroke="#ec4899" stroke-width="2" stroke-dasharray="3 2"/>
+                <line x1="110" y1="68" x2="170" y2="42" stroke="#ec4899" stroke-width="1.5" stroke-dasharray="2 2"/>
+                <text x="20" y="115" fill="#9ca3af" font-size="9">출결률 →</text>
+                <text x="12" y="14" fill="#9ca3af" font-size="9">점수 ↑</text>
+              </svg>
             </div>
-            <div class="mt-4 flex gap-2">
-              <button class="flex-1 py-2 text-sm rounded-lg bg-gray-50 hover:bg-gray-100">데이터 채우기</button>
-              <button class="flex-1 py-2 text-sm rounded-lg bg-gray-100 text-gray-400 cursor-not-allowed">🔒 발송 잠금</button>
+
+            <div class="mt-4 text-[13px] text-ink-700 leading-relaxed">
+              <span class="inline-block px-2 py-0.5 rounded-md text-[11px] font-bold bg-brand-50 text-brand-700 mr-1">출결률</span>
+              을 <b class="text-brand-700">88% → 98%</b>로 개선하면<br/>
+              <b>68점 → 76점</b> (+8) 예상돼요.
             </div>
+
+            <button onclick="location.href='report.html'" class="mt-4 w-full py-2.5 rounded-xl bg-brand-50 text-brand-700 text-sm font-bold hover:bg-brand-100 transition">자세히 보기 →</button>
           </div>
         </div>
       </section>
