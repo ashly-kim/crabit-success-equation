@@ -9,7 +9,7 @@
 <title>데이터 허브 2 · 우리학원 성공방정식</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="shared.js?v=1776361101192"></script>
+<script src="shared.js?v=1776361136167"></script>
 <script>__applyTheme();</script>
 <!-- 엑셀 파싱 (SheetJS, MIT 라이선스, 무료) -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -372,15 +372,45 @@
   }
 
   function downloadTemplate(){
-    const sample = [
-      ['학생이름','반','복습시간','숙제이행률','출결률','질문횟수','기말고사점수'],
-      ['김민재','중3 수학반',5,85,95,3,78],
-      ['박서연','중3 수학반',7,92,100,5,88],
-      ['이하윤','중2 수학반',3,70,88,1,65],
+    // 상단 5행 merge 설명
+    const msg1 = '📊 우리학원 성공방정식 · 데이터 입력 템플릿';
+    const msg2 = '학원에서 기록하는 데이터들을 입력하여 업로드하시면, 회귀분석을 기반으로 우리 학원만의 성공방정식을 자동으로 찾아드려요.';
+    const msg3 = '💡 입력 방법: 학생 이름과 학부모 전화번호(알림톡 발송용)는 그대로 두시고, 변수 컬럼명은 실제 관리하시는 지표명으로 바꿔주세요. 각 행에 학생별 측정값을 기록해주세요.';
+    const msg4 = '⚠️ 변수(X)는 최소 2개 이상 권장하며, 예측 대상(Y)이 되는 결과 지표(예: 시험 성적)는 가장 오른쪽 열에 두시면 자동으로 인식돼요.';
+    const msg5 = '🔒 파일은 원장님 브라우저에서 직접 처리되며 서버로 전송되지 않아요. 학부모 연락처는 알림톡 발송 시에만 솔라피 API로 전달됩니다.';
+    const NCOL = 8;
+    const pad = (row) => { while(row.length < NCOL) row.push(null); return row; };
+    const aoa = [
+      pad([msg1]),
+      pad([msg2]),
+      pad([msg3]),
+      pad([msg4]),
+      pad([msg5]),
+      ['학생 이름', '학부모 전화번호', '변수 1 (복습시간)', '변수 2 (숙제이행률)', '변수 3 (출결률)', '변수 4 (질문횟수)', '변수 5 (수업집중도)', '결과 · 시험 성적'],
+      ['김민재', '010-1234-5678', 5,  85, 95, 3, 4.2, 78],
+      ['박서연', '010-2345-6789', 7,  92, 100, 5, 4.8, 88],
+      ['이하윤', '010-3456-7890', 3,  70, 88, 1, 3.1, 65],
+      ['최지우', '010-4567-8901', 4,  78, 92, 2, 3.8, 71]
     ];
-    const ws = XLSX.utils.aoa_to_sheet(sample);
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    // 1~5행 전체 컬럼 병합
+    ws['!merges'] = [
+      { s:{r:0,c:0}, e:{r:0,c:NCOL-1} },
+      { s:{r:1,c:0}, e:{r:1,c:NCOL-1} },
+      { s:{r:2,c:0}, e:{r:2,c:NCOL-1} },
+      { s:{r:3,c:0}, e:{r:3,c:NCOL-1} },
+      { s:{r:4,c:0}, e:{r:4,c:NCOL-1} }
+    ];
+    // 컬럼 너비
+    ws['!cols'] = [
+      {wch:12},{wch:16},{wch:16},{wch:20},{wch:14},{wch:14},{wch:16},{wch:18}
+    ];
+    // 설명행 높이
+    ws['!rows'] = [
+      {hpt:28},{hpt:40},{hpt:48},{hpt:40},{hpt:40},{hpt:30}
+    ];
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, '학생데이터');
+    XLSX.utils.book_append_sheet(wb, ws, '학원 데이터');
     XLSX.writeFile(wb, '우리학원_데이터_템플릿.xlsx');
   }
 
