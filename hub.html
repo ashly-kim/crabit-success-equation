@@ -9,7 +9,7 @@
 <title>데이터 허브 · 우리학원 성공방정식</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="shared.js?v=1776381395379"></script>
+<script src="shared.js?v=1776381523898"></script>
 <script>__applyTheme();</script>
 <!-- 엑셀 파싱 (SheetJS, MIT 라이선스, 무료) -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -329,12 +329,19 @@
               ✨ 분석 완료
             </div>
             <h2 class="text-[28px] font-extrabold leading-tight text-ink-900">
-              우리 학원만의 <span class="text-brand-600">성공방정식</span>을 찾았어요
+              우리 학원만의 <span class="text-brand-600">학생 성장 패턴</span>을 찾았어요
             </h2>
-            <p class="text-[14px] text-ink-700/80 mt-2">업로드하신 데이터 <b id="resRows" class="text-brand-700">0</b>건을 기반으로 계산했어요.</p>
+            <p class="text-[14px] text-ink-700/80 mt-2">업로드하신 데이터 <b id="resRows" class="text-brand-700">0</b>건을 기반으로 도출한 결과예요.</p>
 
-            <div class="mt-6 bg-white/90 rounded-2xl p-6" style="backdrop-filter:blur(6px);box-shadow:0 8px 24px rgba(124,58,237,.1)">
-              <div class="text-[11px] font-bold text-brand-600 mb-2 tracking-wider">🧮 우리 학원 성공방정식</div>
+            <div class="mt-4 rounded-xl p-3.5 flex items-start gap-2" style="background:#fff7ed;border:1px solid #fed7aa">
+              <div class="text-base flex-shrink-0">💡</div>
+              <div class="text-[12.5px] text-[#9a3412] leading-relaxed">
+                <b>이 공식은 100% 정확한 예측이 아니에요.</b> 우리 학원 <b class="text-ink-900" id="resDisclaimerN">76</b>명 학생의 실제 데이터에서 발견한 <b>'학생 성장 패턴'</b>이며, 데이터가 많을수록·최근일수록 신뢰도가 높아져요.
+              </div>
+            </div>
+
+            <div class="mt-5 bg-white/90 rounded-2xl p-6" style="backdrop-filter:blur(6px);box-shadow:0 8px 24px rgba(124,58,237,.1)">
+              <div class="text-[11px] font-bold text-brand-600 mb-2 tracking-wider">🧮 우리 학원 학생 성장 공식</div>
               <div class="text-[18px] font-extrabold leading-relaxed text-ink-900" id="resFormula">—</div>
             </div>
 
