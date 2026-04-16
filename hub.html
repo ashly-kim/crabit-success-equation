@@ -9,7 +9,7 @@
 <title>데이터 허브 · 우리학원 성공방정식</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="shared.js?v=1776361564528"></script>
+<script src="shared.js?v=1776361596048"></script>
 <script>__applyTheme();</script>
 <!-- 엑셀 파싱 (SheetJS, MIT 라이선스, 무료) -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -111,14 +111,13 @@
         </div>
       </section>
 
-      <!-- STEP 2: 매핑 확인 -->
+      <!-- 매핑 확인 -->
       <section id="stepMapping" class="hidden">
         <div class="bg-white rounded-3xl shadow-card ring-soft p-8 reveal">
           <div class="flex items-center justify-between mb-5 flex-wrap gap-3">
             <div>
-              <div class="text-sm text-brand-600 font-semibold">STEP 2</div>
-              <h2 class="text-[18px] font-extrabold mt-0.5">컬럼 매핑 확인</h2>
-              <p class="text-sm text-ink-500 mt-1">AI가 자동으로 매핑했어요. 확인하고 필요하면 수정해주세요.</p>
+              <h2 class="text-[18px] font-extrabold">컬럼 역할을 지정해주세요</h2>
+              <p class="text-sm text-ink-500 mt-1">각 컬럼을 <b class="text-[#1e48b8]">변수(X)</b> / <b class="text-[#9a3412]">결과(Y)</b> / 분석 제외 중 하나로 선택해주세요.</p>
             </div>
             <div class="flex items-center gap-4 text-xs text-ink-500">
               <span>📊 <b class="text-ink-900" id="rowCount">0</b>행</span>
@@ -127,11 +126,32 @@
             </div>
           </div>
 
-          <!-- 컬럼별 역할 지정 -->
-          <div class="grid md:grid-cols-2 gap-3 mb-6" id="mappingList"></div>
+          <!-- 컬럼 역할 지정 (표 형태) -->
+          <div class="border border-gray-200 rounded-xl overflow-hidden mb-5">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="bg-gray-50 text-ink-500 text-[12px]">
+                  <th class="px-4 py-3 text-left font-bold w-10">#</th>
+                  <th class="px-4 py-3 text-left font-bold">엑셀 컬럼명</th>
+                  <th class="px-4 py-3 text-left font-bold">샘플 값</th>
+                  <th class="px-4 py-3 text-center font-bold w-48">역할</th>
+                </tr>
+              </thead>
+              <tbody id="mappingTable"></tbody>
+            </table>
+          </div>
 
-          <!-- 미리보기 -->
-          <div class="border border-gray-100 rounded-xl overflow-auto mb-5" style="max-height:560px">
+          <!-- 간단 도움말 + AI 제안 -->
+          <div class="flex items-center justify-between mb-5 flex-wrap gap-3 text-[12px]">
+            <div class="text-ink-500">
+              💡 <b class="text-[#9a3412]">결과(Y)</b>는 1개만 지정, <b class="text-[#1e48b8]">변수(X)</b>는 2~5개 권장
+            </div>
+            <button onclick="applyAutoMapping()" class="text-brand-600 font-semibold hover:underline">✨ AI 자동 매핑 제안 적용 →</button>
+          </div>
+
+          <!-- 원본 데이터 미리보기 -->
+          <div class="text-[12px] text-ink-500 mb-2 font-semibold">📄 원본 데이터 미리보기</div>
+          <div class="border border-gray-100 rounded-xl overflow-auto mb-5" style="max-height:400px">
             <table class="preview-table">
               <thead id="previewHead"></thead>
               <tbody id="previewBody"></tbody>
@@ -142,12 +162,15 @@
           <div class="flex items-center justify-between gap-3 flex-wrap">
             <button onclick="resetFlow()" class="px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold hover:bg-gray-50">← 다른 파일 올리기</button>
             <div class="flex items-center gap-3">
-              <div class="text-xs text-ink-500" id="mappingStatus">—</div>
+              <div class="text-xs font-semibold" id="mappingStatus">—</div>
               <button onclick="runAnalysis()" id="runBtn" class="px-6 py-2.5 rounded-xl bg-brand-500 text-white text-sm font-bold hover:bg-brand-600 disabled:bg-gray-300 disabled:cursor-not-allowed">
                 회귀분석 실행 →
               </button>
             </div>
           </div>
+
+          <!-- 분석 오류 inline 메시지 -->
+          <div id="analysisError" class="hidden mt-4 rounded-xl bg-rose-50 border border-rose-200 p-4 text-[13px] text-rose-800"></div>
         </div>
       </section>
 
