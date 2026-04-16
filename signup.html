@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta http-equiv="Cache-Control" content="no-cache, max-age=0, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+<title>회원가입 · 우리학원 성공방정식</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="shared.js?v=1776357498786"></script>
+<script>__applyTheme();</script>
+<style>
+  html,body{background:#f6f7fb;min-height:100vh}
+  .kakao-btn{background:#FEE500;color:#3c1e1e}
+  .kakao-btn:hover{background:#fdd835}
+  .field-hint{font-size:11px;color:#6b7280;margin-top:6px;line-height:1.5}
+  .field-hint.bad{color:#dc2626;font-weight:600}
+  .field-hint.good{color:#059669;font-weight:600}
+</style>
+</head>
+<body class="font-sans text-ink-900 antialiased">
+
+<div class="min-h-screen flex flex-col">
+  <main class="flex-1 flex items-center justify-center px-6 py-12">
+    <div class="w-full max-w-md">
+
+      <a href="index.html" class="flex items-center justify-center gap-2 mb-8">
+        <div class="w-11 h-11 rounded-xl bg-brand-500 grid place-items-center text-white font-extrabold text-lg">우</div>
+        <div class="text-left">
+          <div class="text-[18px] font-extrabold leading-tight">우리학원 성공방정식</div>
+          <div class="text-[11px] text-ink-500">by CRABIT</div>
+        </div>
+      </a>
+
+      <div class="bg-white rounded-3xl shadow-card ring-soft p-8">
+        <h1 class="text-[24px] font-extrabold mb-1.5">원장님, 반갑습니다</h1>
+        <p class="text-sm text-ink-500 mb-7">우리 학원만의 성공방정식을 만들러 가보실까요?</p>
+
+        <!-- 카카오 -->
+        <button onclick="signupKakao()" class="kakao-btn w-full py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 mb-4">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4C6.48 4 2 7.58 2 12c0 2.72 1.7 5.12 4.29 6.56-.18.66-.66 2.38-.76 2.75-.12.46.17.46.36.33.15-.1 2.4-1.63 3.35-2.28.91.13 1.82.19 2.76.19 5.52 0 10-3.58 10-8S17.52 4 12 4z"/></svg>
+          카카오로 시작하기
+        </button>
+
+        <div class="flex items-center gap-3 my-5">
+          <div class="flex-1 h-px bg-gray-200"></div>
+          <div class="text-xs text-ink-500">또는</div>
+          <div class="flex-1 h-px bg-gray-200"></div>
+        </div>
+
+        <form onsubmit="doSignup(event)" class="space-y-5">
+          <!-- 학원 이름 -->
+          <div>
+            <label class="block text-xs font-bold text-ink-500 mb-1.5">학원 이름</label>
+            <input id="suAcademy" type="text" placeholder="예: 행복수학학원"
+              class="w-full px-4 py-3 rounded-xl border border-gray-200 text-[15px] focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100"/>
+          </div>
+
+          <!-- 원장님 성함 -->
+          <div>
+            <label class="block text-xs font-bold text-ink-500 mb-1.5">원장님 성함</label>
+            <input id="suDirector" type="text" placeholder="예: 김원장"
+              class="w-full px-4 py-3 rounded-xl border border-gray-200 text-[15px] focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100"/>
+          </div>
+
+          <!-- 휴대폰 번호 (아이디) -->
+          <div>
+            <label class="block text-xs font-bold text-ink-500 mb-1.5">휴대폰 번호 <span class="text-accent-600">(아이디로 사용)</span></label>
+            <div class="flex gap-2">
+              <input id="suPhone" type="tel" inputmode="numeric" placeholder="010-1234-5678" maxlength="13"
+                class="flex-1 px-4 py-3 rounded-xl border border-gray-200 text-[15px] font-semibold focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100"
+                oninput="this.value = __formatPhone(this.value); checkPhone();"/>
+              <button type="button" onclick="sendCode()" id="suSendBtn" class="px-4 py-3 rounded-xl border border-gray-200 text-sm font-semibold text-ink-700 hover:bg-gray-50 whitespace-nowrap">인증번호 받기</button>
+            </div>
+            <div id="suPhoneHint" class="field-hint">가입한 계정의 아이디로 사용돼요.</div>
+          </div>
+
+          <!-- 인증번호 (데모: 아무 6자리나) -->
+          <div id="suCodeWrap" class="hidden">
+            <label class="block text-xs font-bold text-ink-500 mb-1.5">인증번호</label>
+            <input id="suCode" type="text" inputmode="numeric" placeholder="6자리 숫자" maxlength="6"
+              class="w-full px-4 py-3 rounded-xl border border-gray-200 text-[15px] font-mono focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100"/>
+            <div class="field-hint">📱 시연 중이라 아무 <b>6자리</b> 숫자나 입력하시면 통과돼요.</div>
+          </div>
+
+          <!-- 비밀번호 -->
+          <div>
+            <label class="block text-xs font-bold text-ink-500 mb-1.5">비밀번호</label>
+            <input id="suPw" type="password" placeholder="영문·숫자·특수문자 중 2종류 이상 (8자+)"
+              class="w-full px-4 py-3 rounded-xl border border-gray-200 text-[15px] focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100"
+              oninput="checkPw()"/>
+            <div id="suPwHint" class="field-hint">영문 / 숫자 / 특수문자 중 <b>2종류 이상</b> 포함 · 8자 이상</div>
+          </div>
+
+          <!-- 비밀번호 확인 -->
+          <div>
+            <label class="block text-xs font-bold text-ink-500 mb-1.5">비밀번호 확인</label>
+            <input id="suPw2" type="password" placeholder="한 번 더 입력해주세요"
+              class="w-full px-4 py-3 rounded-xl border border-gray-200 text-[15px] focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100"
+              oninput="checkPw2()"/>
+            <div id="suPw2Hint" class="field-hint"></div>
+          </div>
+
+          <!-- 약관 -->
+          <div class="space-y-2 pt-2 border-t border-gray-100">
+            <label class="flex items-center gap-3 cursor-pointer text-sm">
+              <input type="checkbox" id="suAgreeAll" onchange="toggleAllAgree(this.checked)"/>
+              <span class="font-bold">전체 동의</span>
+            </label>
+            <div class="pl-8 space-y-1.5">
+              <label class="flex items-center gap-3 cursor-pointer text-[13px]">
+                <input type="checkbox" class="su-agree" data-required="1"/>
+                <span>(필수) 이용약관</span>
+                <a href="#" onclick="event.preventDefault();alert('이용약관 내용')" class="text-brand-600 hover:underline text-xs ml-auto">보기</a>
+              </label>
+              <label class="flex items-center gap-3 cursor-pointer text-[13px]">
+                <input type="checkbox" class="su-agree" data-required="1"/>
+                <span>(필수) 개인정보 처리방침</span>
+                <a href="#" onclick="event.preventDefault();alert('개인정보 처리방침')" class="text-brand-600 hover:underline text-xs ml-auto">보기</a>
+              </label>
+              <label class="flex items-center gap-3 cursor-pointer text-[13px]">
+                <input type="checkbox" class="su-agree"/>
+                <span>(선택) 마케팅 정보 수신 동의</span>
+              </label>
+            </div>
+          </div>
+
+          <div id="suErr" class="hidden text-sm text-rose-600 font-semibold">—</div>
+
+          <button class="w-full py-3.5 rounded-xl bg-brand-500 text-white font-bold hover:bg-brand-600">
+            가입하고 시작하기
+          </button>
+        </form>
+
+        <div class="text-center mt-5 text-sm text-ink-500">
+          이미 계정이 있으신가요? <a href="login.html" class="font-semibold text-brand-600 hover:underline">로그인</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div id="footer"></div>
+</div>
+
+<script>
+  document.getElementById('footer').outerHTML = __renderFooter();
+
+  if(__auth.getSession()) location.href = 'index.html';
+
+  function setHint(id, text, level){
+    const el = document.getElementById(id);
+    el.textContent = text;
+    el.className = 'field-hint' + (level ? ' ' + level : '');
+  }
+
+  function checkPhone(){
+    const digits = document.getElementById('suPhone').value.replace(/\D/g,'');
+    if(digits.length !== 11){ setHint('suPhoneHint', '가입한 계정의 아이디로 사용돼요.'); return; }
+    if(__auth.findByPhone(digits)) setHint('suPhoneHint', '이미 가입된 휴대폰 번호예요.', 'bad');
+    else setHint('suPhoneHint', '사용 가능한 번호예요.', 'good');
+  }
+  function checkPw(){
+    const pw = document.getElementById('suPw').value;
+    if(!pw){ setHint('suPwHint', '영문 / 숫자 / 특수문자 중 <b>2종류 이상</b> 포함 · 8자 이상'); document.getElementById('suPwHint').innerHTML = '영문 / 숫자 / 특수문자 중 <b>2종류 이상</b> 포함 · 8자 이상'; return; }
+    const r = __validatePassword(pw);
+    if(!r.ok) setHint('suPwHint', r.error, 'bad');
+    else setHint('suPwHint', '사용 가능한 비밀번호예요.', 'good');
+  }
+  function checkPw2(){
+    const pw = document.getElementById('suPw').value;
+    const pw2 = document.getElementById('suPw2').value;
+    if(!pw2){ setHint('suPw2Hint', ''); return; }
+    if(pw !== pw2) setHint('suPw2Hint', '비밀번호가 일치하지 않아요.', 'bad');
+    else setHint('suPw2Hint', '일치해요.', 'good');
+  }
+  function sendCode(){
+    const d = document.getElementById('suPhone').value.replace(/\D/g,'');
+    if(d.length !== 11){ alert('휴대폰 번호를 정확히 입력해주세요.'); return; }
+    document.getElementById('suCodeWrap').classList.remove('hidden');
+    document.getElementById('suSendBtn').textContent = '재전송';
+  }
+  function toggleAllAgree(checked){
+    document.querySelectorAll('.su-agree').forEach(c => c.checked = checked);
+  }
+  // 개별 체크 → 전체 동의 자동 토글
+  document.querySelectorAll('.su-agree').forEach(c => c.addEventListener('change', ()=>{
+    const all = [...document.querySelectorAll('.su-agree')].every(x=>x.checked);
+    document.getElementById('suAgreeAll').checked = all;
+  }));
+
+  function doSignup(e){
+    e.preventDefault();
+    const err = document.getElementById('suErr');
+    const showErr = msg => { err.textContent = msg; err.classList.remove('hidden'); };
+
+    const academy = document.getElementById('suAcademy').value.trim();
+    const director = document.getElementById('suDirector').value.trim();
+    const phone = document.getElementById('suPhone').value.replace(/\D/g,'');
+    const code = document.getElementById('suCode').value.trim();
+    const pw = document.getElementById('suPw').value;
+    const pw2 = document.getElementById('suPw2').value;
+
+    if(!academy) return showErr('학원 이름을 입력해주세요.');
+    if(!director) return showErr('원장님 성함을 입력해주세요.');
+    if(phone.length !== 11) return showErr('휴대폰 번호를 정확히 입력해주세요.');
+    if(!document.getElementById('suCodeWrap').classList.contains('hidden') && code.length !== 6) return showErr('인증번호 6자리를 입력해주세요.');
+    if(document.getElementById('suCodeWrap').classList.contains('hidden')) return showErr('인증번호를 먼저 받아주세요.');
+    const pwr = __validatePassword(pw);
+    if(!pwr.ok) return showErr(pwr.error);
+    if(pw !== pw2) return showErr('비밀번호가 일치하지 않아요.');
+
+    const requiredOK = [...document.querySelectorAll('.su-agree[data-required="1"]')].every(c=>c.checked);
+    if(!requiredOK) return showErr('필수 약관에 모두 동의해주세요.');
+
+    const r = __auth.signup({ phone, password:pw, academy, director });
+    if(!r.ok) return showErr(r.error);
+
+    location.href = 'index.html';
+  }
+
+  function signupKakao(){
+    __auth.kakaoLogin();
+    location.href = 'index.html';
+  }
+</script>
+</body>
+</html>
