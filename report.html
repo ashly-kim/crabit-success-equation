@@ -9,7 +9,7 @@
 <title>리포트카드 · 우리학원 성공방정식</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="shared.js?v=1776384237065"></script>
+<script src="shared.js?v=1776384252501"></script>
 <script>__applyTheme();</script>
 <!-- PDF 내보내기 (html2pdf = jsPDF + html2canvas 번들) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -412,7 +412,7 @@
       const sentPct = total ? Math.round(sent / total * 100) : 0;
       return `
         <tr class="cursor-pointer" onclick="switchView('detail','${u.id}')">
-          <td><div class="text-[13px] font-semibold text-ink-900">${u.uploadedAt}</div></td>
+          <td><div class="text-[13px] font-semibold text-ink-900">${fmtDate(u.uploadedAt)}</div></td>
           <td><div class="font-bold text-ink-900 truncate max-w-[240px]">📊 ${escapeHtml(u.fileName)}</div><div class="text-[11.5px] text-ink-500 mt-0.5">${u.rowCount}행 · ${u.colCount}컬럼</div></td>
           <td><div class="text-[12.5px] leading-relaxed" style="max-width:420px">${formulaString(u.analysis)}</div><div class="text-[11px] text-ink-500 mt-1">신뢰도 R² <b class="text-brand-700">${Math.round((u.analysis?.r2 || 0)*100)}%</b></div></td>
           <td style="text-align:center"><div class="text-[18px] font-extrabold text-ink-900">${total}<span class="text-[12px] font-bold text-ink-500 ml-0.5">명</span></div></td>
