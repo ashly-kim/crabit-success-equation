@@ -9,7 +9,7 @@
 <title>리포트카드 · 우리학원 성공방정식</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="shared.js?v=1776385997222"></script>
+<script src="shared.js?v=1776386013182"></script>
 <script>__applyTheme();</script>
 <!-- PDF 내보내기 (html2pdf = jsPDF + html2canvas 번들) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -597,17 +597,17 @@
       <div class="a4-inner">
 
         <!-- 한 줄 요약 -->
-        <div class="mb-4">
-          <h2 class="text-[15.5px] font-extrabold text-ink-900 leading-snug">
+        <div class="mb-3">
+          <h2 class="text-[14.5px] font-extrabold text-ink-900 leading-snug">
             ${escapeHtml(r.studentName)} 학생의 성장 가능성을 <span style="color:#6d28d9">${escapeHtml(a.yLabel)}</span> 기준으로 정리했어요
           </h2>
-          <p class="text-[11.5px] text-ink-500 mt-1.5 leading-relaxed">
+          <p class="text-[11px] text-ink-500 mt-1 leading-relaxed">
             우리 학원 <b>${a.n}명</b>의 실제 데이터에서 찾은 <b>학생 성장 패턴</b>을 이 학생에게 적용한 결과예요. 100% 정확한 예측이 아닌 참고용 인사이트입니다.
           </p>
         </div>
 
         <!-- 핵심 지표 카드 3개 -->
-        <div class="grid grid-cols-3 gap-3 mb-4">
+        <div class="grid grid-cols-3 gap-3 mb-3">
           <div class="metric-card">
             <div class="metric-label">현재 ${escapeHtml(a.yLabel)}</div>
             <div class="metric-value">${fmt(r.yActual, 1)}</div>
