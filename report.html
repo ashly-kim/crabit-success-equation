@@ -9,7 +9,7 @@
 <title>리포트카드 · 우리학원 성공방정식</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="shared.js?v=1776386064978"></script>
+<script src="shared.js?v=1776386075518"></script>
 <script>__applyTheme();</script>
 <!-- PDF 내보내기 (html2pdf = jsPDF + html2canvas 번들) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -638,7 +638,7 @@
           <div class="viz-block col-span-3" style="margin-top:0">
             <div class="viz-title">📊 학급 안에서 ${escapeHtml(r.studentName)} 학생의 위치</div>
             <div class="viz-sub">${escapeHtml(a.xLabels[topIdx])} ↔ ${escapeHtml(a.yLabel)} · 가장 영향 큰 변수 기준</div>
-            <svg viewBox="0 0 500 220" class="w-full" style="background:linear-gradient(135deg,#faf5ff,#fdf2f8);border-radius:10px">
+            <svg viewBox="0 0 500 190" class="w-full" style="background:linear-gradient(135deg,#faf5ff,#fdf2f8);border-radius:10px">
               ${[0,1,2,3,4].map(i => {
                 const yv = y0 + (y1-y0)*i/4;
                 return `<line x1="${PL}" y1="${sy(yv)}" x2="${PR}" y2="${sy(yv)}" stroke="#f1f5f9"/>`;
