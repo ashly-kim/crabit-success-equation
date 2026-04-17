@@ -174,10 +174,8 @@ window.__renderLayout = function(active){
 
   return `
   <aside class="w-64 shrink-0 bg-white border-r border-gray-100 hidden lg:flex flex-col sticky top-0 h-screen">
-    <a href="index.html" class="px-6 py-6 flex items-center hover:bg-gray-50 transition">
-      <div class="text-[22px] font-extrabold tracking-tight leading-none">
-        <span class="text-ink-900">Crab</span><span class="text-accent-500">it</span>
-      </div>
+    <a href="index.html" class="px-6 py-5 flex items-center hover:bg-gray-50 transition">
+      <img src="assets/crabit-logo.png" alt="Crabit" class="h-8 w-auto object-contain select-none" draggable="false" />
     </a>
     <nav class="px-3 mt-2 space-y-1 text-[15px]">
       ${navHtml}
