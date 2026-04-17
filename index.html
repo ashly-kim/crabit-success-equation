@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="shared.js?v=1776383967576"></script>
+<script src="shared.js?v=1776384020545"></script>
 <script>__applyTheme();</script>
 <style>
   html,body{background:#f6f7fb}
@@ -153,8 +153,8 @@
       </section>
 
       <!-- 대시보드 시각화 2: 신뢰도 추이 + 알림톡 현황 -->
-      <section class="grid grid-cols-1 md:grid-cols-[1.3fr_1fr] gap-6">
-        <div class="bg-white rounded-3xl p-7 shadow-card ring-soft">
+      <section class="grid grid-cols-1 md:grid-cols-[1.3fr_1fr] gap-6 items-stretch">
+        <div class="bg-white rounded-3xl p-7 shadow-card ring-soft flex flex-col">
           <div class="flex items-end justify-between mb-5">
             <div>
               <h3 class="text-lg font-extrabold">방정식 신뢰도(R²) 추이</h3>
@@ -162,61 +162,68 @@
             </div>
             <span class="text-xs text-ink-500 font-semibold">최근 6개월</span>
           </div>
-          <svg viewBox="0 0 420 120" class="w-full h-32" preserveAspectRatio="xMidYMid meet">
+          <!-- SVG: viewBox x범위 0~600, 6등분 x좌표: 0,120,240,360,480,600 → 중앙: 60,180,300,420,540,570 -->
+          <!-- 날짜 레이블 grid-cols-6 각 셀 중앙에 점이 오도록 x: 50,150,250,350,450,550 -->
+          <svg viewBox="0 0 600 160" class="w-full" style="height:180px" preserveAspectRatio="xMidYMid meet">
             <defs>
               <linearGradient id="r2Area" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#8b5cf6" stop-opacity="0.35"/>
+                <stop offset="0%" stop-color="#8b5cf6" stop-opacity="0.3"/>
                 <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0"/>
               </linearGradient>
             </defs>
-            <path d="M 10 95 C 60 92, 90 78, 130 72 C 170 66, 210 54, 250 46 C 290 40, 330 30, 410 22 L 410 115 L 10 115 Z" fill="url(#r2Area)"/>
-            <path d="M 10 95 C 60 92, 90 78, 130 72 C 170 66, 210 54, 250 46 C 290 40, 330 30, 410 22" fill="none" stroke="#7c3aed" stroke-width="2.5" stroke-linecap="round"/>
-            <circle cx="10" cy="95" r="3.5" fill="#7c3aed"/>
-            <circle cx="90" cy="78" r="3.5" fill="#7c3aed"/>
-            <circle cx="170" cy="66" r="3.5" fill="#7c3aed"/>
-            <circle cx="250" cy="46" r="3.5" fill="#7c3aed"/>
-            <circle cx="330" cy="30" r="3.5" fill="#7c3aed"/>
-            <circle cx="410" cy="22" r="5" fill="#7c3aed"/>
-            <circle cx="410" cy="22" r="9" fill="#7c3aed" opacity="0.25"/>
+            <path d="M 50 130 C 120 126, 160 108, 250 100 C 310 94, 380 76, 350 70 C 420 56, 480 40, 550 28 L 550 155 L 50 155 Z" fill="url(#r2Area)"/>
+            <path d="M 50 130 C 150 126, 200 108, 250 100 C 310 94, 380 76, 450 54 C 490 40, 510 34, 550 28" fill="none" stroke="#7c3aed" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="50"  cy="130" r="5" fill="#7c3aed"/>
+            <circle cx="150" cy="118" r="5" fill="#7c3aed"/>
+            <circle cx="250" cy="100" r="5" fill="#7c3aed"/>
+            <circle cx="350" cy="76"  r="5" fill="#7c3aed"/>
+            <circle cx="450" cy="54"  r="5" fill="#7c3aed"/>
+            <circle cx="550" cy="28"  r="7" fill="#7c3aed"/>
+            <circle cx="550" cy="28"  r="13" fill="#7c3aed" opacity="0.2"/>
           </svg>
-          <div class="mt-3 grid grid-cols-6 gap-1 text-[11px] text-center">
-            <div><div class="text-ink-500">11월</div><div class="font-bold text-ink-700">42%</div></div>
-            <div><div class="text-ink-500">12월</div><div class="font-bold text-ink-700">55%</div></div>
-            <div><div class="text-ink-500">1월</div><div class="font-bold text-ink-700">63%</div></div>
-            <div><div class="text-ink-500">2월</div><div class="font-bold text-ink-700">68%</div></div>
-            <div><div class="text-ink-500">3월</div><div class="font-bold text-ink-700">74%</div></div>
-            <div><div class="text-brand-700 font-semibold">4월</div><div class="font-extrabold text-brand-700">78% ↑</div></div>
+          <div class="mt-2 grid grid-cols-6 text-[12px] text-center">
+            <div><div class="text-ink-500">11월</div><div class="font-bold text-ink-700 mt-0.5">42%</div></div>
+            <div><div class="text-ink-500">12월</div><div class="font-bold text-ink-700 mt-0.5">55%</div></div>
+            <div><div class="text-ink-500">1월</div><div class="font-bold text-ink-700 mt-0.5">63%</div></div>
+            <div><div class="text-ink-500">2월</div><div class="font-bold text-ink-700 mt-0.5">68%</div></div>
+            <div><div class="text-ink-500">3월</div><div class="font-bold text-ink-700 mt-0.5">74%</div></div>
+            <div><div class="text-brand-700 font-semibold">4월</div><div class="font-extrabold text-brand-700 mt-0.5">78% ↑</div></div>
           </div>
         </div>
 
-        <div class="bg-white rounded-3xl p-7 shadow-card ring-soft">
-          <div class="flex items-end justify-between mb-4">
-            <h3 class="text-lg font-extrabold">알림톡 발송 현황</h3>
-            <span class="text-xs text-ink-500 font-semibold">지난 30일</span>
-          </div>
-          <div class="flex items-center gap-5">
-            <svg viewBox="0 0 100 100" class="w-28 h-28 flex-shrink-0">
-              <circle cx="50" cy="50" r="38" fill="none" stroke="#f3f4f6" stroke-width="12"/>
-              <circle cx="50" cy="50" r="38" fill="none" stroke="#7c3aed" stroke-width="12"
-                      stroke-dasharray="238.76" stroke-dashoffset="28.65" transform="rotate(-90 50 50)" stroke-linecap="round"/>
-              <text x="50" y="55" text-anchor="middle" font-size="18" font-weight="800" fill="#111827">88%</text>
-            </svg>
-            <div class="flex-1 space-y-2">
-              <div class="flex items-center justify-between text-sm">
-                <span class="flex items-center gap-1.5 text-ink-700"><span class="w-2 h-2 rounded-full bg-brand-600"></span>성공</span>
-                <b class="text-ink-900">42건</b>
-              </div>
-              <div class="flex items-center justify-between text-sm">
-                <span class="flex items-center gap-1.5 text-ink-700"><span class="w-2 h-2 rounded-full bg-accent-500"></span>실패</span>
-                <b class="text-ink-900">3건</b>
-              </div>
-              <div class="flex items-center justify-between text-sm">
-                <span class="flex items-center gap-1.5 text-ink-700"><span class="w-2 h-2 rounded-full bg-gray-300"></span>번호 미등록</span>
-                <b class="text-ink-900">5건</b>
-              </div>
+        <div class="bg-white rounded-3xl p-7 shadow-card ring-soft flex flex-col">
+          <div class="flex items-end justify-between mb-6">
+            <div>
+              <h3 class="text-lg font-extrabold">알림톡 발송 현황</h3>
+              <p class="text-xs text-ink-500 mt-1">지난 30일 기준</p>
             </div>
           </div>
-          <a href="report.html" class="block w-full text-center mt-5 py-2.5 rounded-xl bg-gray-50 text-ink-700 text-sm font-bold hover:bg-gray-100 transition">리포트 생성내역 보기 →</a>
+          <!-- 도넛 차트 -->
+          <div class="flex items-center justify-center mb-6">
+            <svg viewBox="0 0 120 120" class="w-36 h-36">
+              <circle cx="60" cy="60" r="46" fill="none" stroke="#f3f4f6" stroke-width="14"/>
+              <circle cx="60" cy="60" r="46" fill="none" stroke="#7c3aed" stroke-width="14"
+                      stroke-dasharray="289.03" stroke-dashoffset="34.68" transform="rotate(-90 60 60)" stroke-linecap="round"/>
+              <text x="60" y="56" text-anchor="middle" font-size="20" font-weight="800" fill="#111827">88%</text>
+              <text x="60" y="72" text-anchor="middle" font-size="10" fill="#9ca3af">발송 성공률</text>
+            </svg>
+          </div>
+          <!-- 항목별 -->
+          <div class="space-y-3 flex-1">
+            <div class="flex items-center justify-between rounded-xl bg-brand-50 px-4 py-3">
+              <span class="flex items-center gap-2 text-[14px] font-semibold text-ink-700"><span class="w-2.5 h-2.5 rounded-full bg-brand-600"></span>발송 성공</span>
+              <b class="text-[18px] font-extrabold text-brand-700">42건</b>
+            </div>
+            <div class="flex items-center justify-between rounded-xl bg-pink-50 px-4 py-3">
+              <span class="flex items-center gap-2 text-[14px] font-semibold text-ink-700"><span class="w-2.5 h-2.5 rounded-full bg-pink-400"></span>발송 실패</span>
+              <b class="text-[18px] font-extrabold text-pink-600">3건</b>
+            </div>
+            <div class="flex items-center justify-between rounded-xl bg-gray-50 px-4 py-3">
+              <span class="flex items-center gap-2 text-[14px] font-semibold text-ink-700"><span class="w-2.5 h-2.5 rounded-full bg-gray-300"></span>번호 미등록</span>
+              <b class="text-[18px] font-extrabold text-gray-500">5건</b>
+            </div>
+          </div>
+          <a href="report.html" class="block w-full text-center mt-5 py-3 rounded-xl bg-gray-50 text-ink-700 text-[15px] font-bold hover:bg-gray-100 transition">리포트 생성내역 보기 →</a>
         </div>
       </section>
 
