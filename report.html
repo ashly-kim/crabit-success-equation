@@ -9,7 +9,7 @@
 <title>리포트카드 · 우리학원 성공방정식</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="shared.js?v=1776386182219"></script>
+<script src="shared.js?v=1776386196585"></script>
 <script>__applyTheme();</script>
 <!-- PDF 내보내기 (html2pdf = jsPDF + html2canvas 번들) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -582,12 +582,15 @@
           <div class="flex items-center gap-3">
             <div class="stu-avatar" style="${avatar};width:58px;height:58px;font-size:26px">${escapeHtml(initials(r.studentName))}</div>
             <div>
-              <div class="text-[11px] font-bold text-brand-700 tracking-wider">📘 성장 리포트카드</div>
+              <div class="text-[11px] font-bold text-brand-700 tracking-wider">📘 학생 성장 방정식 리포트</div>
               <div class="text-[26px] font-extrabold text-ink-900 leading-tight mt-0.5">${escapeHtml(r.studentName)}</div>
               <div class="text-[12px] text-ink-500 mt-0.5">${escapeHtml(r.className || '반 미지정')} · 발행일 ${dateStr}</div>
             </div>
           </div>
           <div class="text-right">
+            <div style="display:inline-flex;align-items:center;gap:5px;background:#ede9fe;border-radius:8px;padding:4px 10px;margin-bottom:6px">
+              <span style="font-size:10px;font-weight:800;color:#6d28d9">📊 ${a.n}명 실제 데이터 기반 분석</span>
+            </div>
             <div class="text-[10px] text-ink-500 font-bold">발행</div>
             <div class="text-[12.5px] font-extrabold text-ink-900">크래빗 영어학원</div>
           </div>
