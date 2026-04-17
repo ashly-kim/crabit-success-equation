@@ -9,7 +9,7 @@
 <title>리포트카드 · 우리학원 성공방정식</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="shared.js?v=1776386075518"></script>
+<script src="shared.js?v=1776386182219"></script>
 <script>__applyTheme();</script>
 <!-- PDF 내보내기 (html2pdf = jsPDF + html2canvas 번들) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -568,8 +568,8 @@
     const slope = sxy / (sxx || 1);
     const intr = my - slope*mx;
 
-    // 가정 실천 팁 (top scenario 기반)
-    const homeTips = generateHomeTips(topScenario);
+    // 가정 실천 팁 (전체 시나리오 기반 맞춤 Action Plan)
+    const homeTips = generateHomeTips(scSorted, r.studentName, a.yLabel);
 
     // 학생 이니셜과 그라데이션
     const avatar = avatarStyle(r.studentName);
