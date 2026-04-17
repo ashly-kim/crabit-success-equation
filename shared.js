@@ -232,20 +232,45 @@ window.__renderTopbar = function(crumbs){
   `;
 };
 
-// ===== 공통 푸터 (저작권·무단 이용 경고) =====
+// ===== 공통 푸터 =====
 window.__renderFooter = function(){
   return `
-  <footer class="mt-16 border-t border-gray-200 bg-white">
-    <div class="max-w-[1280px] mx-auto px-8 py-8 space-y-2 text-[11px] text-ink-500 leading-relaxed">
-      <div class="flex items-center gap-2 mb-2">
-        <div class="w-6 h-6 rounded-md bg-brand-500 grid place-items-center text-white font-bold text-[11px]">우</div>
-        <span class="text-ink-700">우리학원 성공방정식</span>
-        <span class="text-ink-300">by CRABIT</span>
+  <footer class="mt-16 border-t border-gray-100 bg-white">
+    <div class="max-w-[1280px] mx-auto px-8 py-10">
+
+      <!-- 로고 -->
+      <img src="assets/crabit-logo.png" alt="Crabit" style="height:36px;width:auto;object-fit:contain;margin-bottom:16px" />
+
+      <!-- 회사 정보 -->
+      <div class="text-[13px] font-bold text-ink-900 mb-2">주식회사 크래빗</div>
+      <div class="text-[12.5px] text-ink-500 leading-relaxed space-y-0.5">
+        <div>대표 : 김현지 &nbsp;|&nbsp; 주소 : 서울시 구로구 디지털로 288, 2003-1호</div>
+        <div>사업자등록번호 : 747-86-03279 &nbsp;|&nbsp; 연락처 : 010-5957-2483 &nbsp;|&nbsp; 통신판매업신고번호 : 제 2025-서울구로-2011</div>
       </div>
-      <p class="max-w-3xl">
-        본 사이트의 모든 콘텐츠·분석 방법론·리포트 템플릿·UI 디자인의 저작권은 ㈜크래빗(CRABIT)에 있습니다. 동의 없이 무단 복제·배포·판매 등을 금지하며, 위반 시 저작권법 등 관련 법령에 따라 민·형사상 책임을 질 수 있습니다.
-      </p>
-      <p class="text-[11px] text-ink-400">© 2026 Crabit. Co., Ltd. All Rights Reserved</p>
+
+      <!-- 경고문 -->
+      <div class="mt-4 text-[12px] text-ink-500 leading-relaxed max-w-3xl font-medium">
+        본 사이트의 모든 콘텐츠·분석 방법론·리포트 템플릿·UI 디자인의 저작권은 ㈜크래빗(CRABIT)에 있습니다.<br/>
+        동의 없이 무단 복제·배포·판매 등을 금지하며, 위반 시 저작권법 등 관련 법령에 따라 민·형사상 책임을 질 수 있습니다.
+      </div>
+
+      <!-- SNS 아이콘 -->
+      <div class="flex items-center gap-3 mt-5">
+        <a href="#" class="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 grid place-items-center transition">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="#9ca3af" stroke="none"/></svg>
+        </a>
+        <a href="#" class="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 grid place-items-center transition">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="1.8"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        </a>
+      </div>
+
+      <!-- 정책 링크 + 저작권 -->
+      <div class="flex items-center gap-6 mt-5 text-[12.5px] text-ink-500">
+        <a href="#" class="hover:text-ink-900 transition font-medium">환불 정책</a>
+        <a href="#" class="hover:text-ink-900 transition font-medium">판매 정책</a>
+      </div>
+      <div class="mt-3 text-[12px] text-ink-400">© 2026 크래빗 Co., Ltd. All rights reserved.</div>
+
     </div>
   </footer>
   `;
