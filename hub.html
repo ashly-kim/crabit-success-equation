@@ -9,7 +9,7 @@
 <title>데이터 허브 · 우리학원 성공방정식</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="shared.js?v=1776384131632"></script>
+<script src="shared.js?v=1776384160834"></script>
 <script>__applyTheme();</script>
 <!-- 엑셀 파싱 (SheetJS, MIT 라이선스, 무료) -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -1010,13 +1010,30 @@
       </div>
 
       <div class="rounded-2xl p-5" style="background:#f5f5f5;border:1px solid #e5e7eb">
-        <div class="font-extrabold text-ink-900 mb-2 text-[15px]">③ 이 방정식, 얼마나 믿어도 돼요?</div>
-        <p><span class="term">신뢰도<span class="tpop"><span class="tp-title">📐 신뢰도 (R²)</span>방정식이 실제 데이터를 <b>얼마나 설명</b>하는지 0~100%로 보여주는 값.<span class="tp-eg">학생들 ${yLabel} 차이의 ${r2Pct}%를 이 X들이 설명.</span></span></span> (R²)가 <b class="text-brand-700">${r2Pct}%</b>예요. "우리 학원 학생들의 ${yLabel} 차이 중 <b>${r2Pct}%</b>를 선택하신 X 변수들(${xLabels.join(', ')})이 설명해준다"는 뜻이에요.</p>
-        <p class="mt-2">${r2Pct >= 70
-            ? `🟢 <b>70% 이상</b>이니까 학부모 상담·리포트카드에 자신있게 활용하세요.`
+        <div class="font-extrabold text-ink-900 mb-3 text-[15px]">③ 이 방정식, 얼마나 믿어도 돼요? — <span class="term">R²<span class="tpop"><span class="tp-title">📐 결정계수 R²</span>방정식이 실제 데이터를 <b>얼마나 설명하는지</b> 0~100%로 나타내는 지표.<span class="tp-eg">R²=78%면 학생들 ${yLabel} 차이의 78%를 이 변수들이 설명해요.</span></span></span> 계산법</div>
+
+        <div class="rounded-xl p-4 mb-3" style="background:white;border:1px solid #e5e7eb">
+          <div class="text-[12px] font-bold text-ink-500 mb-2 tracking-wide">🔢 R²는 이렇게 계산돼요</div>
+          <div class="text-[13px] leading-relaxed space-y-1.5">
+            <p>① 전체 학생 ${n}명의 <b>${yLabel} 평균</b>을 먼저 구해요 → ȳ</p>
+            <p>② 각 학생의 실제 값이 평균과 얼마나 차이나는지 제곱해서 합산 → <b>총 분산(SS_total)</b></p>
+            <p>③ 방정식이 예측한 값이 실제와 얼마나 틀리는지 제곱합 → <b>잔차(SS_residual)</b></p>
+            <p>④ <b class="text-brand-700">R² = 1 − (SS_residual ÷ SS_total)</b></p>
+          </div>
+          <div class="mt-3 text-[12px] text-ink-500 bg-gray-50 rounded-lg p-2.5">
+            예시: SS_total=1000, SS_residual=220 → R² = 1 − 0.22 = <b class="text-brand-700">0.78 (78%)</b>
+          </div>
+        </div>
+
+        <p class="text-[13.5px]"><span class="term">결정계수<span class="tpop"><span class="tp-title">📐 결정계수 (R²)</span>"내 방정식이 Y 변동의 몇 %를 설명하느냐"의 비율.<span class="tp-eg">0% = 전혀 못 맞춤 / 100% = 완벽히 맞춤</span></span></span> R²가 <b class="text-brand-700">${r2Pct}%</b>라는 건, 우리 학원 학생들의 <b>${yLabel} 차이</b> 중 <b class="text-brand-700">${r2Pct}%</b>를 선택하신 변수들(${xLabels.join(', ')})이 설명한다는 의미예요. 나머지 ${100 - r2Pct}%는 측정하지 않은 다른 요인(집안 환경, 컨디션 등)의 영향이에요.</p>
+
+        <div class="mt-3 rounded-xl px-4 py-3 text-[13px] font-semibold ${r2Pct >= 70 ? 'bg-green-50 text-green-800' : r2Pct >= 50 ? 'bg-yellow-50 text-yellow-800' : 'bg-red-50 text-red-800'}">
+          ${r2Pct >= 70
+            ? `🟢 <b>R² ${r2Pct}% — 신뢰도 높음.</b> 학부모 상담·리포트카드에 자신있게 활용하세요.`
             : r2Pct >= 50
-            ? `🟡 <b>50~70%</b>면 참고용으로 OK. 데이터가 쌓이면 신뢰도 ↑`
-            : `🔴 <b>50% 미만</b>이에요. 변수를 바꾸거나 학생 데이터를 더 모아보세요.`}</p>
+            ? `🟡 <b>R² ${r2Pct}% — 참고 수준.</b> 데이터가 쌓일수록 신뢰도가 올라가요.`
+            : `🔴 <b>R² ${r2Pct}% — 낮은 편.</b> 변수를 바꾸거나 학생 데이터를 더 모아보세요.`}
+        </div>
       </div>
 
       <div class="rounded-2xl p-5 bg-white" style="border:1px dashed #ddd6fe">
