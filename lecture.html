@@ -9,7 +9,7 @@
 <title>사용 가이드 · 우리학원 성공방정식</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="shared.js?v=1776401212335"></script>
+<script src="shared.js?v=1776509417486"></script>
 <script>__applyTheme();</script>
 <style>
   html,body{background:#f6f7fb}
@@ -311,14 +311,15 @@
             <button class="w-full p-6 flex items-center justify-between text-left hover:bg-gray-50 transition" onclick="toggleAcc(this)">
               <div>
                 <div class="text-xs font-semibold text-brand-600 mb-1">개념</div>
-                <div class="font-bold text-lg">β(베타)는 무슨 의미인가요?</div>
+                <div class="font-bold text-lg">회귀계수(β, 베타)는 무슨 의미인가요?</div>
               </div>
               <span class="acc-arrow text-2xl text-ink-300">›</span>
             </button>
             <div class="acc-content px-6 text-ink-700 leading-relaxed">
-              <b>β = "X가 1만큼 늘면 Y가 몇 점 오르는가"</b>예요.<br/>
-              예: β=0.42인 복습시간 → 복습 1시간 더 하면 성적 +0.42점.<br/>
-              <b>숫자가 클수록 영향력이 큰 변수</b>입니다. 학원의 우선순위를 정할 때 가장 중요해요.
+              β(베타), 즉 회귀계수는 <b>"다른 조건이 모두 동일할 때, 이 변수가 1 증가하면 결과(Y)가 얼마나 변하는가"</b>를 나타내요.<br/><br/>
+              예: 복습시간의 β=2.16 → <b>출결률·숙제이행률 등 다른 조건이 같다는 전제 하에</b>, 복습을 1시간 더 하면 성적이 평균 +2.16점 오른다는 의미예요.<br/><br/>
+              이 "다른 조건 동일"이라는 전제가 핵심이에요. 복습시간과 숙제이행률이 동시에 오르는 경우엔, 복습 혼자만의 효과를 따로 분리해서 보는 게 바로 회귀계수의 역할입니다.<br/><br/>
+              <b>절댓값이 클수록 순수 영향력이 큰 변수</b>이며, 이 순위가 곧 원장님이 집중할 우선순위예요.
             </div>
           </div>
 
