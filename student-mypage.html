@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
+<title>내 정보 · Crabit 학생</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: { extend: {
+    fontFamily: { sans: ['Pretendard Variable','Pretendard','system-ui','sans-serif'] },
+    colors: {
+      brand: { 50:'#f5f3ff',100:'#ede9fe',200:'#ddd6fe',400:'#a78bfa',600:'#7c3aed',700:'#6d28d9' },
+      ink:   { 900:'#111827',700:'#374151',500:'#6b7280',400:'#9ca3af',300:'#d1d5db' },
+      teal:  { DEFAULT:'#0A7B6B', l:'#DCF5F0' }
+    },
+    boxShadow: {
+      card:'0 1px 2px rgba(17,24,39,.04),0 8px 24px rgba(17,24,39,.06)',
+      soft:'0 1px 2px rgba(17,24,39,.04),0 4px 12px rgba(17,24,39,.04)'
+    },
+    borderRadius: { '3xl':'1.5rem' }
+  }}
+}
+</script>
+<style>
+  html,body { background:#f6f7fb; font-family:'Pretendard Variable',Pretendard,system-ui,sans-serif; margin:0; }
+  .ring-soft { box-shadow:inset 0 0 0 1px #eef0f5; }
+  .bottom-nav { position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:480px; background:#fff; border-top:1px solid #f3f4f6; display:flex; z-index:10; }
+  .nav-tab { flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; padding:12px 0; font-size:11px; font-weight:600; color:#9ca3af; text-decoration:none; transition:color .15s; border:none; background:none; cursor:pointer; font-family:inherit; }
+  .nav-tab.active { color:#6d28d9; }
+  .nav-tab.disabled { color:#d1d5db; cursor:default; }
+  .code-input { flex:1; padding:14px 16px; border:1.5px solid #e5e7eb; border-radius:12px; font-size:15px; font-weight:700; font-family:inherit; outline:none; letter-spacing:.1em; text-transform:uppercase; transition:border-color .15s; background:#f9fafb; }
+  .code-input:focus { border-color:#7c3aed; box-shadow:0 0 0 3px rgba(124,58,237,.12); background:#fff; }
+  .btn-connect { padding:14px 20px; border-radius:12px; background:#7c3aed; color:#fff; font-size:14px; font-weight:700; border:none; cursor:pointer; white-space:nowrap; transition:background .15s; font-family:inherit; }
+  .btn-connect:hover { background:#6d28d9; }
+  .btn-connect:disabled { background:#c4b5fd; cursor:not-allowed; }
+
+  /* 바텀시트 */
+  .sheet-overlay { position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:50; display:none; align-items:flex-end; justify-content:center; }
+  .sheet-overlay.open { display:flex; }
+  .sheet { background:#fff; border-radius:24px 24px 0 0; width:100%; max-width:480px; padding:24px 24px 40px; animation:slideUp .25s ease; }
+  @keyframes slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
+  .sheet-handle { width:40px; height:4px; background:#e5e7eb; border-radius:9999px; margin:0 auto 28px; }
+  .btn-cancel { flex:1; padding:16px; border-radius:16px; border:1.5px solid #e5e7eb; background:#fff; font-size:15px; font-weight:700; color:#374151; cursor:pointer; font-family:inherit; transition:background .15s; }
+  .btn-cancel:hover { background:#f9fafb; }
+  .btn-confirm { flex:1; padding:16px; border-radius:16px; border:none; background:#7c3aed; color:#fff; font-size:15px; font-weight:700; cursor:pointer; font-family:inherit; transition:background .15s; }
+  .btn-confirm:hover { background:#6d28d9; }
+</style>
+</head>
+<body>
+
+<div style="max-width:480px;margin:0 auto;min-height:100vh;padding-bottom:80px;">
+  <div class="px-5 pt-12 pb-4">
+
+    <h1 class="text-[24px] font-extrabold mb-8">내 정보</h1>
+
+    <!-- 프로필 -->
+    <div class="bg-white rounded-3xl p-6 shadow-card ring-soft mb-4">
+      <div class="flex items-center gap-4">
+        <div id="avatar" class="w-14 h-14 rounded-full flex items-center justify-center font-extrabold text-white text-lg shrink-0"
+          style="background:linear-gradient(135deg,#a78bfa,#7c3aed)">?</div>
+        <div>
+          <div id="profile-name" class="text-[18px] font-extrabold">—</div>
+          <div class="text-sm text-ink-500">학생</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 연결된 기관 -->
+    <div class="bg-white rounded-3xl p-6 shadow-card ring-soft mb-4">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-[16px] font-extrabold">연결된 기관</h2>
+        <span id="inst-count" class="text-xs font-bold px-2.5 py-1 rounded-full" style="color:#7c3aed;background:#f5f3ff">0개</span>
+      </div>
+      <div id="inst-list">
+        <p class="text-sm text-ink-400 py-1">아직 연결된 기관이 없어요</p>
+      </div>
+    </div>
+
+    <!-- 기관 연결하기 -->
+    <div class="bg-white rounded-3xl p-6 shadow-card ring-soft mb-4">
+      <h2 class="text-[16px] font-extrabold mb-1">기관 연결하기</h2>
+      <p class="text-sm text-ink-500 mb-4">학원이나 학교에서 받은 고유코드를 입력해주세요</p>
+      <div class="flex gap-2">
+        <input id="codeInput" type="text" class="code-input" placeholder="고유코드 입력" maxlength="12"
+          oninput="onCodeInput()" onkeydown="if(event.key==='Enter')tryConnect()"/>
+        <button id="connectBtn" class="btn-connect" disabled onclick="tryConnect()">연결</button>
+      </div>
+      <p id="code-err" class="mt-2 text-sm font-semibold text-red-500 min-h-[20px]"></p>
+    </div>
+
+    <!-- 로그아웃 -->
+    <button onclick="logout()" class="w-full py-3 text-sm text-ink-400 hover:text-ink-700 bg-transparent border-none cursor-pointer font-[inherit] transition">
+      로그아웃
+    </button>
+
+  </div>
+</div>
+
+<!-- 하단 탭 네비 -->
+<nav class="bottom-nav">
+  <a href="student-home.html" class="nav-tab">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+      <path d="M3 12l9-8 9 8"/><path d="M5 10v10h14V10"/>
+    </svg>
+    홈
+  </a>
+  <button class="nav-tab disabled" onclick="return false">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+      <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M8 2v4M16 2v4M3 10h18"/>
+    </svg>
+    기록
+  </button>
+  <a href="student-mypage.html" class="nav-tab active">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+      <circle cx="12" cy="8" r="4"/><path d="M4 20c2-4 6-6 8-6s6 2 8 6"/>
+    </svg>
+    내 정보
+  </a>
+</nav>
+
+<!-- 연결 확인 바텀시트 -->
+<div id="sheet-overlay" class="sheet-overlay" onclick="closeSheet()">
+  <div class="sheet" onclick="event.stopPropagation()">
+    <div class="sheet-handle"></div>
+    <div class="text-center mb-7">
+      <div class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4"
+        style="background:linear-gradient(135deg,#ede9fe,#ddd6fe)">
+        <svg class="w-8 h-8" style="color:#7c3aed" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <path d="M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11M20 10v11M8 10v11M12 10v11M16 10v11"/>
+        </svg>
+      </div>
+      <h3 class="text-[20px] font-extrabold leading-snug mb-2">
+        <span id="sheet-name" style="color:#7c3aed">—</span>과<br/>연결할까요?
+      </h3>
+      <p class="text-sm text-ink-500 leading-relaxed">
+        연결 후 해당 기관에서<br/>내 학습 데이터를 볼 수 있어요
+      </p>
+    </div>
+    <div class="flex gap-3">
+      <button class="btn-cancel" onclick="closeSheet()">취소</button>
+      <button class="btn-confirm" onclick="confirmConnect()">연결하기</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SESS_KEY = 'crabit_student_session';
+const INST_KEY = 'crabit_student_institutions';
+const CODE_KEY = 'crabit_institution_codes'; // 관리자 사이트에서 등록
+
+// 로그인 체크
+const sess = JSON.parse(localStorage.getItem(SESS_KEY) || 'null');
+if (!sess) { location.href = 'student-login.html'; }
+
+let pendingInst = null;
+
+// 초기 렌더링
+(function render(){
+  const name = sess ? sess.name : '학생';
+  document.getElementById('profile-name').textContent = name;
+  document.getElementById('avatar').textContent = name[0] || '?';
+  renderInstitutions();
+})();
+
+function renderInstitutions() {
+  const list = JSON.parse(localStorage.getItem(INST_KEY) || '[]');
+  const countEl = document.getElementById('inst-count');
+  const listEl  = document.getElementById('inst-list');
+  countEl.textContent = list.length + '개';
+
+  if (list.length === 0) {
+    listEl.innerHTML = '<p class="text-sm text-ink-400 py-1">아직 연결된 기관이 없어요</p>';
+    return;
+  }
+  listEl.innerHTML = list.map(inst => `
+    <div class="flex items-center gap-3 py-2.5 border-b border-gray-50 last:border-0">
+      <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style="background:#f5f3ff">
+        <svg class="w-4 h-4" style="color:#7c3aed" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <path d="M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11M20 10v11M8 10v11M12 10v11M16 10v11"/>
+        </svg>
+      </div>
+      <div class="flex-1 min-w-0">
+        <div class="text-[14px] font-bold truncate">${inst.name}</div>
+        <div class="text-[11px] text-ink-400">${inst.code}</div>
+      </div>
+      <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full shrink-0" style="color:#0A7B6B;background:#DCF5F0">연결됨</span>
+    </div>
+  `).join('');
+}
+
+function onCodeInput() {
+  const val = document.getElementById('codeInput').value.trim();
+  document.getElementById('connectBtn').disabled = val.length < 4;
+  document.getElementById('code-err').textContent = '';
+}
+
+async function tryConnect() {
+  const code = document.getElementById('codeInput').value.trim().toUpperCase();
+  const errEl = document.getElementById('code-err');
+
+  if (code.length < 4) { errEl.textContent = '코드는 4자리 이상이에요'; return; }
+
+  const existing = JSON.parse(localStorage.getItem(INST_KEY) || '[]');
+  if (existing.some(i => i.code === code)) {
+    errEl.textContent = '이미 연결된 기관이에요';
+    return;
+  }
+
+  // 조회 (TODO: API 연동 시 교체)
+  const btn = document.getElementById('connectBtn');
+  btn.textContent = '조회 중…';
+  btn.disabled = true;
+
+  await new Promise(r => setTimeout(r, 700));
+
+  // 관리자 사이트에서 등록한 코드 목록 조회
+  const registered = JSON.parse(localStorage.getItem(CODE_KEY) || '{}');
+  const instName = registered[code];
+
+  btn.textContent = '연결';
+  btn.disabled = false;
+
+  if (!instName) {
+    errEl.textContent = '코드를 찾을 수 없어요. 다시 확인해주세요';
+    return;
+  }
+
+  pendingInst = { code, name: instName };
+  document.getElementById('sheet-name').textContent = instName;
+  document.getElementById('sheet-overlay').classList.add('open');
+}
+
+function confirmConnect() {
+  if (!pendingInst) return;
+  const list = JSON.parse(localStorage.getItem(INST_KEY) || '[]');
+  list.push({ ...pendingInst, connectedAt: new Date().toISOString() });
+  localStorage.setItem(INST_KEY, JSON.stringify(list));
+  closeSheet();
+  document.getElementById('codeInput').value = '';
+  document.getElementById('connectBtn').disabled = true;
+  renderInstitutions();
+  pendingInst = null;
+}
+
+function closeSheet() {
+  document.getElementById('sheet-overlay').classList.remove('open');
+}
+
+function logout() {
+  if (!confirm('로그아웃 할까요?')) return;
+  localStorage.removeItem(SESS_KEY);
+  location.href = 'student-login.html';
+}
+
+// 테스트용: 브라우저 콘솔에서 아래 실행하면 코드 등록됨
+// localStorage.setItem('crabit_institution_codes', JSON.stringify({'ABC1':'크래빗영어학원','XYZ2':'크래빗수학학원'}))
+</script>
+</body>
+</html>
