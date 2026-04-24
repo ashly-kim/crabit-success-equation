@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
+<title>로그인 · Crabit 학생</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: { extend: {
+    fontFamily: { sans: ['Pretendard Variable','Pretendard','system-ui','sans-serif'] },
+    colors: {
+      brand: { 50:'#f5f3ff',100:'#ede9fe',200:'#ddd6fe',400:'#a78bfa',600:'#7c3aed',700:'#6d28d9' },
+      ink:   { 900:'#111827',700:'#374151',500:'#6b7280',400:'#9ca3af',300:'#d1d5db' }
+    },
+    boxShadow: { soft:'0 1px 2px rgba(17,24,39,.04),0 4px 12px rgba(17,24,39,.04)' }
+  }}
+}
+</script>
+<style>
+  html,body { background:#fff; font-family:'Pretendard Variable',Pretendard,system-ui,sans-serif; }
+  .page { display:none; }
+  .page.active { display:flex; flex-direction:column; }
+  .pin-dot { width:16px; height:16px; border-radius:9999px; background:#e5e7eb; transition:all .15s; }
+  .pin-dot.filled { background:#7c3aed; transform:scale(1.1); }
+  .pin-key { padding:18px 0; border-radius:16px; font-size:20px; font-weight:700; border:none; cursor:pointer; transition:all .12s; }
+  .pin-key:active { transform:scale(0.94); }
+  .pin-key.num { background:#fff; box-shadow:0 1px 2px rgba(17,24,39,.04),0 4px 12px rgba(17,24,39,.04); color:#111827; }
+  .pin-key.num:hover { background:#f5f3ff; }
+  .pin-key.del { background:#f3f4f6; color:#6b7280; }
+  .pin-key.del:hover { background:#e5e7eb; }
+  .field { width:100%; padding:18px 16px; border:1.5px solid #e5e7eb; border-radius:12px; font-size:16px; font-weight:600; font-family:inherit; outline:none; transition:border-color .15s; }
+  .field:focus { border-color:#7c3aed; box-shadow:0 0 0 3px rgba(124,58,237,.12); }
+  .btn-primary { width:100%; padding:17px; border-radius:12px; background:#7c3aed; color:#fff; font-size:16px; font-weight:700; border:none; cursor:pointer; transition:background .15s; font-family:inherit; }
+  .btn-primary:hover { background:#6d28d9; }
+  .btn-primary:disabled { background:#c4b5fd; cursor:not-allowed; }
+  .shake { animation: shake .3s ease; }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
+</style>
+</head>
+<body>
+
+<div style="max-width:480px;margin:0 auto;min-height:100vh;position:relative;">
+
+  <!-- ── 페이지 1: 이름 입력 ── -->
+  <div id="page-name" class="page active min-h-screen px-6 pt-14 pb-8">
+    <div class="text-[22px] font-extrabold tracking-tight text-brand-600 mb-12">Crabit</div>
+    <h1 class="text-[28px] font-extrabold leading-snug mb-2">안녕하세요!</h1>
+    <p class="text-ink-500 text-[15px] mb-8">이름을 알려주세요</p>
+    <input id="nameInput" class="field" placeholder="이름 입력" maxlength="10" autocomplete="off"/>
+    <button id="nameNext" class="btn-primary mt-4" disabled onclick="goToSetPin()">다음 →</button>
+  </div>
+
+  <!-- ── 페이지 2: PIN 설정 ── -->
+  <div id="page-setpin" class="page min-h-screen px-6 pt-14 pb-8">
+    <div class="text-[22px] font-extrabold tracking-tight text-brand-600 mb-12">Crabit</div>
+    <h1 class="text-[28px] font-extrabold leading-snug mb-1">PIN을 설정해요</h1>
+    <p class="text-ink-500 text-[15px]">기억하기 쉬운 숫자 4자리</p>
+    <div id="dots-set" class="flex gap-5 justify-center my-10">
+      <div class="pin-dot"></div><div class="pin-dot"></div>
+      <div class="pin-dot"></div><div class="pin-dot"></div>
+    </div>
+    <div id="err-set" class="text-red-500 text-sm font-semibold text-center -mt-4 mb-4 min-h-[20px]"></div>
+    <div class="grid grid-cols-3 gap-3 px-2">
+      <button class="pin-key num" onclick="pressPin('set','1')">1</button>
+      <button class="pin-key num" onclick="pressPin('set','2')">2</button>
+      <button class="pin-key num" onclick="pressPin('set','3')">3</button>
+      <button class="pin-key num" onclick="pressPin('set','4')">4</button>
+      <button class="pin-key num" onclick="pressPin('set','5')">5</button>
+      <button class="pin-key num" onclick="pressPin('set','6')">6</button>
+      <button class="pin-key num" onclick="pressPin('set','7')">7</button>
+      <button class="pin-key num" onclick="pressPin('set','8')">8</button>
+      <button class="pin-key num" onclick="pressPin('set','9')">9</button>
+      <div></div>
+      <button class="pin-key num" onclick="pressPin('set','0')">0</button>
+      <button class="pin-key del" onclick="pressPin('set','←')">←</button>
+    </div>
+  </div>
+
+  <!-- ── 페이지 3: PIN 확인 ── -->
+  <div id="page-confirm" class="page min-h-screen px-6 pt-14 pb-8">
+    <div class="text-[22px] font-extrabold tracking-tight text-brand-600 mb-12">Crabit</div>
+    <h1 class="text-[28px] font-extrabold leading-snug mb-1">PIN 확인</h1>
+    <p class="text-ink-500 text-[15px]">한 번 더 입력해주세요</p>
+    <div id="dots-confirm" class="flex gap-5 justify-center my-10">
+      <div class="pin-dot"></div><div class="pin-dot"></div>
+      <div class="pin-dot"></div><div class="pin-dot"></div>
+    </div>
+    <div id="err-confirm" class="text-red-500 text-sm font-semibold text-center -mt-4 mb-4 min-h-[20px]"></div>
+    <div class="grid grid-cols-3 gap-3 px-2">
+      <button class="pin-key num" onclick="pressPin('confirm','1')">1</button>
+      <button class="pin-key num" onclick="pressPin('confirm','2')">2</button>
+      <button class="pin-key num" onclick="pressPin('confirm','3')">3</button>
+      <button class="pin-key num" onclick="pressPin('confirm','4')">4</button>
+      <button class="pin-key num" onclick="pressPin('confirm','5')">5</button>
+      <button class="pin-key num" onclick="pressPin('confirm','6')">6</button>
+      <button class="pin-key num" onclick="pressPin('confirm','7')">7</button>
+      <button class="pin-key num" onclick="pressPin('confirm','8')">8</button>
+      <button class="pin-key num" onclick="pressPin('confirm','9')">9</button>
+      <div></div>
+      <button class="pin-key num" onclick="pressPin('confirm','0')">0</button>
+      <button class="pin-key del" onclick="pressPin('confirm','←')">←</button>
+    </div>
+  </div>
+
+  <!-- ── 페이지 4: 재방문 로그인 ── -->
+  <div id="page-login" class="page min-h-screen px-6 pt-14 pb-8">
+    <div class="text-[22px] font-extrabold tracking-tight text-brand-600 mb-12">Crabit</div>
+    <h1 id="login-title" class="text-[28px] font-extrabold leading-snug mb-1">반가워요!</h1>
+    <p class="text-ink-500 text-[15px]">PIN을 입력해주세요</p>
+    <div id="dots-login" class="flex gap-5 justify-center my-10">
+      <div class="pin-dot"></div><div class="pin-dot"></div>
+      <div class="pin-dot"></div><div class="pin-dot"></div>
+    </div>
+    <div id="err-login" class="text-red-500 text-sm font-semibold text-center -mt-4 mb-4 min-h-[20px]"></div>
+    <div class="grid grid-cols-3 gap-3 px-2">
+      <button class="pin-key num" onclick="pressPin('login','1')">1</button>
+      <button class="pin-key num" onclick="pressPin('login','2')">2</button>
+      <button class="pin-key num" onclick="pressPin('login','3')">3</button>
+      <button class="pin-key num" onclick="pressPin('login','4')">4</button>
+      <button class="pin-key num" onclick="pressPin('login','5')">5</button>
+      <button class="pin-key num" onclick="pressPin('login','6')">6</button>
+      <button class="pin-key num" onclick="pressPin('login','7')">7</button>
+      <button class="pin-key num" onclick="pressPin('login','8')">8</button>
+      <button class="pin-key num" onclick="pressPin('login','9')">9</button>
+      <div></div>
+      <button class="pin-key num" onclick="pressPin('login','0')">0</button>
+      <button class="pin-key del" onclick="pressPin('login','←')">←</button>
+    </div>
+    <button onclick="resetAccount()" class="mt-8 w-full text-center text-sm text-ink-400 hover:text-ink-700 transition bg-transparent border-none cursor-pointer font-[inherit]">
+      새 계정으로 시작하기
+    </button>
+  </div>
+
+</div>
+
+<script>
+const SESS_KEY = 'crabit_student_session';
+let pinSet = '', pinFirst = '';
+
+// 진입 시 계정 여부 확인
+(function init(){
+  const sess = localStorage.getItem(SESS_KEY);
+  if (sess) {
+    const { name } = JSON.parse(sess);
+    document.getElementById('login-title').textContent = name + '님, 반가워요!';
+    showPage('login');
+  } else {
+    showPage('name');
+  }
+})();
+
+// 이름 입력 핸들링
+document.getElementById('nameInput').addEventListener('input', function(){
+  document.getElementById('nameNext').disabled = !this.value.trim();
+});
+document.getElementById('nameInput').addEventListener('keydown', function(e){
+  if (e.key === 'Enter' && this.value.trim()) goToSetPin();
+});
+
+function goToSetPin() {
+  showPage('setpin');
+  pinSet = '';
+  updateDots('set', '');
+}
+
+// PIN 키패드
+function pressPin(mode, key) {
+  const errEl = document.getElementById('err-' + mode);
+  errEl.textContent = '';
+
+  if (key === '←') {
+    if (mode === 'set')     { pinSet = pinSet.slice(0,-1); updateDots('set', pinSet); }
+    if (mode === 'confirm') { pinFirst = pinFirst.slice(0,-1); updateDots('confirm', pinFirst); }
+    if (mode === 'login')   { pinSet = pinSet.slice(0,-1); updateDots('login', pinSet); }
+    return;
+  }
+
+  if (mode === 'set') {
+    if (pinSet.length >= 4) return;
+    pinSet += key;
+    updateDots('set', pinSet);
+    if (pinSet.length === 4) setTimeout(() => { pinFirst = pinSet; pinSet = ''; showPage('confirm'); updateDots('confirm',''); }, 200);
+  }
+  if (mode === 'confirm') {
+    if (pinFirst.length >= 4 && mode === 'confirm') {
+      // already waiting — shouldn't happen
+    }
+    if (pinSet.length >= 4) return;
+    pinSet += key;
+    updateDots('confirm', pinSet);
+    if (pinSet.length === 4) setTimeout(() => confirmPin(), 150);
+  }
+  if (mode === 'login') {
+    if (pinSet.length >= 4) return;
+    pinSet += key;
+    updateDots('login', pinSet);
+    if (pinSet.length === 4) setTimeout(() => doLogin(), 150);
+  }
+}
+
+function confirmPin() {
+  const errEl = document.getElementById('err-confirm');
+  if (pinSet === pinFirst) {
+    const name = document.getElementById('nameInput').value.trim();
+    const id = Math.random().toString(36).slice(2,10);
+    localStorage.setItem(SESS_KEY, JSON.stringify({ id, name, pin: pinSet }));
+    location.href = 'student-home.html';
+  } else {
+    errEl.textContent = 'PIN이 일치하지 않아요';
+    const dotsEl = document.getElementById('dots-confirm');
+    dotsEl.classList.add('shake');
+    setTimeout(() => dotsEl.classList.remove('shake'), 350);
+    pinSet = '';
+    pinFirst = '';
+    updateDots('confirm', '');
+    setTimeout(() => showPage('setpin'), 600);
+  }
+}
+
+function doLogin() {
+  const errEl = document.getElementById('err-login');
+  const sess = JSON.parse(localStorage.getItem(SESS_KEY) || '{}');
+  if (sess.pin === pinSet) {
+    location.href = 'student-home.html';
+  } else {
+    errEl.textContent = 'PIN이 올바르지 않아요';
+    const dotsEl = document.getElementById('dots-login');
+    dotsEl.classList.add('shake');
+    setTimeout(() => dotsEl.classList.remove('shake'), 350);
+    pinSet = '';
+    updateDots('login', '');
+  }
+}
+
+function resetAccount() {
+  if (!confirm('계정을 초기화하면 기존 데이터가 모두 삭제돼요. 계속할까요?')) return;
+  localStorage.removeItem(SESS_KEY);
+  location.reload();
+}
+
+function updateDots(mode, value) {
+  const container = document.getElementById('dots-' + mode);
+  if (!container) return;
+  container.querySelectorAll('.pin-dot').forEach((dot, i) => {
+    dot.classList.toggle('filled', i < value.length);
+  });
+}
+
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  pinSet = '';
+}
+</script>
+</body>
+</html>
